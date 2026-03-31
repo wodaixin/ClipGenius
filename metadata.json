@@ -1,0 +1,5 @@
+{
+  "name": "ClipGenius",
+  "description": "A professional-grade AI clipboard manager that intelligently captures, analyzes, and organizes images, videos, text, and links using Gemini AI.",
+  "requestFramePermissions": []
+}

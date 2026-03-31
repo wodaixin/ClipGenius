@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "PasteItem": {
+      "title": "PasteItem",
+      "description": "A record of a pasted item (text, image, or URL).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the item." },
+        "type": { "type": "string", "enum": ["image", "text", "url", "video"], "description": "The type of content." },
+        "content": { "type": "string", "description": "The actual content (base64 for images/videos, raw text for others)." },
+        "mimeType": { "type": "string", "description": "The MIME type of the content." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the item was captured." },
+        "suggestedName": { "type": "string", "description": "AI-suggested filename." },
+        "summary": { "type": "string", "description": "AI-generated summary of the content." },
+        "isPinned": { "type": "boolean", "description": "Whether the item is pinned to the top." },
+        "userId": { "type": "string", "description": "The UID of the owner." }
+      },
+      "required": ["id", "type", "content", "mimeType", "timestamp", "suggestedName", "userId"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "A message in a chat conversation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "model"] },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "role", "text", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/pastes/{pasteId}": {
+      "schema": "PasteItem",
+      "description": "User's captured clipboard items."
+    },
+    "/users/{userId}/chats/{chatId}/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "User's chat history messages."
+    }
+  }
+}

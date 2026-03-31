@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: /users/{userId}/pastes/{pasteId}
+    // Document ID: auto-generated or custom UUID
+    // Fields:
+    //   - id: string (required)
+    //   - type: string (required, enum: image, text, url, video)
+    //   - content: string (required)
+    //   - mimeType: string (required)
+    //   - timestamp: timestamp (required)
+    //   - suggestedName: string (required)
+    //   - summary: string (optional)
+    //   - isPinned: boolean (optional)
+    //   - userId: string (required)
+    //
+    // Collection: /users/{userId}/chats/{chatId}/messages/{messageId}
+    // Fields:
+    //   - id: string (required)
+    //   - role: string (required, enum: user, model)
+    //   - text: string (required)
+    //   - timestamp: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidPaste(data) {
+      return data.keys().hasAll(['id', 'type', 'content', 'mimeType', 'timestamp', 'suggestedName', 'userId']) &&
+             data.id is string &&
+             data.type in ['image', 'text', 'url', 'video'] &&
+             data.content is string && data.content.size() < 1048576 && // 1MB limit
+             data.mimeType is string &&
+             data.timestamp is timestamp &&
+             data.suggestedName is string && data.suggestedName.size() < 255 &&
+             data.userId == request.auth.uid;
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['id', 'role', 'text', 'timestamp']) &&
+             data.id is string &&
+             data.role in ['user', 'model'] &&
+             data.text is string && data.text.size() < 5000 &&
+             data.timestamp is timestamp;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "wodaixin@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+
+      match /pastes/{pasteId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidPaste(request.resource.data);
+        allow update: if isOwner(userId) && isValidPaste(request.resource.data) && 
+                         request.resource.data.userId == resource.data.userId;
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /chats/{chatId}/messages/{messageId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidMessage(request.resource.data);
+        allow update: if isOwner(userId) && isValidMessage(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
