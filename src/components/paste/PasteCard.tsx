@@ -136,12 +136,14 @@ export function PasteCard({ item }: PasteCardProps) {
               </>
             )}
 
-            <button
-              onClick={() => copyToClipboard(item)}
-              className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-            >
-              {isCopied ? <CheckCircle2 className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
-            </button>
+            {item.type !== "video" && (
+              <button
+                onClick={() => copyToClipboard(item)}
+                className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+              >
+                {isCopied ? <CheckCircle2 className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
+              </button>
+            )}
           </div>
         </div>
 
@@ -150,11 +152,11 @@ export function PasteCard({ item }: PasteCardProps) {
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[10px] font-mono opacity-30 uppercase tracking-widest">
+                <span className="text-[10px] font-mono opacity-50 uppercase tracking-widest">
                   {format(item.timestamp, "HH:mm:ss")}
                 </span>
                 <div className="h-[1px] w-8 bg-[#141414]/10" />
-                <span className="text-[10px] font-mono opacity-30 uppercase tracking-widest">
+                <span className="text-[10px] font-mono opacity-50 uppercase tracking-widest">
                   {format(item.timestamp, "MMM d, yyyy")}
                 </span>
               </div>

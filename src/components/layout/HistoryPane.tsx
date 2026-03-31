@@ -39,7 +39,7 @@ export function HistoryPane() {
 
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
-            <span className="text-[9px] font-mono opacity-30 uppercase tracking-widest">
+            <span className="text-[10px] font-mono opacity-60 uppercase tracking-widest">
               Records
             </span>
             <span className="text-sm font-bold">{items.length}</span>
@@ -65,7 +65,7 @@ export function HistoryPane() {
             >
               <Layers className="w-16 h-16 mb-6 stroke-[1px]" />
               <h4 className="text-2xl font-serif italic mb-2">Empty Archives</h4>
-              <p className="text-[10px] font-mono uppercase tracking-[0.3em]">
+              <p className="text-[10px] font-mono uppercase tracking-[0.3em] opacity-60">
                 Waiting for input signal
               </p>
             </motion.div>
@@ -79,7 +79,7 @@ export function HistoryPane() {
         {/* End of List Indicator */}
         {items.length > 0 && (
           <div className="pt-12 pb-24 text-center">
-            <span className="text-[9px] font-mono opacity-20 uppercase tracking-[0.5em]">
+            <span className="text-[9px] font-mono opacity-40 uppercase tracking-[0.5em]">
               End of Archives
             </span>
           </div>

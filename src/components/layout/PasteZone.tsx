@@ -47,7 +47,7 @@ export function PasteZone() {
               <h1 className="text-2xl font-serif font-bold italic tracking-tight leading-none">
                 ClipGenius
               </h1>
-              <p className="text-[9px] font-mono opacity-40 uppercase tracking-widest mt-1">
+              <p className="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-1">
                 Intelligence Layer
               </p>
             </div>
@@ -57,7 +57,7 @@ export function PasteZone() {
             {/* Auto AI Toggle */}
             {user && (
               <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-[#F9F9F7] rounded-full border border-[#141414]/5">
-                <span className="text-[9px] font-mono uppercase tracking-widest opacity-40">
+                <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">
                   Auto AI
                 </span>
                 <button
@@ -78,7 +78,7 @@ export function PasteZone() {
             {user ? (
               <div className="flex items-center gap-4">
                 <div className="flex flex-col items-end">
-                  <span className="text-[9px] font-mono opacity-30 uppercase tracking-widest">
+                  <span className="text-[10px] font-mono opacity-60 uppercase tracking-widest">
                     {user.displayName}
                   </span>
                   <button
@@ -178,7 +178,7 @@ export function PasteZone() {
                   ].map(({ icon: Icon, label }) => (
                     <div key={label} className="flex flex-col items-center gap-2">
                       <Icon className="w-5 h-5 opacity-20" />
-                      <span className="text-[8px] font-mono uppercase tracking-widest opacity-30">
+                      <span className="text-[9px] font-mono uppercase tracking-widest opacity-50">
                         {label}
                       </span>
                     </div>
@@ -193,7 +193,7 @@ export function PasteZone() {
       {/* Action Buttons */}
       <div className="px-8 md:px-12 pb-8 flex gap-4">
         <button
-          onClick={() => user && openChatWithItem(null)}
+          onClick={() => openChatWithItem(null)}
           className="flex-1 flex items-center justify-center gap-3 bg-white border border-[#141414]/10 py-4 rounded-2xl hover:bg-[#141414] hover:text-white transition-all group"
         >
           <MessageSquare className="w-5 h-5 opacity-40 group-hover:opacity-100" />
@@ -212,7 +212,7 @@ export function PasteZone() {
       <div className="p-8 md:p-12 border-t border-[#141414]/5 bg-[#F9F9F7]/50">
         <div className="flex items-center gap-4 mb-6">
           <div className="h-[1px] flex-1 bg-[#141414]/10" />
-          <span className="text-[9px] font-mono opacity-30 uppercase tracking-[0.4em]">
+          <span className="text-[9px] font-mono opacity-50 uppercase tracking-[0.4em]">
             System Intelligence
           </span>
           <div className="h-[1px] flex-1 bg-[#141414]/10" />
@@ -226,7 +226,7 @@ export function PasteZone() {
             <div key={f.label} className="flex flex-col gap-3 group/feature">
               <div className="flex items-center justify-between">
                 <f.icon className="w-4 h-4 opacity-20 group-hover/feature:opacity-100 transition-opacity" />
-                <span className="text-[8px] font-mono opacity-30">{f.value}</span>
+                <span className="text-[9px] font-mono opacity-50">{f.value}</span>
               </div>
               <span className="text-[9px] font-bold uppercase tracking-widest">{f.label}</span>
               <div className="h-1 w-full bg-[#141414]/5 rounded-full overflow-hidden">

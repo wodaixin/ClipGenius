@@ -4,12 +4,19 @@ import { usePasteStore } from "./usePasteStore";
 import { useAuth } from "../context/AuthContext";
 import { format } from "date-fns";
 
+// Module-level: ignore paste events within 500ms (handles StrictMode double-mount)
+let lastPasteTime = 0;
+
 export function useClipboard() {
   const { user } = useAuth();
   const { addItem, setIsDragging, isAutoAnalyzeEnabled } = usePasteStore();
 
   const handlePaste = useCallback(
     async (e: ClipboardEvent) => {
+      const now = Date.now();
+      if (now - lastPasteTime < 500) return;
+      lastPasteTime = now;
+
       const clipboardData = e.clipboardData;
       if (!clipboardData) return;
 
@@ -21,8 +28,13 @@ export function useClipboard() {
           const reader = new FileReader();
           reader.onload = async (event) => {
             const base64 = event.target?.result as string;
-            const id = crypto.randomUUID();
             const type = file.type.startsWith("video/") ? "video" : "image";
+
+            // Videos from clipboard may only contain a data URL header (not the full file).
+            // If the base64 is tiny, likely a truncated read — skip it.
+            if (type === "video" && base64.length < 1024) return;
+
+            const id = crypto.randomUUID();
             const newItem: PasteItem = {
               id,
               type,
@@ -63,7 +75,6 @@ export function useClipboard() {
 
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
-      // Suppress default so we handle it ourselves
       e.preventDefault();
       handlePaste(e);
     };
@@ -71,7 +82,6 @@ export function useClipboard() {
     return () => window.removeEventListener("paste", onPaste);
   }, [handlePaste]);
 
-  // Expose drag state helpers for PasteZone
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);

@@ -21,11 +21,11 @@ export function ChatContextItem({ item, onDismiss }: ChatContextItemProps) {
               referrerPolicy="no-referrer"
             />
           ) : (
-            <span className="text-[9px] font-mono opacity-40 uppercase">{item.type}</span>
+            <span className="text-[9px] font-mono opacity-60 uppercase">{item.type}</span>
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-mono uppercase tracking-widest opacity-40">Referencing Context</p>
+          <p className="text-[9px] font-mono uppercase tracking-widest opacity-60">Referencing Context</p>
           <p className="text-[11px] font-bold truncate uppercase tracking-tighter">
             {item.suggestedName ||
               (item.type === "text" ? item.content : item.type)}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useChat } from "../../context/ChatContext";
 import { useAppContext } from "../../context/AppContext";
+import { useAuth } from "../../context/AuthContext";
 import { cn } from "../../lib/utils";
 import { StoredAttachment } from "../../types";
 
@@ -58,6 +59,7 @@ function AttachmentPreview({ item }: { item: StoredAttachment }) {
 }
 
 export function ChatModal() {
+  const { user, login } = useAuth();
   const {
     chatMessages,
     chatInput,
@@ -92,8 +94,32 @@ export function ChatModal() {
             exit={{ scale: 0.9, y: 20 }}
             className="w-full max-w-2xl h-[80vh] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[#141414]/10"
           >
-            {/* Header */}
-            <div className="p-6 border-b border-[#141414]/5 flex items-center justify-between bg-[#F9F9F7]">
+            {!user ? (
+              <div className="flex flex-col items-center justify-center h-full p-16 text-center gap-6">
+                <div className="w-16 h-16 bg-[#141414]/5 rounded-full flex items-center justify-center">
+                  <MessageSquare className="w-8 h-8 opacity-20" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold uppercase tracking-widest mb-2">Login Required</h3>
+                  <p className="text-sm opacity-50">Sign in to use AI Chatbot</p>
+                </div>
+                <button
+                  onClick={login}
+                  className="px-8 py-4 bg-[#141414] text-white text-xs font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
+                >
+                  Login with Google
+                </button>
+                <button
+                  onClick={closeChat}
+                  className="text-[10px] font-mono uppercase tracking-widest opacity-30 hover:opacity-100 transition-opacity"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <>
+              {/* Header */}
+              <div className="p-6 border-b border-[#141414]/5 flex items-center justify-between bg-[#F9F9F7]">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-[#141414] rounded-full flex items-center justify-center">
                   <MessageSquare className="w-4 h-4 text-white" />
@@ -137,7 +163,7 @@ export function ChatModal() {
                     <Volume2 className="w-10 h-10 text-white" />
                   </div>
                   <h4 className="text-lg font-bold uppercase tracking-widest mb-2">Live Voice Active</h4>
-                  <p className="text-xs font-mono opacity-40 max-w-xs">
+                  <p className="text-xs font-mono opacity-70 max-w-xs">
                     {liveTranscription || "Listening to your voice..."}
                   </p>
                 </div>
@@ -146,7 +172,7 @@ export function ChatModal() {
               {chatMessages.length === 0 && !isLiveActive && (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
                   <Sparkles className="w-12 h-12 mb-4" />
-                  <p className="text-xs font-mono uppercase tracking-widest">
+                  <p className="text-xs font-mono uppercase tracking-widest opacity-60">
                     Ask me anything about your captures
                   </p>
                 </div>
@@ -177,8 +203,8 @@ export function ChatModal() {
 
                   {/* Thinking bubble (shown while model is thinking) */}
                   {msg.role === "model" && msg.thinking && (
-                    <div className="mb-1 p-3 rounded-2xl rounded-bl-sm bg-[#E8E8E4] text-[11px] font-mono opacity-50 leading-relaxed whitespace-pre-wrap break-words">
-                      <div className="uppercase tracking-widest opacity-40 mb-1 text-[9px]">Thinking...</div>
+                    <div className="mb-1 p-3 rounded-2xl rounded-bl-sm bg-[#E8E8E4] text-[11px] font-mono opacity-80 leading-relaxed whitespace-pre-wrap break-words">
+                      <div className="uppercase tracking-widest opacity-50 mb-1 text-[9px]">Thinking...</div>
                       {msg.thinking}
                     </div>
                   )}
@@ -198,7 +224,7 @@ export function ChatModal() {
                       </div>
                     </div>
                   )}
-                  <span className="text-[8px] font-mono opacity-30 mt-1 uppercase tracking-widest">
+                  <span className="text-[9px] font-mono opacity-50 mt-1 uppercase tracking-widest">
                     {format(msg.timestamp, "HH:mm")}
                   </span>
                 </div>
@@ -207,7 +233,7 @@ export function ChatModal() {
               {isChatLoading && (
                 <div className="flex items-center gap-3 opacity-40">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-[10px] font-mono uppercase tracking-widest">Thinking...</span>
+                  <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">Thinking...</span>
                 </div>
               )}
 
@@ -297,6 +323,8 @@ export function ChatModal() {
                 </button>
               </div>
             </div>
+              </>
+            )}
           </motion.div>
         </motion.div>
       )}
