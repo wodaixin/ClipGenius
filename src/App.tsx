@@ -410,6 +410,7 @@ export default function App() {
   }, [handlePaste]);
 
   const openChatWithItem = (item: PasteItem) => {
+    if (!user) return;
     setIsChatOpen(true);
     setContextItem(item);
     setChatMessages([]); // Clear messages immediately for the new context
@@ -417,11 +418,13 @@ export default function App() {
   };
 
   const openImageGenWithText = (text: string) => {
+    if (!user) return;
     setIsImageGenOpen(true);
     setImagePrompt(`Create a high-quality visual representation of: ${text}`);
   };
 
   const startImageEdit = (item: PasteItem) => {
+    if (!user) return;
     setIsImageGenOpen(true);
     setContextItem(item);
     setImagePrompt("Add a futuristic neon glow to this image");
@@ -759,12 +762,12 @@ export default function App() {
   }, [items, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#F5F5F0]">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden flex bg-[#F5F5F0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#F5F5F0]">
       {/* Main Layout: Split Pane */}
-      <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
-        
+      <div className="flex flex-col lg:flex-row min-h-0 flex-1 w-full">
+
         {/* Left Pane: The "Hero" Paste Zone */}
-        <aside className="w-full lg:w-[45%] h-full border-r border-[#141414]/10 bg-white flex flex-col relative">
+        <aside className="w-full lg:w-[45%] lg:h-screen lg:overflow-y-auto shrink-0 border-r border-[#141414]/10 bg-white flex flex-col relative">
           {/* Vertical Rail Text (Recipe 11) */}
           <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden xl:block">
             <span className="writing-vertical text-[10px] font-mono opacity-20 uppercase tracking-[0.4em] select-none">
@@ -811,7 +814,19 @@ export default function App() {
                         <LogOut className="w-3 h-3" /> LOGOUT
                       </button>
                     </div>
-                    {user.photoURL && <img src={user.photoURL} alt="User" className="w-8 h-8 rounded-full border border-[#141414]/10" />}
+                    {user.photoURL && (
+                      <img
+                        src={user.photoURL}
+                        alt="User"
+                        className="w-8 h-8 rounded-full border border-[#141414]/10"
+                        onError={(e) => { const img = e.currentTarget as HTMLImageElement; img.style.display = 'none'; (img.nextElementSibling as HTMLElement).style.display = 'flex'; }}
+                      />
+                    )}
+                    <span
+                      className="hidden w-8 h-8 rounded-full border border-[#141414]/10 bg-[#141414] text-white text-xs font-bold items-center justify-center select-none"
+                    >
+                      {user.displayName?.[0] || user.email?.[0]?.toUpperCase() || '?'}
+                    </span>
                   </div>
                 ) : (
                   <button 
@@ -900,15 +915,15 @@ export default function App() {
 
           {/* Action Buttons */}
           <div className="px-8 md:px-12 pb-8 flex gap-4">
-            <button 
-              onClick={() => setIsChatOpen(true)}
+            <button
+              onClick={() => user && setIsChatOpen(true)}
               className="flex-1 flex items-center justify-center gap-3 bg-white border border-[#141414]/10 py-4 rounded-2xl hover:bg-[#141414] hover:text-white transition-all group"
             >
               <MessageSquare className="w-5 h-5 opacity-40 group-hover:opacity-100" />
               <span className="text-[10px] font-mono uppercase tracking-widest">AI Chatbot</span>
             </button>
-            <button 
-              onClick={() => setIsImageGenOpen(true)}
+            <button
+              onClick={() => user && setIsImageGenOpen(true)}
               className="flex-1 flex items-center justify-center gap-3 bg-white border border-[#141414]/10 py-4 rounded-2xl hover:bg-[#141414] hover:text-white transition-all group"
             >
               <Sparkles className="w-5 h-5 opacity-40 group-hover:opacity-100" />
@@ -950,7 +965,7 @@ export default function App() {
         </aside>
 
         {/* Right Pane: History List */}
-        <main className="flex-1 h-full flex flex-col bg-[#F5F5F0]">
+        <main className="flex-1 h-screen overflow-y-auto bg-[#F5F5F0]">
           {/* Search & Filter Header */}
           <div className="p-8 md:p-12 border-b border-[#141414]/5 flex flex-col md:flex-row items-stretch md:items-center gap-6 justify-between bg-white/50 backdrop-blur-xl sticky top-0 z-10">
             <div className="relative flex-1 max-w-xl">
@@ -1016,7 +1031,7 @@ export default function App() {
                       item.isPinned ? "opacity-100" : "opacity-80 hover:opacity-100"
                     )}>
                       {/* Preview Column */}
-                      <div className="w-full md:w-64 aspect-square md:aspect-auto md:h-64 bg-white border border-[#141414]/5 rounded-2xl relative shadow-sm group-hover:shadow-xl transition-all duration-500">
+                      <div className="w-full md:w-64 aspect-square bg-white border border-[#141414]/5 rounded-2xl relative shadow-sm group-hover:shadow-xl transition-all duration-500 shrink-0">
                         {item.type === "image" ? (
                           <img 
                             src={item.content} 
@@ -1106,7 +1121,7 @@ export default function App() {
                       </div>
 
                       {/* Info Column */}
-                      <div className="flex-1 flex flex-col justify-center py-2">
+                      <div className="flex-1 min-w-0 max-h-64 overflow-hidden flex flex-col justify-center py-2">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2">
@@ -1118,14 +1133,14 @@ export default function App() {
                                 {format(item.timestamp, "MMM d, yyyy")}
                               </span>
                             </div>
-                             <h3 className="text-2xl font-bold uppercase tracking-tighter truncate leading-none flex items-center gap-3 group/title">
+                             <h3 className="text-2xl font-bold uppercase tracking-tighter truncate leading-none flex items-center gap-2 group/title mb-2">
                               {item.isAnalyzing ? (
                                 <span className="flex items-center gap-3 opacity-20">
                                   <Loader2 className="w-5 h-5 animate-spin" />
                                   Analyzing...
                                 </span>
                               ) : editingItemId === item.id ? (
-                                <input 
+                                <input
                                   type="text"
                                   value={editName}
                                   onChange={(e) => setEditName(e.target.value)}
@@ -1133,65 +1148,66 @@ export default function App() {
                                   autoFocus
                                 />
                               ) : (
-                                <>
-                                  {item.suggestedName}
-                                  <button 
-                                    onClick={() => startEditing(item)}
-                                    className="p-1 opacity-20 hover:opacity-100 transition-opacity"
-                                  >
-                                    <Edit3 className="w-4 h-4" />
-                                  </button>
-                                  {user && (
-                                    <button 
-                                      onClick={() => analyzeContent(item)}
-                                      className={cn(
-                                        "p-1 rounded-md transition-all hover:scale-110",
-                                        item.summary ? "text-[#141414]/20 hover:text-blue-500" : "text-blue-500"
-                                      )}
-                                    >
-                                      <Wand2 className="w-4 h-4" />
-                                    </button>
-                                  )}
-                                </>
+                                <span className="truncate">{item.suggestedName}</span>
                               )}
                             </h3>
                           </div>
-                          <div className="flex gap-2">
-                            {editingItemId === item.id ? (
-                              <div className="flex gap-2">
-                                <button 
-                                  onClick={() => saveEdit(item.id)}
-                                  className="px-4 py-2 bg-[#141414] text-white text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-all"
-                                >
-                                  Save
-                                </button>
-                                <button 
-                                  onClick={() => setEditingItemId(null)}
-                                  className="px-4 py-2 border border-[#141414]/10 text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#141414]/5 transition-all"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <>
-                                <button 
-                                  onClick={() => togglePin(item.id)}
-                                  className={cn(
-                                    "p-2 rounded-full border border-[#141414]/10 transition-all",
-                                    item.isPinned ? "bg-[#141414] text-white border-[#141414]" : "hover:bg-white"
+                          {/* Action Buttons Row */}
+                          <div className="flex items-center gap-1 mb-4">
+                              {!item.isAnalyzing && editingItemId !== item.id && (
+                                <>
+                                  <button
+                                    onClick={() => startEditing(item)}
+                                    className="p-1.5 opacity-20 hover:opacity-100 transition-opacity"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                  {user && (
+                                    <button
+                                      onClick={() => analyzeContent(item)}
+                                      className={cn(
+                                        "p-1.5 rounded-md transition-all",
+                                        item.summary ? "text-[#141414]/20 hover:text-blue-500" : "text-blue-500"
+                                      )}
+                                    >
+                                      <Wand2 className="w-3.5 h-3.5" />
+                                    </button>
                                   )}
-                                >
-                                  {item.isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
-                                </button>
-                                <button 
-                                  onClick={() => deleteItem(item.id)}
-                                  className="p-2 rounded-full border border-[#141414]/10 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </>
-                            )}
-                          </div>
+                                  <div className="w-[1px] h-4 bg-[#141414]/10 mx-1.5 self-center" />
+                                  <button
+                                    onClick={() => togglePin(item.id)}
+                                    className={cn(
+                                      "p-1.5 rounded-md transition-all",
+                                      item.isPinned ? "text-[#141414]" : "text-[#141414]/30 hover:text-[#141414]"
+                                    )}
+                                  >
+                                    {item.isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+                                  </button>
+                                  <button
+                                    onClick={() => deleteItem(item.id)}
+                                    className="p-1.5 text-[#141414]/30 hover:text-red-500 transition-colors"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </>
+                              )}
+                              {editingItemId === item.id && (
+                                <>
+                                  <button
+                                    onClick={() => saveEdit(item.id)}
+                                    className="px-4 py-1.5 bg-[#141414] text-white text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-all"
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingItemId(null)}
+                                    className="px-4 py-1.5 border border-[#141414]/10 text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#141414]/5 transition-all"
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                              )}
+                            </div>
                         </div>
 
                         {editingItemId === item.id ? (
@@ -1202,7 +1218,7 @@ export default function App() {
                             placeholder="Enter summary..."
                           />
                         ) : (
-                          <p className="text-lg font-serif italic text-[#141414]/60 leading-relaxed mb-6 line-clamp-2">
+                          <p className="text-lg font-serif italic text-[#141414]/60 leading-relaxed mb-6 line-clamp-2 truncate">
                             {item.isAnalyzing ? "Processing content through intelligence layer..." : item.summary || "No summary generated."}
                           </p>
                         )}
@@ -1271,11 +1287,12 @@ export default function App() {
                           )}
                         </div>
 
-                        {item.type !== "image" && (
-                          <div className="p-4 bg-white/40 border border-[#141414]/5 rounded-xl text-[11px] font-mono opacity-40 line-clamp-2 break-all">
+                        {(item.type === "text" || item.type === "url") && (
+                          <div className="p-4 bg-white/40 border border-[#141414]/5 rounded-xl text-[11px] font-mono opacity-40 line-clamp-2 truncate">
                             {item.content}
                           </div>
                         )}
+
                       </div>
                     </div>
 

@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__chrome-devtools__list_network_requests",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__get_network_request",
+      "Bash(curl -s \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2F578b6404f94e9f6ad1b0ca7a6b84c3597fa02f7916106726edf2afc4d34fc3b2..png?Expires=1775043321&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=EoXW5IkZMQX3NHWkzMHKn%2FJvh%2B4%3D\" -o /tmp/screenshot2.png)",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__type_text",
+      "mcp__chrome-devtools__get_console_message",
+      "Bash(curl -s \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2F04dfda0e411c0eea194df9a263b42e4de9b73d7f7ecc81e6f1706c4217dbdcd2..png?Expires=1775045283&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=CnRhGBsHjwABaI8DIZ6il6NKgKE%3D\" -o /tmp/firebase1.png)",
+      "Bash(curl -s \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2F2412ca139628bccb63cd5a66f0b8a6d7177fa329d2780a22770d6b21560c6aef..png?Expires=1775045284&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=YLs6Jq1ohhHxRqrXKqu3lVY2zOI%3D\" -o /tmp/firebase2.png)",
+      "Bash(curl -L -s \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2F04dfda0e411c0eea194df9a263b42e4de9b73d7f7ecc81e6f1706c4217dbdcd2..png?Expires=1775045283&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=CnRhGBsHjwABaI8DIZ6il6NKgKE%3D\" -o /tmp/firebase1.png)",
+      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2F04dfda0e411c0eea194df9a263b42e4de9b73d7f7ecc81e6f1706c4217dbdcd2..png?Expires=1775045283&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=CnRhGBsHjwABaI8DIZ6il6NKgKE%3D\" -O /tmp/firebase1.png)",
+      "Bash(find ~/.config/google-chrome/Default -name *.ldb -o -name *.log)",
+      "Bash(find /home/hitfm -name cdm-screenshot.png -o -name screenshot*.png)",
+      "Bash(find ~/.config/google-chrome -name *.ldb -path *Local*)",
+      "Bash(find ~/.config/google-chrome -path '*Local Storage*' -name *.ldb)",
+      "Bash(grep -a firebase:authUser ~/.config/google-chrome/Default/Local Storage/leveldb/*.ldb)",
+      "Bash(strings ~/.config/google-chrome/Default/Local Storage/leveldb/*.ldb)",
+      "Bash(find ~/.config/google-chrome -name *.json -path *Local*)",
+      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2F710e10c41ca0789a73005d0cbd5c630cdbdfa9f54aa9a65b3cfb56bf396a057b..png?Expires=1775048875&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=1pJMhHDWnJGAU13oePVGQPnRkxo%3D\" -O /tmp/layout.png)",
+      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2F20eb7afbed730cd8cae7be51850126aee91f886b151fff444617fc99dade36d0..png?Expires=1775049020&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=wlf4jlwbOM4sKGZp8N2%2BL%2FCiAz0%3D\" -O /tmp/layout2.png)",
+      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fe7e54f9fa5506af3af2db814faf476ee3ff5aa39a192cc64b70d55c2a222ecef..png?Expires=1775049199&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=nR4HrUp2g9XSoj7U3QOgfNgoQFM%3D\" -O /tmp/layout3.png)",
+      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fd7a2df3ecfa9e6cf86196a6d865acce8d5b7ece4db3d95cf81b9f1e61035077f..png?Expires=1775049501&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcK8&Signature=4kkSgJ9yjn2w2960ZKA%2F3fhZwvA%3D\" -O /tmp/layout4.png)",
+      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fd7a2df3ecfa9e6cf86196a6d865acce8d5b7ece4db3d95cf81b9f1e61035077f..png?Expires=1775049501&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=4kkSgJ9yjn2w2960ZKA%2F3fhZwvA%3D\" -O /tmp/layout4.png)",
+      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fe16c4f2044af4222af19cf9ab833672ae4f6144e92b1a7374c5b7282a56aaefc..png?Expires=1775049934&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=RUkW1vCdsL84Qf3K6FNGIB2rVyg%3D\" -O /tmp/layout5.png)"
+    ],
+    "additionalDirectories": [
+      "/home/hitfm/.cache/chrome-devtools-mcp/chrome-profile"
+    ]
+  }
+}
