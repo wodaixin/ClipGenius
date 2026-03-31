@@ -11,7 +11,7 @@ interface LiveSessionCallbacks {
 export async function startLiveSession(
   callbacks: LiveSessionCallbacks
 ): Promise<LiveSessionConnection> {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
   const session = await ai.live.connect({
     model: "gemini-3.1-flash-live-preview",

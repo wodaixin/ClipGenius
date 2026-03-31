@@ -78,8 +78,8 @@ export function useImageGen() {
     try {
       const apiKey =
         imageQuality === "pro"
-          ? process.env.API_KEY || process.env.GEMINI_API_KEY
-          : process.env.GEMINI_API_KEY;
+          ? import.meta.env.VITE_GEMINI_API_KEY
+          : import.meta.env.VITE_GEMINI_API_KEY;
 
       const result = await generateImage({
         prompt: imagePrompt,

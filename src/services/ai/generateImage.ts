@@ -20,7 +20,7 @@ export async function generateImage(params: GenerateImageParams): Promise<string
   } = params;
 
   const resolvedKey = apiKey ||
-    (quality === "pro" ? (process.env.API_KEY || process.env.GEMINI_API_KEY) : process.env.GEMINI_API_KEY);
+    (quality === "pro" ? import.meta.env.VITE_GEMINI_API_KEY : import.meta.env.VITE_GEMINI_API_KEY);
 
   const ai = new GoogleGenAI({ apiKey: resolvedKey });
 

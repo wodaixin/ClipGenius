@@ -29,7 +29,8 @@
       "mcp__chrome-devtools__press_key"
     ],
     "additionalDirectories": [
-      "/home/hitfm/.cache/chrome-devtools-mcp/chrome-profile"
+      "/home/hitfm/.cache/chrome-devtools-mcp/chrome-profile",
+      "/home/hitfm"
     ]
   }
 }

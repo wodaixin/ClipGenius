@@ -120,7 +120,7 @@ export function useChat() {
     if (!chatInput.trim()) return;
 
     const { GoogleGenAI, ThinkingLevel } = await import("@google/genai");
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
     const userMsgId = crypto.randomUUID();
     const userMsg: ChatMessage = {

@@ -43,7 +43,7 @@ function buildAnalysisParts(item: PasteItem): {
 
 /** Analyze a PasteItem with Gemini and return suggested name + summary */
 export async function analyzeContent(item: PasteItem): Promise<AnalysisResult> {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
   const { parts, config } = buildAnalysisParts(item);
 
   const response = await ai.models.generateContent({
