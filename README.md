@@ -1,20 +1,52 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# ClipGenius - AI Clipboard System
 
-# Run and deploy your AI Studio app
+ClipGenius is a professional-grade AI clipboard manager that intelligently captures, analyzes, and organizes images, videos, text, and links using Gemini AI.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/2a164aaf-f7fd-46e5-a289-d673eda4cba6
+- **Intelligent Capture:** Automatically detects images, videos, URLs, and text from your clipboard.
+- **AI Analysis:** Uses Gemini 3.1 Pro to provide summaries and suggested names for every item.
+- **Multimodal Chat:** Integrated AI assistant that can answer questions about your captures, search the web, or help with coding.
+- **Image Generation:** Create high-quality visual assets directly from text prompts.
+- **Cloud Sync:** Securely stores your clipboard history in Firebase Firestore, synced across your devices.
+- **Professional UI:** A clean, editorial-style interface designed for productivity.
 
-## Run Locally
+## Setup
 
-**Prerequisites:**  Node.js
+### Prerequisites
 
+- Node.js 18+
+- A Google Cloud Project with Firebase enabled.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Environment Variables
+
+Create a `.env` file in the root directory based on `.env.example`:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+APP_URL=your_app_url
+```
+
+### Installation
+
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Deployment
+
+This project is designed to be deployed on Google Cloud Run via AI Studio.
+
+1. Connect your GitHub repository in AI Studio.
+2. Use the **Export to GitHub** feature to sync your changes.
+3. Configure your secrets (API keys) in the AI Studio settings.
+
+## License
+
+MIT
