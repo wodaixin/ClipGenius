@@ -24,7 +24,9 @@
       "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fe7e54f9fa5506af3af2db814faf476ee3ff5aa39a192cc64b70d55c2a222ecef..png?Expires=1775049199&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=nR4HrUp2g9XSoj7U3QOgfNgoQFM%3D\" -O /tmp/layout3.png)",
       "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fd7a2df3ecfa9e6cf86196a6d865acce8d5b7ece4db3d95cf81b9f1e61035077f..png?Expires=1775049501&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcK8&Signature=4kkSgJ9yjn2w2960ZKA%2F3fhZwvA%3D\" -O /tmp/layout4.png)",
       "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fd7a2df3ecfa9e6cf86196a6d865acce8d5b7ece4db3d95cf81b9f1e61035077f..png?Expires=1775049501&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=4kkSgJ9yjn2w2960ZKA%2F3fhZwvA%3D\" -O /tmp/layout4.png)",
-      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fe16c4f2044af4222af19cf9ab833672ae4f6144e92b1a7374c5b7282a56aaefc..png?Expires=1775049934&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=RUkW1vCdsL84Qf3K6FNGIB2rVyg%3D\" -O /tmp/layout5.png)"
+      "Bash(wget -q --timeout=10 \"https://minimax-algeng-chat-tts.oss-cn-wulanchabu.aliyuncs.com/ccv2%2F2026-03-31%2FMiniMax-M2.7%2F2005135824835846176%2Fe16c4f2044af4222af19cf9ab833672ae4f6144e92b1a7374c5b7282a56aaefc..png?Expires=1775049934&OSSAccessKeyId=LTAI5tGLnRTkBjLuYPjNcKQ8&Signature=RUkW1vCdsL84Qf3K6FNGIB2rVyg%3D\" -O /tmp/layout5.png)",
+      "mcp__chrome-devtools__fill",
+      "mcp__chrome-devtools__press_key"
     ],
     "additionalDirectories": [
       "/home/hitfm/.cache/chrome-devtools-mcp/chrome-profile"
