@@ -1,6 +1,7 @@
 import React from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { AppProvider } from "./context/AppContext";
+import { ChatProvider } from "./context/ChatContext";
 import { useFirestoreSync } from "./hooks/useFirestoreSync";
 import { useClipboard } from "./hooks/useClipboard";
 import { PasteZone } from "./components/layout/PasteZone";
@@ -31,7 +32,9 @@ export default function App() {
   return (
     <AuthProvider>
       <AppProvider>
-        <AppContent />
+        <ChatProvider>
+          <AppContent />
+        </ChatProvider>
       </AppProvider>
     </AuthProvider>
   );

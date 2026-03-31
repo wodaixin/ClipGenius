@@ -1,4 +1,3 @@
-import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from "react-markdown";
 import { format } from "date-fns";
@@ -11,11 +10,51 @@ import {
   Volume2,
   Send,
   XCircle,
+  Film,
 } from "lucide-react";
-import { useChat } from "../../hooks/useChat";
+import { useChat } from "../../context/ChatContext";
 import { useAppContext } from "../../context/AppContext";
-import { ChatContextItem } from "./ChatContextItem";
 import { cn } from "../../lib/utils";
+import { StoredAttachment } from "../../types";
+
+function AttachmentPreview({ item }: { item: StoredAttachment }) {
+  if (item.type === "image") {
+    return (
+      <img
+        src={item.content}
+        alt={item.suggestedName}
+        className="w-full max-h-64 object-cover"
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+  if (item.type === "video") {
+    return (
+      <div className="relative bg-black flex items-center justify-center h-40">
+        <Film className="w-8 h-8 text-white opacity-50" />
+        <video
+          src={item.content}
+          className="absolute inset-0 w-full h-full object-contain"
+          controls
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-start gap-3 p-4 bg-[#F9F9F7]">
+      <div className="flex-shrink-0 w-8 h-8 bg-[#141414]/5 rounded-lg flex items-center justify-center">
+        <span className="text-[8px] font-mono uppercase opacity-40 leading-none">
+          {item.type === "text" ? "TXT" : "URL"}
+        </span>
+      </div>
+      <p className="text-[11px] font-mono opacity-60 leading-relaxed line-clamp-4 break-all">
+        {item.type === "text"
+          ? item.content
+          : item.content}
+      </p>
+    </div>
+  );
+}
 
 export function ChatModal() {
   const {
@@ -29,7 +68,7 @@ export function ChatModal() {
     closeChat,
     clearChat,
     sendMessage,
-    startLiveSession,
+    startLiveSessionHandler,
     stopLiveSession,
   } = useChat();
 
@@ -66,7 +105,7 @@ export function ChatModal() {
                   <Trash2 className="w-5 h-5 opacity-40 hover:opacity-100" />
                 </button>
                 <button
-                  onClick={isLiveActive ? stopLiveSession : startLiveSession}
+                  onClick={isLiveActive ? stopLiveSession : startLiveSessionHandler}
                   className={cn(
                     "p-2 rounded-full transition-all",
                     isLiveActive ? "bg-red-500 text-white animate-pulse" : "hover:bg-[#141414]/5"
@@ -118,6 +157,22 @@ export function ChatModal() {
                     msg.role === "user" ? "ml-auto items-end" : "mr-auto items-start"
                   )}
                 >
+                  {/* Inline attachments (Gemini-style — shown above text bubble) */}
+                  {msg.role === "user" && msg.attachments && msg.attachments.length > 0 && (
+                    <div className="mb-1 rounded-2xl rounded-br-sm overflow-hidden border border-[#141414]/10">
+                      {msg.attachments.length === 1 ? (
+                        <AttachmentPreview item={msg.attachments[0]} />
+                      ) : (
+                        <div className="grid grid-cols-2 gap-0.5">
+                          {msg.attachments.map((att) => (
+                            <AttachmentPreview key={att.id} item={att} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Text bubble — always rendered, uses placeholder when empty */}
                   <div
                     className={cn(
                       "p-4 rounded-2xl text-sm leading-relaxed",
@@ -127,7 +182,12 @@ export function ChatModal() {
                     )}
                   >
                     <div className="prose prose-sm max-w-none prose-invert">
-                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      <ReactMarkdown>
+                        {msg.text ||
+                          (msg.role === "user" && msg.attachments?.length
+                            ? " "
+                            : msg.text)}
+                      </ReactMarkdown>
                     </div>
                   </div>
                   <span className="text-[8px] font-mono opacity-30 mt-1 uppercase tracking-widest">
@@ -146,11 +206,46 @@ export function ChatModal() {
 
             {/* Input */}
             <div className="p-6 border-t border-[#141414]/5 bg-[#F9F9F7]">
+              {/* Sticky attachment preview — disappears after send */}
               {contextItem && (
-                <ChatContextItem
-                  item={contextItem}
-                  onDismiss={() => setContextItem(null)}
-                />
+                <div className="mb-3 p-3 bg-white border border-[#141414]/10 rounded-2xl flex items-center justify-between shadow-sm">
+                  <div className="flex items-center gap-3 overflow-hidden flex-1 min-w-0">
+                    <div className="w-10 h-10 bg-[#F9F9F7] rounded-lg flex-shrink-0 flex items-center justify-center border border-[#141414]/5 overflow-hidden">
+                      {contextItem.type === "image" && (
+                        <img
+                          src={contextItem.content}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
+                      {contextItem.type === "video" && (
+                        <Film className="w-5 h-5 opacity-40" />
+                      )}
+                      {contextItem.type === "text" && (
+                        <span className="text-[8px] font-mono opacity-40 uppercase leading-none text-center px-1">TXT</span>
+                      )}
+                      {contextItem.type === "url" && (
+                        <span className="text-[8px] font-mono opacity-40 uppercase leading-none text-center px-1">URL</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[9px] font-mono uppercase tracking-widest opacity-40">Attaching</p>
+                      <p className="text-[11px] font-bold truncate uppercase tracking-tighter">
+                        {contextItem.type === "text"
+                          ? contextItem.content.slice(0, 60) + (contextItem.content.length > 60 ? "..." : "")
+                          : contextItem.type === "url"
+                          ? contextItem.content
+                          : contextItem.suggestedName || contextItem.type}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setContextItem(null)}
+                    className="p-2 hover:bg-red-50 hover:text-red-600 rounded-full transition-colors flex-shrink-0"
+                  >
+                    <XCircle className="w-4 h-4 opacity-30 hover:opacity-100" />
+                  </button>
+                </div>
               )}
               <div className="relative">
                 <input
@@ -165,7 +260,7 @@ export function ChatModal() {
                 />
                 <button
                   onClick={sendMessage}
-                  disabled={isChatLoading || !chatInput.trim()}
+                  disabled={isChatLoading || (!chatInput.trim() && !contextItem)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#141414] text-white rounded-xl flex items-center justify-center disabled:opacity-20 transition-opacity"
                 >
                   <Send className="w-4 h-4" />

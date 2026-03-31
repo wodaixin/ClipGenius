@@ -21,7 +21,7 @@ import { PastePreview } from "./PastePreview";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../context/AuthContext";
 import { usePasteStore } from "../../hooks/usePasteStore";
-import { useChat } from "../../hooks/useChat";
+import { useChat } from "../../context/ChatContext";
 import { useImageGen } from "../../hooks/useImageGen";
 import { analyzeContent } from "../../services/ai/analyzeContent";
 

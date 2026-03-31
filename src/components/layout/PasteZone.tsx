@@ -16,7 +16,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { usePasteStore } from "../../hooks/usePasteStore";
 import { useClipboard } from "../../hooks/useClipboard";
-import { useChat } from "../../hooks/useChat";
+import { useChat } from "../../context/ChatContext";
 import { useImageGen } from "../../hooks/useImageGen";
 import { cn } from "../../lib/utils";
 

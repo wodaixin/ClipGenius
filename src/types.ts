@@ -29,6 +29,15 @@ export interface ChatMessage {
   role: "user" | "model";
   text: string;
   timestamp: Date;
+  attachments?: StoredAttachment[];
+}
+
+export interface StoredAttachment {
+  id: string;
+  type: PasteType;
+  content: string; // base64 data URI
+  mimeType: string;
+  suggestedName: string;
 }
 
 // Re-exported from @google/genai for use in services

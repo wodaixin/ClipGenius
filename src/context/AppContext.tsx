@@ -1,12 +1,34 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { PasteItem } from "../types";
 import { getPastes } from "../lib/db";
+import { generateImage } from "../services/ai/generateImage";
+
+export type ImageQuality = "standard" | "pro";
+export type ImageSize = "1K" | "2K" | "4K";
 
 interface AppContextValue {
   items: PasteItem[];
   setItems: React.Dispatch<React.SetStateAction<PasteItem[]>>;
   contextItem: PasteItem | null;
   setContextItem: (item: PasteItem | null) => void;
+  // Image Gen
+  isImageGenOpen: boolean;
+  imagePrompt: string;
+  imageSize: ImageSize;
+  generatedImage: string | null;
+  isGeneratingImage: boolean;
+  isEditingImage: boolean;
+  imageQuality: ImageQuality;
+  hasApiKey: boolean;
+  setImagePrompt: (v: string) => void;
+  setImageSize: (v: ImageSize) => void;
+  setImageQuality: (v: ImageQuality) => void;
+  openImageGen: () => void;
+  openImageGenWithText: (text: string) => void;
+  startImageEdit: (item: PasteItem) => void;
+  closeImageGen: () => void;
+  generateImageAction: () => Promise<void>;
+  downloadGenerated: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -15,13 +37,114 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<PasteItem[]>([]);
   const [contextItem, setContextItem] = useState<PasteItem | null>(null);
 
+  // Image Gen state
+  const [isImageGenOpen, setIsImageGenOpen] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [imageSize, setImageSize] = useState<ImageSize>("1K");
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isEditingImage, setIsEditingImage] = useState(false);
+  const [imageQuality, setImageQuality] = useState<ImageQuality>("standard");
+  const [hasApiKey, setHasApiKey] = useState(true);
+
   // Load persisted items on mount
   useEffect(() => {
     getPastes().then(setItems);
   }, []);
 
+  // Check API key when modal opens
+  useEffect(() => {
+    const checkApiKey = async () => {
+      if (window.aistudio?.hasSelectedApiKey) {
+        const hasKey = await window.aistudio.hasSelectedApiKey();
+        setHasApiKey(hasKey);
+      }
+    };
+    if (isImageGenOpen) checkApiKey();
+  }, [isImageGenOpen]);
+
+  const openImageGen = useCallback(() => {
+    setIsImageGenOpen(true);
+  }, []);
+
+  const openImageGenWithText = useCallback((text: string) => {
+    setIsImageGenOpen(true);
+    setImagePrompt(`Create a high-quality visual representation of: ${text}`);
+    setIsEditingImage(false);
+    setContextItem(null);
+  }, []);
+
+  const startImageEdit = useCallback((item: PasteItem) => {
+    setIsImageGenOpen(true);
+    setContextItem(item);
+    setImagePrompt("Add a futuristic neon glow to this image");
+    setIsEditingImage(true);
+  }, []);
+
+  const closeImageGen = useCallback(() => {
+    setIsImageGenOpen(false);
+    setIsEditingImage(false);
+    setContextItem(null);
+    setGeneratedImage(null);
+    setImagePrompt("");
+  }, []);
+
+  const generateImageAction = useCallback(async () => {
+    if (!imagePrompt.trim()) return;
+
+    if (imageQuality === "pro" && window.aistudio?.hasSelectedApiKey) {
+      const hasKey = await window.aistudio.hasSelectedApiKey();
+      if (!hasKey) {
+        await window.aistudio.openSelectKey();
+        setHasApiKey(true);
+      }
+    }
+
+    setIsGeneratingImage(true);
+    setGeneratedImage(null);
+
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      const result = await generateImage({
+        prompt: imagePrompt,
+        quality: imageQuality,
+        size: imageSize,
+        contextItem,
+        apiKey,
+      });
+      if (result) setGeneratedImage(result);
+    } catch (error: any) {
+      console.error("Image gen error:", error);
+      if (
+        error?.message?.includes("PERMISSION_DENIED") ||
+        error?.message?.includes("not found")
+      ) {
+        if (imageQuality === "pro") setHasApiKey(false);
+      }
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  }, [imagePrompt, imageQuality, imageSize, contextItem]);
+
+  const downloadGenerated = useCallback(() => {
+    if (!generatedImage) return;
+    const link = document.createElement("a");
+    link.href = generatedImage;
+    link.download = `gen_${Date.now()}.png`;
+    link.click();
+  }, [generatedImage]);
+
   return (
-    <AppContext.Provider value={{ items, setItems, contextItem, setContextItem }}>
+    <AppContext.Provider
+      value={{
+        items, setItems, contextItem, setContextItem,
+        isImageGenOpen, imagePrompt, imageSize, generatedImage,
+        isGeneratingImage, isEditingImage, imageQuality, hasApiKey,
+        setImagePrompt, setImageSize, setImageQuality,
+        openImageGen, openImageGenWithText, startImageEdit,
+        closeImageGen, generateImageAction, downloadGenerated,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

@@ -4,9 +4,6 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
-  getDocs,
-  collection,
-  query,
   serverTimestamp,
 } from "../../firebase";
 import { PasteItem } from "../../types";
@@ -30,7 +27,12 @@ export async function syncPasteUpdateToCloud(
   fields: Partial<PasteItem>
 ): Promise<void> {
   try {
-    await updateDoc(doc(db, `users/${uid}/pastes`, id), fields as Record<string, unknown>);
+    // Filter out undefined values as Firebase doesn't accept them
+    const definedFields = Object.fromEntries(
+      Object.entries(fields).filter(([, v]) => v !== undefined)
+    );
+    if (Object.keys(definedFields).length === 0) return;
+    await updateDoc(doc(db, `users/${uid}/pastes`, id), definedFields as Record<string, unknown>);
   } catch (error) {
     console.error("syncPasteUpdateToCloud failed:", error);
   }
