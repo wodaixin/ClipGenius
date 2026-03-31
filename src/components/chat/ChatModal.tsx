@@ -11,6 +11,7 @@ import {
   Send,
   XCircle,
   Film,
+  AlertTriangle,
 } from "lucide-react";
 import { useChat } from "../../context/ChatContext";
 import { useAppContext } from "../../context/AppContext";
@@ -64,12 +65,14 @@ export function ChatModal() {
     isChatOpen,
     isLiveActive,
     liveTranscription,
+    chatError,
     setChatInput,
     closeChat,
     clearChat,
     sendMessage,
     startLiveSessionHandler,
     stopLiveSession,
+    clearChatError,
   } = useChat();
 
   const { contextItem, setContextItem } = useAppContext();
@@ -172,24 +175,29 @@ export function ChatModal() {
                     </div>
                   )}
 
-                  {/* Text bubble — always rendered, uses placeholder when empty */}
-                  <div
-                    className={cn(
-                      "p-4 rounded-2xl text-sm leading-relaxed",
-                      msg.role === "user"
-                        ? "bg-[#141414] text-white rounded-tr-none"
-                        : "bg-[#F0F0EE] text-[#141414] rounded-tl-none"
-                    )}
-                  >
-                    <div className="prose prose-sm max-w-none prose-invert">
-                      <ReactMarkdown>
-                        {msg.text ||
-                          (msg.role === "user" && msg.attachments?.length
-                            ? " "
-                            : msg.text)}
-                      </ReactMarkdown>
+                  {/* Thinking bubble (shown while model is thinking) */}
+                  {msg.role === "model" && msg.thinking && (
+                    <div className="mb-1 p-3 rounded-2xl rounded-bl-sm bg-[#E8E8E4] text-[11px] font-mono opacity-50 leading-relaxed whitespace-pre-wrap break-words">
+                      <div className="uppercase tracking-widest opacity-40 mb-1 text-[9px]">Thinking...</div>
+                      {msg.thinking}
                     </div>
-                  </div>
+                  )}
+
+                  {/* Text bubble — only rendered when there's actual text */}
+                  {msg.text && (
+                    <div
+                      className={cn(
+                        "p-4 rounded-2xl text-sm leading-relaxed",
+                        msg.role === "user"
+                          ? "bg-[#141414] text-white rounded-tr-none"
+                          : "bg-[#F0F0EE] text-[#141414] rounded-tl-none"
+                      )}
+                    >
+                      <div className="prose prose-sm max-w-none prose-invert">
+                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
                   <span className="text-[8px] font-mono opacity-30 mt-1 uppercase tracking-widest">
                     {format(msg.timestamp, "HH:mm")}
                   </span>
@@ -202,6 +210,28 @@ export function ChatModal() {
                   <span className="text-[10px] font-mono uppercase tracking-widest">Thinking...</span>
                 </div>
               )}
+
+              <AnimatePresence>
+                {chatError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl"
+                  >
+                    <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-red-700 font-mono leading-relaxed">{chatError}</p>
+                    </div>
+                    <button
+                      onClick={clearChatError}
+                      className="p-1 hover:bg-red-100 rounded-full transition-colors flex-shrink-0"
+                    >
+                      <XCircle className="w-4 h-4 text-red-400 hover:text-red-600" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Input */}
@@ -252,7 +282,7 @@ export function ChatModal() {
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  onKeyDown={(e) => e.key === "Enter" && !isChatLoading && sendMessage()}
                   placeholder={
                     contextItem ? "ASK ABOUT THIS CONTEXT..." : "TYPE YOUR MESSAGE..."
                   }

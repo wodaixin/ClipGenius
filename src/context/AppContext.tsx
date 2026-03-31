@@ -45,14 +45,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [imageQuality, setImageQuality] = useState<ImageQuality>("standard");
-  const [hasApiKey, setHasApiKey] = useState(true);
+  const [hasApiKey, setHasApiKey] = useState(false);
 
   // Load persisted items on mount
   useEffect(() => {
     getPastes().then(setItems);
   }, []);
 
-  // Check API key when modal opens
+  // Check if AI Studio has a paid key selected when modal opens
   useEffect(() => {
     const checkApiKey = async () => {
       if (window.aistudio?.hasSelectedApiKey) {
@@ -92,36 +92,48 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const generateImageAction = useCallback(async () => {
     if (!imagePrompt.trim()) return;
 
-    if (imageQuality === "pro" && window.aistudio?.hasSelectedApiKey) {
-      const hasKey = await window.aistudio.hasSelectedApiKey();
-      if (!hasKey) {
-        await window.aistudio.openSelectKey();
-        setHasApiKey(true);
-      }
-    }
-
     setIsGeneratingImage(true);
     setGeneratedImage(null);
 
+    let result: string | null = null;
+
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      const result = await generateImage({
+      result = await generateImage({
         prompt: imagePrompt,
         quality: imageQuality,
         size: imageSize,
         contextItem,
-        apiKey,
+        apiKey: import.meta.env.VITE_GEMINI_API_KEY,
       });
-      if (result) setGeneratedImage(result);
     } catch (error: any) {
       console.error("Image gen error:", error);
-      if (
+      const isPermissionError =
         error?.message?.includes("PERMISSION_DENIED") ||
-        error?.message?.includes("not found")
-      ) {
-        if (imageQuality === "pro") setHasApiKey(false);
+        error?.message?.includes("not found") ||
+        error?.message?.includes("quota") ||
+        error?.message?.includes("has no");
+
+      // PRO mode failed — prompt user to select AI Studio paid key
+      if (imageQuality === "pro" && isPermissionError) {
+        setHasApiKey(false);
+        window.aistudio?.openSelectKey?.();
+        const hasKey = await window.aistudio?.hasSelectedApiKey?.();
+        if (hasKey) {
+          const paidKey = await window.aistudio?.getSelectedApiKey?.();
+          if (paidKey) {
+            setHasApiKey(true);
+            result = await generateImage({
+              prompt: imagePrompt,
+              quality: imageQuality,
+              size: imageSize,
+              contextItem,
+              apiKey: paidKey,
+            });
+          }
+        }
       }
     } finally {
+      if (result) setGeneratedImage(result);
       setIsGeneratingImage(false);
     }
   }, [imagePrompt, imageQuality, imageSize, contextItem]);

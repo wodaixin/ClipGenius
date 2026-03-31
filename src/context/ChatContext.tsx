@@ -20,6 +20,10 @@ import {
 } from "../lib/db";
 import { startLiveSession } from "../services/ai/startLiveSession";
 import { LiveSessionConnection } from "../types";
+import {
+  getChatProvider,
+  buildChatParams,
+} from "../services/ai/providers/chat-router";
 
 interface ChatContextValue {
   chatMessages: ChatMessage[];
@@ -29,6 +33,7 @@ interface ChatContextValue {
   isLiveActive: boolean;
   isMicMuted: boolean;
   liveTranscription: string;
+  chatError: string | null;
   setChatInput: (input: string) => void;
   setIsMicMuted: (muted: boolean) => void;
   openChatWithItem: (item: import("../types").PasteItem | null) => void;
@@ -37,6 +42,7 @@ interface ChatContextValue {
   sendMessage: () => void;
   startLiveSessionHandler: () => void;
   stopLiveSession: () => void;
+  clearChatError: () => void;
 }
 
 const ChatContext = createContext<ChatContextValue | null>(null);
@@ -52,6 +58,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [isLiveActive, setIsLiveActive] = useState(false);
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [liveTranscription, setLiveTranscription] = useState("");
+  const [chatError, setChatError] = useState<string | null>(null);
   const liveSessionRef = useRef<LiveSessionConnection | null>(null);
 
   // Sync chat messages from cloud when chat is open
@@ -146,18 +153,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const sendMessage = useCallback(async () => {
-    if (!chatInput.trim() && !contextItem) return;
-
-    const { GoogleGenAI, ThinkingLevel } = await import("@google/genai");
-    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+    const hasText = chatInput.trim().length > 0;
+    if (!hasText && !contextItem) return;
 
     const userMsgId = crypto.randomUUID();
     const userMsg: ChatMessage = {
       id: userMsgId,
       role: "user",
-      text: chatInput,
+      text: chatInput.trim(),
       timestamp: new Date(),
-      // Only store serializable fields — PasteItem has Date which Firestore can't serialize reliably
       attachments: contextItem
         ? [{ id: contextItem.id, type: contextItem.type, content: contextItem.content, mimeType: contextItem.mimeType, suggestedName: contextItem.suggestedName }]
         : undefined,
@@ -166,14 +170,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setChatInput("");
     setIsChatLoading(true);
 
-    // Move contextItem into message, then clear it so it disappears from sticky panel
     const sentItem = contextItem;
     setContextItem(null);
 
-    const chatId = "default";
-
+    // Save user message
     if (user) {
-      await setDoc(doc(db, `users/${user.uid}/chats/${chatId}/messages`, userMsgId), {
+      await setDoc(doc(db, `users/${user.uid}/chats/default/messages`, userMsgId), {
         ...userMsg,
         timestamp: serverTimestamp(),
       });
@@ -182,68 +184,99 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       setChatMessages((prev) => [...prev, userMsg]);
     }
 
+    // Build chat history
+    const allMessages = [...chatMessages, userMsg];
+    const history: { role: "user" | "model"; content: string }[] = allMessages.map((m) => ({
+      role: m.role as "user" | "model",
+      content: m.text,
+    }));
+
+    let finalPrompt = chatInput.trim();
+    if (sentItem) {
+      if (sentItem.type === "image" || sentItem.type === "video") {
+        finalPrompt = `[Context: ${sentItem.type} attached] ${chatInput}`;
+      } else {
+        finalPrompt = `Context: "${sentItem.content}"\n\nUser Question: ${chatInput}`;
+      }
+    }
+
+    // Create placeholder model message for streaming updates
+    const modelMsgId = crypto.randomUUID();
+    const modelMsg: ChatMessage = {
+      id: modelMsgId,
+      role: "model",
+      text: "",
+      thinking: "",
+      timestamp: new Date(),
+    };
+
+    if (user) {
+      await setDoc(doc(db, `users/${user.uid}/chats/default/messages`, modelMsgId), {
+        ...modelMsg,
+        timestamp: serverTimestamp(),
+      });
+    } else {
+      setChatMessages((prev) => [...prev, modelMsg]);
+    }
+
+    const provider = getChatProvider();
+    const params = buildChatParams(history);
+    // Append the new prompt with context
+    params.messages.push({ role: "user", content: finalPrompt });
+
     try {
-      const history = chatMessages.map((m) => ({
-        role: m.role === "user" ? "user" : "model",
-        parts: [{ text: m.text }],
-      }));
+      const chunks = provider.streamChat(params);
+      let fullText = "";
 
-      const parts: any[] = [];
-      let finalPrompt = chatInput;
-
-      if (sentItem) {
-        if (sentItem.type === "image" || sentItem.type === "video") {
-          parts.push({
-            inlineData: {
-              data: sentItem.content.split(",")[1],
-              mimeType: sentItem.mimeType,
-            },
-          });
-          finalPrompt = `[Context: ${sentItem.type} attached] ${chatInput}`;
-        } else {
-          finalPrompt = `Context: "${sentItem.content}"\n\nUser Question: ${chatInput}`;
+      for await (const chunk of chunks) {
+        if (chunk.type === "thinking") {
+          modelMsg.thinking = (modelMsg.thinking || "") + chunk.text;
+          setChatMessages((prev) =>
+            prev.map((m) => (m.id === modelMsgId ? { ...m, thinking: modelMsg.thinking } : m))
+          );
+        } else if (chunk.type === "text") {
+          fullText += chunk.text;
+          modelMsg.text = fullText;
+          setChatMessages((prev) =>
+            prev.map((m) => (m.id === modelMsgId ? { ...m, text: fullText } : m))
+          );
+        } else if (chunk.type === "done") {
+          break;
         }
       }
 
-      parts.push({ text: finalPrompt });
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
-        contents: [
-          ...history.map((h) => ({ role: h.role, parts: h.parts })),
-          { role: "user", parts },
-        ],
-        config: {
-          systemInstruction:
-            "You are ClipGenius AI, a professional-grade assistant for a clipboard manager. Always refer to the attached context (image, video, or text) to answer questions accurately.",
-          tools: [{ googleSearch: {} }],
-          thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
-        },
-      });
-
-      const modelMsgId = crypto.randomUUID();
-      const modelMsg: ChatMessage = {
-        id: modelMsgId,
-        role: "model",
-        text: response.text || "I couldn't generate a response.",
-        timestamp: new Date(),
-      };
-
+      // Final save
+      const finalMsg = { ...modelMsg, text: fullText || "I couldn't generate a response." };
       if (user) {
         await setDoc(doc(db, `users/${user.uid}/chats/default/messages`, modelMsgId), {
-          ...modelMsg,
+          ...finalMsg,
           timestamp: serverTimestamp(),
         });
       } else {
-        await saveChatMessage(modelMsg);
-        setChatMessages((prev) => [...prev, modelMsg]);
+        await saveChatMessage(finalMsg);
       }
     } catch (error) {
       console.error("Chat error:", error);
+      const message = error instanceof Error ? error.message : "Request failed. Please try again.";
+      setChatError(
+        message.includes("429") || message.includes("quota") || message.includes("rate")
+          ? "API rate limit exceeded. Please try again later."
+          : message.includes("fetch")
+          ? "Network error. Please check your connection."
+          : message
+      );
+      // Remove placeholder message on error
+      if (user) {
+        await deleteDoc(doc(db, `users/${user.uid}/chats/default/messages`, modelMsgId));
+      } else {
+        setChatMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
+      }
     } finally {
       setIsChatLoading(false);
     }
   }, [chatInput, chatMessages, contextItem, user, setContextItem]);
+
+  const clearChatError = useCallback(() => setChatError(null), []);
 
   return (
     <ChatContext.Provider
@@ -255,6 +288,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         isLiveActive,
         isMicMuted,
         liveTranscription,
+        chatError,
         setChatInput,
         setIsMicMuted,
         openChatWithItem,
@@ -263,6 +297,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         sendMessage,
         startLiveSessionHandler: _handleStartLiveSession,
         stopLiveSession,
+        clearChatError,
       }}
     >
       {children}

@@ -11,25 +11,16 @@ interface GenerateImageParams {
 
 /** Generate or edit an image with Gemini */
 export async function generateImage(params: GenerateImageParams): Promise<string | null> {
-  const {
-    prompt,
-    quality,
-    size,
-    contextItem,
-    apiKey,
-  } = params;
+  const { prompt, quality, size, contextItem, apiKey } = params;
 
-  const resolvedKey = apiKey ||
-    (quality === "pro" ? import.meta.env.VITE_GEMINI_API_KEY : import.meta.env.VITE_GEMINI_API_KEY);
-
-  const ai = new GoogleGenAI({ apiKey: resolvedKey });
+  const ai = new GoogleGenAI({ apiKey: apiKey || import.meta.env.VITE_GEMINI_API_KEY });
 
   let response;
 
   if (contextItem) {
     // Image editing mode
     response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
+      model: import.meta.env.VITE_IMAGE_STANDARD_MODEL || "gemini-2.5-flash-image",
       contents: {
         parts: [
           { inlineData: { data: contextItem.content.split(",")[1], mimeType: contextItem.mimeType } },
@@ -38,9 +29,9 @@ export async function generateImage(params: GenerateImageParams): Promise<string
       },
     });
   } else if (quality === "pro") {
-    // Pro generation
+    // PRO generation (may fail without paid key — caller should catch and prompt)
     response = await ai.models.generateContent({
-      model: "gemini-3-pro-image-preview",
+      model: import.meta.env.VITE_IMAGE_PRO_MODEL || "gemini-3-pro-image-preview",
       contents: { parts: [{ text: prompt }] },
       config: {
         imageConfig: { aspectRatio: "1:1", imageSize: size },
@@ -49,7 +40,7 @@ export async function generateImage(params: GenerateImageParams): Promise<string
   } else {
     // Standard generation
     response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
+      model: import.meta.env.VITE_IMAGE_STANDARD_MODEL || "gemini-2.5-flash-image",
       contents: { parts: [{ text: prompt }] },
       config: {
         imageConfig: { aspectRatio: "1:1" },

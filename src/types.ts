@@ -2,9 +2,10 @@ import { LiveServerMessage } from "@google/genai";
 
 declare global {
   interface Window {
-    aistudio: {
+    aistudio?: {
       hasSelectedApiKey: () => Promise<boolean>;
-      openSelectKey: () => Promise<void>;
+      openSelectKey: () => void;
+      getSelectedApiKey?: () => Promise<string>;
     };
   }
 }
@@ -28,6 +29,7 @@ export interface ChatMessage {
   id: string;
   role: "user" | "model";
   text: string;
+  thinking?: string;
   timestamp: Date;
   attachments?: StoredAttachment[];
 }

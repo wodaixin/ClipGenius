@@ -30,7 +30,8 @@
       "Bash(timeout 5 npx chrome-devtools-mcp@latest --browserUrl http://127.0.0.1:9222)",
       "Bash(find /home/hitfm/.claude/plugins/marketplaces/claude-plugins-official -name *.json)",
       "Bash(pstree -p 72141)",
-      "Bash(ps --ppid 72141)"
+      "Bash(ps --ppid 72141)",
+      "Bash(grep \"AudioContent\" /home/hitfm/ClipGenius/node_modules/@google/genai/dist/*.d.ts)"
     ],
     "additionalDirectories": [
       "/home/hitfm/.cache/chrome-devtools-mcp/chrome-profile",
