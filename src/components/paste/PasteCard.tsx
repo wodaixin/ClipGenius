@@ -371,7 +371,12 @@ export function PasteCard({ item }: PasteCardProps) {
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="relative max-w-4xl w-[90vw] max-h-[85vh] rounded-2xl overflow-hidden"
+              className={cn(
+                "relative rounded-2xl overflow-hidden",
+                (item.type === "image" || item.type === "video")
+                  ? "max-w-[90vw] max-h-[90vh]"
+                  : "max-w-4xl w-[90vw] max-h-[85vh]"
+              )}
               onClick={(e) => e.stopPropagation()}
             >
               <PastePreview item={fullItem} full className="w-full h-full" />
