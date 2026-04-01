@@ -37,25 +37,37 @@ export function PastePreview({ item, className, full }: PastePreviewProps) {
   }
 
   if (item.type === "markdown") {
+    if (full) {
+      return (
+        <div className={cn("w-full h-full overflow-auto p-8 bg-[#F9F9F7] rounded-2xl prose prose-sm max-w-none", className)}>
+          <ReactMarkdown>{item.content}</ReactMarkdown>
+        </div>
+      );
+    }
+    // Thumbnail: plain text preview, no rendering
+    const plainText = item.content.replace(/^#{1,6}\s+/gm, "").replace(/[*_`>\[\]]/g, "").trim();
     return (
-      <div className={cn(
-        "w-full h-full overflow-auto p-6 bg-[#F9F9F7] rounded-2xl",
-        full ? "prose prose-sm max-w-none text-base" : "prose prose-xs max-w-none text-xs line-clamp-6 pointer-events-none",
-        className
-      )}>
-        <ReactMarkdown>{item.content}</ReactMarkdown>
+      <div className={cn("w-full h-full flex flex-col p-5 bg-[#F9F9F7] rounded-2xl overflow-hidden", className)}>
+        <span className="text-[10px] font-sans font-bold uppercase tracking-widest opacity-50 mb-2">MD</span>
+        <p className="text-xs font-sans leading-relaxed opacity-75 line-clamp-6 break-words">{plainText}</p>
       </div>
     );
   }
 
   return (
-    <div className={cn("w-full h-full flex flex-col items-center justify-center p-8 bg-[#F9F9F7] rounded-2xl", className)}>
-      {item.type === "url" ? (
-        <LinkIcon className="w-12 h-12 opacity-5 mb-4" />
+    <div className={cn("w-full h-full flex flex-col items-center justify-center p-8 bg-[#F9F9F7] rounded-2xl", full && "items-start justify-start overflow-auto p-10", className)}>
+      {full ? (
+        <p className="text-sm font-sans leading-relaxed whitespace-pre-wrap break-words w-full">{item.content}</p>
       ) : (
-        <FileText className="w-12 h-12 opacity-5 mb-4" />
+        <>
+          {item.type === "url" ? (
+            <LinkIcon className="w-12 h-12 opacity-5 mb-4" />
+          ) : (
+            <FileText className="w-12 h-12 opacity-5 mb-4" />
+          )}
+          <span className="text-[8px] font-mono uppercase tracking-widest opacity-50">{item.type}</span>
+        </>
       )}
-      <span className="text-[8px] font-mono uppercase tracking-widest opacity-50">{item.type}</span>
     </div>
   );
 }

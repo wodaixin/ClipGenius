@@ -131,6 +131,14 @@ export function PasteCard({ item }: PasteCardProps) {
                     <Sparkles className="w-5 h-5" />
                   </button>
                 )}
+                {item.type === "markdown" && (
+                  <button
+                    onClick={() => openImageGenWithText(item.content)}
+                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                  </button>
+                )}
                 {item.type === "image" && (
                   <button
                     onClick={() => startImageEdit(item)}
@@ -300,9 +308,9 @@ export function PasteCard({ item }: PasteCardProps) {
                     <span className="text-xs font-sans uppercase tracking-widest">{t("pasteCard.editImage")}</span>
                   </button>
                 )}
-                {(item.type === "text" || item.type === "url") && (
+                {(item.type === "text" || item.type === "url" || item.type === "markdown") && (
                   <button
-                    onClick={() => openImageGenWithText(item.type === "text" ? item.content : item.summary || item.content)}
+                    onClick={() => openImageGenWithText(item.type === "url" ? item.summary || item.content : item.content)}
                     className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
                   >
                     <Sparkles className="w-3 h-3 opacity-75 group-hover/btn:opacity-100" />

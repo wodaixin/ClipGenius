@@ -197,7 +197,7 @@ export function PasteZone() {
       <div className="flex-1 p-8 md:p-12 flex flex-col">
         <div
           className={cn(
-            "flex-1 border-2 border-dashed border-[#141414]/20 rounded-3xl flex flex-col items-center justify-center text-center transition-all duration-700 relative overflow-hidden group p-12 min-h-[320px]",
+            "flex-1 border-2 border-dashed border-[#141414]/20 rounded-3xl flex flex-col items-center justify-center text-center transition-all duration-700 relative overflow-hidden group p-8 min-h-[200px]",
             isDragging
               ? "bg-[#141414] border-solid border-[#141414]"
               : "bg-[#F9F9F7] hover:bg-white hover:border-[#141414]/40"
