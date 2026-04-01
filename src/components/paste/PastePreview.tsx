@@ -1,5 +1,5 @@
-import React from "react";
-import { FileText, Link as LinkIcon, Code } from "lucide-react";
+import React, { useState } from "react";
+import { FileText, Link as LinkIcon, Code, Copy, CheckCheck } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import SyntaxHighlighter from "react-syntax-highlighter";
@@ -10,7 +10,21 @@ import { cn } from "../../lib/utils";
 interface PastePreviewProps {
   item: PasteItem;
   className?: string;
-  full?: boolean; // lightbox mode
+  full?: boolean;
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button onClick={handleCopy} className="ml-auto p-1 text-white/40 hover:text-white/80 transition-colors">
+      {copied ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+    </button>
+  );
 }
 
 export function PastePreview({ item, className, full }: PastePreviewProps) {
@@ -43,8 +57,15 @@ export function PastePreview({ item, className, full }: PastePreviewProps) {
   if (item.type === "markdown") {
     if (full) {
       return (
-        <div className={cn("w-full h-full overflow-auto p-8 bg-[#1e1e1e] text-[#d4d4d4] prose prose-invert prose-sm max-w-none scrollbar-thin-light", className)}>
-          <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{item.content}</ReactMarkdown>
+        <div className={cn("w-full flex flex-col bg-[#1e1e1e] rounded-2xl overflow-hidden max-h-[85vh]", className)}>
+          <div className="flex items-center gap-2 px-4 py-2 bg-[#2d2d2d] shrink-0">
+            <Code className="w-3 h-3 text-white/40" />
+            <span className="text-[10px] font-mono uppercase tracking-widest text-white/40">markdown</span>
+            <CopyButton text={item.content} />
+          </div>
+          <div className="flex-1 overflow-auto p-8 prose prose-invert prose-sm max-w-none scrollbar-thin-light">
+            <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{item.content}</ReactMarkdown>
+          </div>
         </div>
       );
     }
@@ -65,6 +86,7 @@ export function PastePreview({ item, className, full }: PastePreviewProps) {
         <div className="flex items-center gap-2 px-4 py-2 bg-[#2d2d2d] shrink-0">
           <Code className="w-3 h-3 text-white/40" />
           <span className="text-[10px] font-mono uppercase tracking-widest text-white/40">{lang}</span>
+          <CopyButton text={item.content} />
         </div>
         {full ? (
           <SyntaxHighlighter
@@ -84,23 +106,31 @@ export function PastePreview({ item, className, full }: PastePreviewProps) {
     );
   }
 
+  if (item.type === "text" || item.type === "url") {
+    if (full) return (
+      <div className={cn("w-full flex flex-col bg-[#1e1e1e] rounded-2xl overflow-hidden max-h-[85vh]", className)}>
+        <div className="flex items-center gap-2 px-4 py-2 bg-[#2d2d2d] shrink-0">
+          {item.type === "url" ? <LinkIcon className="w-3 h-3 text-white/40" /> : <FileText className="w-3 h-3 text-white/40" />}
+          <span className="text-[10px] font-mono uppercase tracking-widest text-white/40">{item.type}</span>
+          <CopyButton text={item.content} />
+        </div>
+        <div
+          className="flex-1 overflow-y-auto p-6 text-sm font-sans text-[#d4d4d4] leading-relaxed whitespace-pre-wrap break-words scrollbar-thin-light"
+        >
+          {item.content}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      style={full ? { maxHeight: "85vh", overflowY: "auto" } : undefined}
-      className={cn(full ? "w-full p-10 bg-[#1e1e1e] text-[#d4d4d4] rounded-2xl scrollbar-thin-light" : "w-full h-full flex flex-col items-center justify-center p-8 bg-[#F9F9F7] rounded-2xl", className)}
-    >
-      {full ? (
-        <p className="text-sm font-sans leading-relaxed whitespace-pre-wrap break-words overflow-x-hidden w-full">{item.content}</p>
+    <div className={cn("w-full h-full flex flex-col items-center justify-center p-8 bg-[#F9F9F7] rounded-2xl", className)}>
+      {item.type === "url" ? (
+        <LinkIcon className="w-8 h-8 opacity-10 mb-3 shrink-0" />
       ) : (
-        <>
-          {item.type === "url" ? (
-            <LinkIcon className="w-8 h-8 opacity-10 mb-3 shrink-0" />
-          ) : (
-            <FileText className="w-8 h-8 opacity-10 mb-3 shrink-0" />
-          )}
-          <p className="text-xs font-sans leading-relaxed opacity-60 line-clamp-6 break-all text-center">{item.content}</p>
-        </>
+        <FileText className="w-8 h-8 opacity-10 mb-3 shrink-0" />
       )}
+      <p className="text-xs font-sans leading-relaxed opacity-60 line-clamp-6 break-all text-center">{item.content}</p>
     </div>
   );
 }
