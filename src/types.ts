@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-export type PasteType = "image" | "text" | "url" | "video" | "markdown";
+export type PasteType = "image" | "text" | "url" | "video" | "markdown" | "code";
 
 export interface PasteItem {
   id: string;

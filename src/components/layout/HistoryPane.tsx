@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Trash2, Layers, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { usePasteStore } from "../../hooks/usePasteStore";
 import { PasteCard } from "../paste/PasteCard";
+import { estimateCardHeight } from "../../lib/estimateCardHeight";
 import { cn } from "../../lib/utils";
 
 export function HistoryPane() {
@@ -15,6 +17,16 @@ export function HistoryPane() {
     setSearchQuery,
     clearUnpinned,
   } = usePasteStore();
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: filteredItems.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: (i) => estimateCardHeight(filteredItems[i]),
+    overscan: 5,
+    gap: 48,
+  });
 
   return (
     <main className="flex-1 h-screen overflow-y-auto bg-[#F5F5F0]">
@@ -57,28 +69,34 @@ export function HistoryPane() {
       </div>
 
       {/* Scrollable List */}
-      <div className="flex-1 overflow-y-auto p-8 md:p-12 space-y-12">
-        <AnimatePresence initial={false}>
-          {filteredItems.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="h-full flex flex-col items-center justify-center text-center opacity-40 py-20"
-            >
-              <Layers className="w-16 h-16 mb-6 stroke-[1px]" />
-              <h4 className="text-2xl font-serif italic mb-2">{t("history.emptyTitle")}</h4>
-              <p className="text-xs font-sans uppercase tracking-[0.3em] opacity-75">
-                {t("history.emptyDesc")}
-              </p>
-            </motion.div>
-          ) : (
-            filteredItems.map((item) => (
-              <PasteCard key={item.id} item={item} />
-            ))
-          )}
-        </AnimatePresence>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 md:p-12">
+        {filteredItems.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="h-full flex flex-col items-center justify-center text-center opacity-40 py-20"
+          >
+            <Layers className="w-16 h-16 mb-6 stroke-[1px]" />
+            <h4 className="text-2xl font-serif italic mb-2">{t("history.emptyTitle")}</h4>
+            <p className="text-xs font-sans uppercase tracking-[0.3em] opacity-75">
+              {t("history.emptyDesc")}
+            </p>
+          </motion.div>
+        ) : (
+          <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+            {virtualizer.getVirtualItems().map((vItem) => (
+              <div
+                key={vItem.key}
+                data-index={vItem.index}
+                ref={virtualizer.measureElement}
+                style={{ position: "absolute", top: vItem.start, left: 0, right: 0 }}
+              >
+                <PasteCard item={filteredItems[vItem.index]} />
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* End of List Indicator */}
         {items.length > 0 && (
           <div className="pt-12 pb-24 text-center">
             <span className="text-xs font-sans opacity-75 uppercase tracking-[0.5em]">

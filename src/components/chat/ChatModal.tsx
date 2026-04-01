@@ -1,5 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { prepare, layout } from "@chenglou/pretext";
 import ReactMarkdown from "react-markdown";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -14,6 +16,7 @@ import {
   XCircle,
   Film,
   AlertTriangle,
+  Code,
 } from "lucide-react";
 import { useChat } from "../../context/ChatContext";
 import { useAppContext } from "../../context/AppContext";
@@ -44,6 +47,20 @@ function AttachmentPreview({ item }: { item: StoredAttachment }) {
       </div>
     );
   }
+  if (item.type === "code") {
+    const lang = item.mimeType?.startsWith("code/") ? item.mimeType.slice(5) : "code";
+    return (
+      <div className="bg-[#1e1e1e] rounded-xl overflow-hidden">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#2d2d2d]">
+          <Code className="w-3 h-3 text-white/40" />
+          <span className="text-[10px] font-mono uppercase tracking-widest text-white/40">{lang}</span>
+        </div>
+        <pre className="p-3 text-xs font-mono text-[#d4d4d4] leading-relaxed line-clamp-4 overflow-hidden">
+          <code>{item.content}</code>
+        </pre>
+      </div>
+    );
+  }
   return (
     <div className="flex items-start gap-3 p-4 bg-[#F9F9F7]">
       <div className="flex-shrink-0 w-8 h-8 bg-[#141414]/5 rounded-lg flex items-center justify-center">
@@ -52,9 +69,7 @@ function AttachmentPreview({ item }: { item: StoredAttachment }) {
         </span>
       </div>
       <p className="text-[12px] font-sans opacity-75 leading-relaxed line-clamp-4 break-all">
-        {item.type === "text"
-          ? item.content
-          : item.content}
+        {item.content}
       </p>
     </div>
   );
@@ -83,6 +98,34 @@ export function ChatModal() {
   const { contextItem, setContextItem } = useAppContext();
 
   const modalRef = useRef<HTMLDivElement>(null);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
+
+  function estimateMsgHeight(index: number): number {
+    const msg = chatMessages[index];
+    if (!msg) return 80;
+    try {
+      const prepared = prepare(msg.text || msg.thinking || " ", "14px Inter");
+      const { lineCount } = layout(prepared, 380, 22);
+      return 48 + lineCount * 22 + (msg.attachments?.length ? 180 : 0);
+    } catch {
+      return 80;
+    }
+  }
+
+  const virtualizer = useVirtualizer({
+    count: chatMessages.length,
+    getScrollElement: () => messagesScrollRef.current,
+    estimateSize: estimateMsgHeight,
+    overscan: 5,
+    gap: 24,
+  });
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      virtualizer.scrollToIndex(chatMessages.length - 1, { align: "end" });
+    }
+  }, [chatMessages.length]);
 
   return (
     <AnimatePresence>
@@ -162,7 +205,7 @@ export function ChatModal() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div ref={messagesScrollRef} className="flex-1 overflow-y-auto p-6">
               {isLiveActive && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
@@ -184,76 +227,67 @@ export function ChatModal() {
                 </div>
               )}
 
-              {chatMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={cn(
-                    "flex items-start gap-2",
-                    msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                  )}
-                >
-                  {msg.role === "model" && (
-                    <div className="w-6 h-6 rounded-full bg-[#141414] flex items-center justify-center shrink-0">
-                      <Sparkles className="w-3 h-3 text-white" />
-                    </div>
-                  )}
-                <div
-                  className={cn(
-                    "flex flex-col max-w-[85%]",
-                    msg.role === "user" ? "items-end" : "items-start"
-                  )}
-                >
-                  {/* Inline attachments (Gemini-style — shown above text bubble) */}
-                  {msg.role === "user" && msg.attachments && msg.attachments.length > 0 && (
-                    <div className="mb-1 rounded-3xl overflow-hidden border border-[#141414]/10">
-                      {msg.attachments.length === 1 ? (
-                        <AttachmentPreview item={msg.attachments[0]} />
-                      ) : (
-                        <div className="grid grid-cols-2 gap-0.5">
-                          {msg.attachments.map((att) => (
-                            <AttachmentPreview key={att.id} item={att} />
-                          ))}
+              {chatMessages.length > 0 && (
+                <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+                  {virtualizer.getVirtualItems().map((vItem) => {
+                    const msg = chatMessages[vItem.index];
+                    return (
+                      <div
+                        key={vItem.key}
+                        data-index={vItem.index}
+                        ref={virtualizer.measureElement}
+                        style={{ position: "absolute", top: vItem.start, left: 0, right: 0 }}
+                      >
+                        <div className={cn("flex items-start gap-2", msg.role === "user" ? "flex-row-reverse" : "flex-row")}>
+                          {msg.role === "model" && (
+                            <div className="w-6 h-6 rounded-full bg-[#141414] flex items-center justify-center shrink-0">
+                              <Sparkles className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                          <div className={cn("flex flex-col max-w-[85%]", msg.role === "user" ? "items-end" : "items-start")}>
+                            {msg.role === "user" && msg.attachments && msg.attachments.length > 0 && (
+                              <div className="mb-1 rounded-3xl overflow-hidden border border-[#141414]/10">
+                                {msg.attachments.length === 1 ? (
+                                  <AttachmentPreview item={msg.attachments[0]} />
+                                ) : (
+                                  <div className="grid grid-cols-2 gap-0.5">
+                                    {msg.attachments.map((att) => (
+                                      <AttachmentPreview key={att.id} item={att} />
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {msg.role === "model" && (
+                              msg.thinking ? (
+                                <div className="mb-1 p-3 rounded-3xl bg-[#E8E8E4] text-[12px] font-sans opacity-80 leading-relaxed whitespace-pre-wrap break-words">
+                                  <div className="uppercase tracking-widest opacity-70 mb-1 text-xs">{t("chat.thinking")}</div>
+                                  {msg.thinking}
+                                </div>
+                              ) : msg.isResponding ? (
+                                <div className="mb-1 flex items-center gap-2 p-3 rounded-3xl bg-[#E8E8E4]">
+                                  <Loader2 className="w-3 h-3 animate-spin opacity-75" />
+                                  <span className="text-xs font-sans opacity-75 uppercase tracking-widest">{t("chat.thinking")}</span>
+                                </div>
+                              ) : null
+                            )}
+                            {msg.text && (
+                              <div className={cn("p-4 text-sm leading-relaxed", msg.role === "user" ? "bg-[#1a1a1a] text-white rounded-3xl" : "bg-[#F0F0EE] text-[#141414] rounded-3xl")}>
+                                <div className={cn("prose prose-sm max-w-none", msg.role === "user" ? "prose-invert" : "")}>
+                                  <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                </div>
+                              </div>
+                            )}
+                            <span className="text-xs font-sans opacity-70 mt-1 uppercase tracking-widest">
+                              {format(msg.timestamp, "HH:mm")}
+                            </span>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Thinking bubble (shown while model is thinking) */}
-                  {msg.role === "model" && (
-                    msg.thinking ? (
-                      <div className="mb-1 p-3 rounded-3xl bg-[#E8E8E4] text-[12px] font-sans opacity-80 leading-relaxed whitespace-pre-wrap break-words">
-                        <div className="uppercase tracking-widest opacity-70 mb-1 text-xs">{t("chat.thinking")}</div>
-                        {msg.thinking}
                       </div>
-                    ) : msg.isResponding ? (
-                      <div className="mb-1 flex items-center gap-2 p-3 rounded-3xl bg-[#E8E8E4]">
-                        <Loader2 className="w-3 h-3 animate-spin opacity-75" />
-                        <span className="text-xs font-sans opacity-75 uppercase tracking-widest">{t("chat.thinking")}</span>
-                      </div>
-                    ) : null
-                  )}
-
-                  {/* Text bubble — only rendered when there's actual text */}
-                  {msg.text && (
-                    <div
-                      className={cn(
-                        "p-4 text-sm leading-relaxed",
-                        msg.role === "user"
-                          ? "bg-[#1a1a1a] text-white rounded-3xl"
-                          : "bg-[#F0F0EE] text-[#141414] rounded-3xl"
-                      )}
-                    >
-                      <div className="prose prose-sm max-w-none prose-invert">
-                        <ReactMarkdown>{msg.text}</ReactMarkdown>
-                      </div>
-                    </div>
-                  )}
-                  <span className="text-xs font-sans opacity-70 mt-1 uppercase tracking-widest">
-                    {format(msg.timestamp, "HH:mm")}
-                  </span>
+                    );
+                  })}
                 </div>
-                </div>
-              ))}
+              )}
 
               <AnimatePresence>
                 {chatError && (
@@ -261,16 +295,13 @@ export function ChatModal() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
-                    className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl"
+                    className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl mt-6"
                   >
                     <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] text-red-700 font-mono leading-relaxed">{chatError}</p>
                     </div>
-                    <button
-                      onClick={clearChatError}
-                      className="p-1 hover:bg-red-100 rounded-full transition-colors flex-shrink-0"
-                    >
+                    <button onClick={clearChatError} className="p-1 hover:bg-red-100 rounded-full transition-colors flex-shrink-0">
                       <XCircle className="w-4 h-4 text-red-400 hover:text-red-600" />
                     </button>
                   </motion.div>
@@ -300,6 +331,9 @@ export function ChatModal() {
                       )}
                       {contextItem.type === "url" && (
                         <span className="text-[8px] font-mono opacity-75 uppercase leading-none text-center px-1">URL</span>
+                      )}
+                      {contextItem.type === "code" && (
+                        <Code className="w-4 h-4 opacity-75" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

@@ -56,15 +56,16 @@ export function useClipboard() {
       if (text && clipboardData.files.length === 0) {
         const isUrl = /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(text.trim());
         const isMarkdown = !isUrl && /^#{1,6} |^\*\*|^- |\*[^*]+\*|```|\[.+\]\(.+\)|^>\s/m.test(text);
-        const type = isUrl ? "url" : isMarkdown ? "markdown" : "text";
+        const codeLang = !isUrl && !isMarkdown ? detectCodeLanguage(text) : null;
+        const type = isUrl ? "url" : isMarkdown ? "markdown" : codeLang ? "code" : "text";
         const id = crypto.randomUUID();
         const newItem: PasteItem = {
           id,
           type,
           content: text,
-          mimeType: isUrl ? "text/uri-list" : "text/markdown",
+          mimeType: isUrl ? "text/uri-list" : codeLang ? `code/${codeLang}` : "text/plain",
           timestamp: new Date(),
-          suggestedName: `${type === "url" ? "link" : type === "markdown" ? "doc" : "note"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
+          suggestedName: `${type === "url" ? "link" : type === "markdown" ? "doc" : type === "code" ? `${codeLang}_snippet` : "note"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
           isAnalyzing: user ? isAutoAnalyzeEnabled : false,
           isPinned: false,
           userId: user?.uid || "guest",
@@ -99,4 +100,32 @@ export function useClipboard() {
   }, [setIsDragging]);
 
   return { handleDragOver, handleDragLeave, handleDrop };
+}
+
+function detectCodeLanguage(text: string): string | null {
+  const t = text.trim();
+  const rules: [RegExp, string][] = [
+    [/^\s*\{[\s\S]*\}\s*$|^\s*\[[\s\S]*\]\s*$/, "json"],
+    [/<\?xml|<\/[a-zA-Z]+>/, "xml"],
+    [/<!DOCTYPE html|<html|<\/div>|<\/span>/, "html"],
+    [/^\s*SELECT\s|^\s*INSERT\s|^\s*UPDATE\s|^\s*CREATE\s/im, "sql"],
+    [/^def |^class |^import |^from .+ import|^async def /m, "python"],
+    [/^func |^package |^import \(|:= /, "go"],
+    [/^fn |^let mut |^use std::|^impl |^pub fn /m, "rust"],
+    [/^#include|^int main\(|std::|cout <</, "cpp"],
+    [/^import |^export |^const |^let |^var |=>|\.tsx?$/, "typescript"],
+    [/^import |^export |^const |^let |^var |=>/, "javascript"],
+    [/^public class |^private |^protected |^import java\./m, "java"],
+    [/^using System|^namespace |^public class /m, "csharp"],
+    [/^<\?php|^\$[a-z_]+ =|echo |->/, "php"],
+    [/^#!\/bin\/bash|^\$\(|^if \[|^fi$|^echo /m, "bash"],
+    [/^[a-z-]+:\s*$|^\s{2,}[a-z-]+:/m, "yaml"],
+    [/^\[.+\]\s*$|^[a-z_]+ = /m, "toml"],
+  ];
+  for (const [regex, lang] of rules) {
+    if (regex.test(t)) return lang;
+  }
+  // Fallback: has enough code-like structure
+  if (/[{};()=>]/.test(t) && t.split("\n").length > 2) return "code";
+  return null;
 }

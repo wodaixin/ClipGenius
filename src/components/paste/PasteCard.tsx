@@ -109,7 +109,7 @@ export function PasteCard({ item }: PasteCardProps) {
           {/* Quick Actions Overlay */}
           <div className="absolute inset-0 bg-[#141414]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4 rounded-2xl">
             <button
-              onClick={() => downloadItem(item)}
+              onClick={(e) => { e.stopPropagation(); downloadItem(item); }}
               className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
             >
               <Download className="w-5 h-5" />
@@ -118,14 +118,14 @@ export function PasteCard({ item }: PasteCardProps) {
             {user && (
               <>
                 <button
-                  onClick={() => openChatWithItem(item)}
+                  onClick={(e) => { e.stopPropagation(); openChatWithItem(item); }}
                   className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                 >
                   <MessageSquare className="w-5 h-5" />
                 </button>
                 {item.type === "text" && (
                   <button
-                    onClick={() => openImageGenWithText(item.content)}
+                    onClick={(e) => { e.stopPropagation(); openImageGenWithText(item.content); }}
                     className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
                     <Sparkles className="w-5 h-5" />
@@ -133,7 +133,15 @@ export function PasteCard({ item }: PasteCardProps) {
                 )}
                 {item.type === "markdown" && (
                   <button
-                    onClick={() => openImageGenWithText(item.content)}
+                    onClick={(e) => { e.stopPropagation(); openImageGenWithText(item.content); }}
+                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                  </button>
+                )}
+                {item.type === "code" && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openImageGenWithText(item.content); }}
                     className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
                     <Sparkles className="w-5 h-5" />
@@ -141,7 +149,7 @@ export function PasteCard({ item }: PasteCardProps) {
                 )}
                 {item.type === "image" && (
                   <button
-                    onClick={() => startImageEdit(item)}
+                    onClick={(e) => { e.stopPropagation(); startImageEdit(item); }}
                     className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
                     <Sparkles className="w-5 h-5" />
@@ -149,7 +157,7 @@ export function PasteCard({ item }: PasteCardProps) {
                 )}
                 {item.type === "url" && (
                   <button
-                    onClick={() => openImageGenWithText(item.summary || item.content)}
+                    onClick={(e) => { e.stopPropagation(); openImageGenWithText(item.summary || item.content); }}
                     className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
                     <Sparkles className="w-5 h-5" />
@@ -160,7 +168,7 @@ export function PasteCard({ item }: PasteCardProps) {
 
             {item.type !== "video" && (
               <button
-                onClick={() => copyToClipboard(item)}
+                onClick={(e) => { e.stopPropagation(); copyToClipboard(item); }}
                 className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
               >
                 {isCopied ? <CheckCircle2 className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
@@ -308,7 +316,7 @@ export function PasteCard({ item }: PasteCardProps) {
                     <span className="text-xs font-sans uppercase tracking-widest">{t("pasteCard.editImage")}</span>
                   </button>
                 )}
-                {(item.type === "text" || item.type === "url" || item.type === "markdown") && (
+                {(item.type === "text" || item.type === "url" || item.type === "markdown" || item.type === "code") && (
                   <button
                     onClick={() => openImageGenWithText(item.type === "url" ? item.summary || item.content : item.content)}
                     className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
