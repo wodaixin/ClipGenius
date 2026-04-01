@@ -24,10 +24,10 @@ In AI Studio Settings → Secrets, add all required environment variables:
 
 | Secret Name | Example Value |
 |---|---|
-| `VITE_GEMINI_API_KEY` | `AIza...` |
+| `VITE_GEMINI_API_KEY` | `your-api-key` |
 | `VITE_FIREBASE_PROJECT_ID` | `clipgenius-app` |
 | `VITE_FIREBASE_APP_ID` | `1:...:web:...` |
-| `VITE_FIREBASE_API_KEY` | `AIza...` |
+| `VITE_FIREBASE_API_KEY` | `your-api-key` |
 | `VITE_FIREBASE_AUTH_DOMAIN` | `clipgenius-app.firebaseapp.com` |
 | `VITE_FIREBASE_FIRESTORE_DB` | `(default)` |
 | `VITE_FIREBASE_STORAGE_BUCKET` | `clipgenius-app.firebasestorage.app` |

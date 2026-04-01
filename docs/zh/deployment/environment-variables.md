@@ -8,7 +8,7 @@ ClipGenius 使用环境变量配置 Firebase、AI 服务和应用行为。所有
 |---|---|---|---|
 | `VITE_FIREBASE_PROJECT_ID` | 是 | Firebase 项目 ID | `my-project-123` |
 | `VITE_FIREBASE_APP_ID` | 是 | Firebase 应用 ID | `1:123456:web:abc` |
-| `VITE_FIREBASE_API_KEY` | 是 | Firebase API 密钥 | `AIza...` |
+| `VITE_FIREBASE_API_KEY` | 是 | Firebase API 密钥 | `your-api-key` |
 | `VITE_FIREBASE_AUTH_DOMAIN` | 是 | Firebase Auth 域名 | `my-project.firebaseapp.com` |
 | `VITE_FIREBASE_FIRESTORE_DB` | 是 | Firestore 数据库 ID | `my-project` |
 | `VITE_FIREBASE_STORAGE_BUCKET` | 是 | Cloud Storage 存储桶 | `my-project.firebasestorage.app` |
@@ -18,7 +18,7 @@ ClipGenius 使用环境变量配置 Firebase、AI 服务和应用行为。所有
 
 | 变量名 | 必需 | 说明 | 示例 |
 |---|---|---|---|
-| `VITE_GEMINI_API_KEY` | 是 | Gemini API 密钥（免费额度） | `AIza...` |
+| `VITE_GEMINI_API_KEY` | 是 | Gemini API 密钥（免费额度） | `your-api-key` |
 
 ## Provider 选择
 
@@ -59,14 +59,14 @@ ClipGenius 使用环境变量配置 Firebase、AI 服务和应用行为。所有
 # Firebase
 VITE_FIREBASE_PROJECT_ID=my-dev-project
 VITE_FIREBASE_APP_ID=1:123456:web:dev
-VITE_FIREBASE_API_KEY=AIzaSyDev...
+VITE_FIREBASE_API_KEY=your-firebase-api-key
 VITE_FIREBASE_AUTH_DOMAIN=my-dev-project.firebaseapp.com
 VITE_FIREBASE_FIRESTORE_DB=my-dev-project
 VITE_FIREBASE_STORAGE_BUCKET=my-dev-project.firebasestorage.app
 VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 
 # Gemini
-VITE_GEMINI_API_KEY=AIzaSyProd...
+VITE_GEMINI_API_KEY=your-gemini-api-key
 
 # App
 VITE_APP_URL=http://localhost:3000
