@@ -23,7 +23,7 @@ import { useAppContext } from "../context/AppContext";
 
 export function usePasteStore() {
   const { user } = useAuth();
-  const { items, setItems } = useAppContext();
+  const { items, setItems, isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled } = useAppContext();
 
   // ---------- UI state ----------
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,9 +32,6 @@ export function usePasteStore() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editSummary, setEditSummary] = useState("");
-  const [isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled] = useState(false);
-
-  // ---------- Derived ----------
   const filteredItems = useMemo(() => {
     const q = searchQuery.toLowerCase();
     const filtered = items.filter(

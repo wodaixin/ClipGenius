@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,700&family=Noto+Serif+SC:wght@400;700&display=swap');
 @import "tailwindcss";
+@import 'highlight.js/styles/atom-one-dark.css';
 @plugin "@tailwindcss/typography";
 
 @theme {
@@ -30,5 +31,33 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(20, 20, 20, 0.25);
+    border-radius: 9999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(20, 20, 20, 0.5);
+  }
+  .scrollbar-thin-light::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin-light::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin-light::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+  }
+  .scrollbar-thin-light::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
   }
 }

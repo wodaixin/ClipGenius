@@ -109,7 +109,7 @@ function detectCodeLanguage(text: string): string | null {
     [/<\?xml|<\/[a-zA-Z]+>/, "xml"],
     [/<!DOCTYPE html|<html|<\/div>|<\/span>/, "html"],
     [/^\s*SELECT\s|^\s*INSERT\s|^\s*UPDATE\s|^\s*CREATE\s/im, "sql"],
-    [/^def |^class |^import |^from .+ import|^async def /m, "python"],
+    [/^def |^from .+ import|^async def /m, "python"],
     [/^func |^package |^import \(|:= /, "go"],
     [/^fn |^let mut |^use std::|^impl |^pub fn /m, "rust"],
     [/^#include|^int main\(|std::|cout <</, "cpp"],

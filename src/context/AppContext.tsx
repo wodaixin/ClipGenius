@@ -20,6 +20,8 @@ interface AppContextValue {
   isEditingImage: boolean;
   imageQuality: ImageQuality;
   hasApiKey: boolean;
+  isAutoAnalyzeEnabled: boolean;
+  setIsAutoAnalyzeEnabled: (v: boolean) => void;
   setImagePrompt: (v: string) => void;
   setImageSize: (v: ImageSize) => void;
   setImageQuality: (v: ImageQuality) => void;
@@ -46,10 +48,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [imageQuality, setImageQuality] = useState<ImageQuality>("standard");
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabledState] = useState(
+    () => localStorage.getItem("autoAnalyze") === "true"
+  );
+  const setIsAutoAnalyzeEnabled = useCallback((v: boolean) => {
+    localStorage.setItem("autoAnalyze", String(v));
+    setIsAutoAnalyzeEnabledState(v);
+  }, []);
 
   // Load persisted items on mount
+  const PREVIEW_LIMIT = 2000;
   useEffect(() => {
-    getPastes().then(setItems);
+    getPastes().then((pastes) =>
+      setItems(pastes.map((p) =>
+        (p.type === "text" || p.type === "url" || p.type === "markdown" || p.type === "code") && p.content.length > PREVIEW_LIMIT
+          ? { ...p, content: p.content.slice(0, PREVIEW_LIMIT) }
+          : p
+      ))
+    );
   }, []);
 
   // Check if AI Studio has a paid key selected when modal opens
@@ -152,6 +168,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         items, setItems, contextItem, setContextItem,
         isImageGenOpen, imagePrompt, imageSize, generatedImage,
         isGeneratingImage, isEditingImage, imageQuality, hasApiKey,
+        isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled,
         setImagePrompt, setImageSize, setImageQuality,
         openImageGen, openImageGenWithText, startImageEdit,
         closeImageGen, generateImageAction, downloadGenerated,

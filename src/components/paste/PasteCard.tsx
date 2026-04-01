@@ -57,13 +57,21 @@ export function PasteCard({ item }: PasteCardProps) {
   const isEditing = editingItemId === item.id;
   const isCopied = copiedId === item.id;
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [fullItem, setFullItem] = useState(item);
 
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setLightboxOpen(false);
     window.addEventListener("keydown", onKey);
+    // Load full content from DB
+    import("../../lib/db").then(({ getPastes }) =>
+      getPastes().then((all) => {
+        const found = all.find((p) => p.id === item.id);
+        if (found) setFullItem(found);
+      })
+    );
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxOpen]);
+  }, [lightboxOpen, item.id]);
 
   const handleAnalyze = async () => {
     if (!user) return;
@@ -353,20 +361,20 @@ export function PasteCard({ item }: PasteCardProps) {
             className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-8"
             onClick={() => setLightboxOpen(false)}
           >
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-10"
+            >
+              ✕
+            </button>
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="relative max-w-5xl max-h-full w-full h-full flex items-center justify-center"
+              className="relative max-w-4xl w-[90vw] max-h-[85vh] rounded-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <PastePreview item={item} full className="max-w-full max-h-[90vh] w-auto h-auto" />
-              <button
-                onClick={() => setLightboxOpen(false)}
-                className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
-              >
-                ✕
-              </button>
+              <PastePreview item={fullItem} full className="w-full h-full" />
             </motion.div>
           </motion.div>
         </AnimatePresence>,
