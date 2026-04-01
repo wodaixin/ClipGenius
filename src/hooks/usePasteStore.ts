@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { PasteItem } from "../types";
 import {
   savePaste,
@@ -13,6 +13,7 @@ import {
   syncClearUnpinnedFromCloud,
 } from "../services/sync/dualSync";
 import { copyItemToClipboard, downloadItem as downloadItemUtil } from "../services/clipboard/clipboardUtils";
+import { analyzeContent } from "../services/ai/analyzeContent";
 import { useAuth } from "../context/AuthContext";
 import { useAppContext } from "../context/AppContext";
 
@@ -57,7 +58,7 @@ export function usePasteStore() {
       setItems((prev: PasteItem[]) => [item, ...prev]);
       if (user) syncPasteToCloud(item, user.uid);
     },
-    [user, setItems]
+    [user]
   );
 
   const updateItem = useCallback(
@@ -138,6 +139,39 @@ export function usePasteStore() {
   const handleDownload = useCallback((item: PasteItem) => {
     downloadItemUtil(item);
   }, []);
+
+  // Auto-analyze: watch for items with isAnalyzing=true and no summary
+  const analyzingRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!user) return;
+    const toAnalyze = items.filter(
+      (item) => item.isAnalyzing && !analyzingRef.current.has(item.id)
+    );
+    toAnalyze.forEach((item) => {
+      analyzingRef.current.add(item.id);
+      analyzeContent(item)
+        .then((result) => updateItem({ ...item, ...result, isAnalyzing: false }))
+        .catch(() => updateItem({ ...item, isAnalyzing: false }))
+        .finally(() => analyzingRef.current.delete(item.id));
+    });
+  }, [items, user, updateItem]);
+
+  // Catch-up: when user logs in, analyze items that missed auto-analyze (pasted before login)
+  const prevUserRef = useRef(user);
+  useEffect(() => {
+    if (!user || prevUserRef.current) return; // only trigger on first login
+    prevUserRef.current = user;
+    if (!isAutoAnalyzeEnabled) return;
+    const toAnalyze = items.filter(
+      (item) => !item.summary && !analyzingRef.current.has(item.id)
+    );
+    toAnalyze.forEach((item) => {
+      analyzingRef.current.add(item.id);
+      analyzeContent(item)
+        .then((result) => updateItem({ ...item, ...result }))
+        .finally(() => analyzingRef.current.delete(item.id));
+    });
+  }, [user, items, isAutoAnalyzeEnabled, updateItem]);
 
   return {
     // State (read from AppContext)
