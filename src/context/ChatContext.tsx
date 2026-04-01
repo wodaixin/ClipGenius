@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { ChatMessage } from "../types";
 import { useAuth } from "../context/AuthContext";
 import { useAppContext } from "../context/AppContext";
@@ -48,6 +49,7 @@ interface ChatContextValue {
 const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { contextItem, setContextItem } = useAppContext();
 
@@ -194,9 +196,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     let finalPrompt = chatInput.trim();
     if (sentItem) {
       if (sentItem.type === "image" || sentItem.type === "video") {
-        finalPrompt = `[Context: ${sentItem.type} attached] ${chatInput}`;
+        finalPrompt = t("chat.contextMedia", { type: sentItem.type, question: chatInput });
       } else {
-        finalPrompt = `Context: "${sentItem.content}"\n\nUser Question: ${chatInput}`;
+        finalPrompt = t("chat.contextText", { content: sentItem.content, question: chatInput });
       }
     }
 
@@ -246,7 +248,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Final save
-      const finalMsg = { ...modelMsg, text: fullText || "I couldn't generate a response." };
+      const finalMsg = { ...modelMsg, text: fullText || t("chat.noResponse") };
       if (user) {
         await setDoc(doc(db, `users/${user.uid}/chats/default/messages`, modelMsgId), {
           ...finalMsg,
@@ -257,12 +259,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("Chat error:", error);
-      const message = error instanceof Error ? error.message : "Request failed. Please try again.";
+      const message = error instanceof Error ? error.message : t("errors.tryAgain");
       setChatError(
         message.includes("429") || message.includes("quota") || message.includes("rate")
-          ? "API rate limit exceeded. Please try again later."
+          ? t("errors.rateLimit")
           : message.includes("fetch")
-          ? "Network error. Please check your connection."
+          ? t("errors.network")
           : message
       );
       // Remove placeholder message on error

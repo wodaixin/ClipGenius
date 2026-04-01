@@ -1,5 +1,6 @@
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { ChatProvider, ChatProviderParams, ChatProviderResponse, ChatStreamChunk } from "./chat-types";
+import i18n from "../../../i18n";
 
 export const geminiChatProvider: ChatProvider = {
   async chat(params): Promise<ChatProviderResponse> {
@@ -21,7 +22,7 @@ export const geminiChatProvider: ChatProvider = {
     });
 
     // response.text excludes thinking parts; extract full parts for thinking
-    const text = response.text || "I couldn't generate a response.";
+    const text = response.text || i18n.t("chat.noResponse");
     return { text };
   },
 

@@ -1,4 +1,5 @@
 import { ChatProvider, ChatProviderParams, ChatProviderResponse, ChatStreamChunk } from "./chat-types";
+import i18n from "../../../i18n";
 
 function getMinimaxBaseUrl(): string {
   // In dev mode, route through Vite proxy (Node.js, bypasses system proxy)
@@ -40,7 +41,7 @@ export const minimaxChatProvider: ChatProvider = {
     const textBlock = data.content?.find((block: any) => block.type === "text");
     const text: string = textBlock?.text || "";
 
-    return { text: text || "I couldn't generate a response." };
+    return { text: text || i18n.t("chat.noResponse") };
   },
 
   async *streamChat(params): AsyncIterable<ChatStreamChunk> {

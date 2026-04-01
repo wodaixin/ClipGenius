@@ -48,7 +48,17 @@
     "thinking": "Thinking...",
     "inputPlaceholder": "TYPE YOUR MESSAGE...",
     "inputContextPlaceholder": "ASK ABOUT THIS CONTEXT...",
-    "attaching": "Attaching"
+    "attaching": "Attaching",
+    "noResponse": "I couldn't generate a response.",
+    "systemInstruction": "You are ClipGenius Assistant. Be concise and helpful.",
+    "contextMedia": "[Context: {{type}} attached] {{question}}",
+    "contextText": "Context: \"{{content}}\"\n\nUser Question: {{question}}"
+  },
+  "chatRouter": {
+    "systemInstruction": "You are ClipGenius AI, a professional-grade assistant for a clipboard manager. Always refer to the attached context (image, video, or text) to answer questions accurately. Respond in English."
+  },
+  "liveVoice": {
+    "systemInstruction": "You are ClipGenius Voice Assistant. Be concise and helpful. Respond in English."
   },
   "imageGen": {
     "loginRequired": "Login Required",
@@ -83,6 +93,16 @@
     "editImage": "Edit Image",
     "generateImage": "Generate Image",
     "loginForAi": "Login for AI Analysis"
+  },
+  "analyze": {
+    "prompt": {
+      "image": "Analyze this image. Suggest a short, descriptive filename (no extension) and provide a 1-sentence summary of what's in the image. Return as JSON: { \"suggestedName\": \"...\", \"summary\": \"...\" }",
+      "video": "Analyze this video. Suggest a short, descriptive filename (no extension) and provide a 1-sentence summary of the video content. Return as JSON: { \"suggestedName\": \"...\", \"summary\": \"...\" }",
+      "url": "Analyze this URL: {{content}}. Suggest a short, descriptive filename (no extension) based on the site and provide a 1-sentence summary of what it likely contains. Return as JSON: { \"suggestedName\": \"...\", \"summary\": \"...\" }",
+      "text": "Analyze this text: \"{{content}}\". Suggest a short, descriptive filename (no extension) based on the content and provide a 1-sentence summary. Return as JSON: { \"suggestedName\": \"...\", \"summary\": \"...\" }"
+    },
+    "noSummary": "No summary available.",
+    "langSuffix": "Respond in English."
   },
   "errors": {
     "generic": "I couldn't generate a response.",

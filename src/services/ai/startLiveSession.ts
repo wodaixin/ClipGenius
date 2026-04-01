@@ -1,5 +1,6 @@
 import { GoogleGenAI, Modality, LiveServerMessage } from "@google/genai";
 import { LiveSessionConnection } from "../../types";
+import i18n from "../../i18n";
 
 interface LiveSessionCallbacks {
   onOpen: () => void;
@@ -52,7 +53,7 @@ export async function startLiveSession(
     model: import.meta.env.VITE_LIVE_MODEL || "gemini-3.1-flash-live-preview",
     config: {
       responseModalities: [Modality.AUDIO],
-      systemInstruction: "You are ClipGenius Voice Assistant. Be concise and helpful.",
+      systemInstruction: i18n.t("liveVoice.systemInstruction"),
     },
     callbacks: {
       onopen: () => {

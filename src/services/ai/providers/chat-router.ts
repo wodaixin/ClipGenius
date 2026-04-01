@@ -7,6 +7,7 @@ import {
 } from "./chat-types";
 import { geminiChatProvider } from "./gemini-chat";
 import { minimaxChatProvider } from "./minimax-chat";
+import i18n from "../../../i18n";
 
 const chatProviders: Record<ChatProviderType, ChatProvider> = {
   gemini: geminiChatProvider,
@@ -39,7 +40,7 @@ export function buildChatParams(
     baseUrl: import.meta.env.VITE_MINIMAX_BASE_URL,
     messages,
     systemInstruction:
-      "You are ClipGenius AI, a professional-grade assistant for a clipboard manager. Always refer to the attached context (image, video, or text) to answer questions accurately.",
+      i18n.t("chatRouter.systemInstruction"),
   };
 }
 

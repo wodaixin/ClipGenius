@@ -1,15 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
 import { PasteItem } from "../../../types";
 import { AnalysisProvider, AnalysisResult } from "./types";
+import i18n from "../../../i18n";
 
 function buildAnalysisPrompt(item: PasteItem): string {
-  if (item.type === "image" || item.type === "video") {
-    return `Analyze this ${item.type}. Suggest a short, descriptive filename (no extension) and provide a 1-sentence summary of what's in the ${item.type}. Return as JSON: { "suggestedName": "...", "summary": "..." }`;
+  const langSuffix = i18n.t("analyze.langSuffix");
+  let prompt: string;
+  if (item.type === "image") {
+    prompt = i18n.t("analyze.prompt.image");
+  } else if (item.type === "video") {
+    prompt = i18n.t("analyze.prompt.video");
+  } else if (item.type === "url") {
+    prompt = i18n.t("analyze.prompt.url", { content: item.content });
+  } else {
+    prompt = i18n.t("analyze.prompt.text", { content: item.content.substring(0, 1000) });
   }
-  if (item.type === "url") {
-    return `Analyze this URL: ${item.content}. Suggest a short, descriptive filename (no extension) based on the site and provide a 1-sentence summary of what it likely contains. Return as JSON: { "suggestedName": "...", "summary": "..." }`;
-  }
-  return `Analyze this text: "${item.content.substring(0, 1000)}...". Suggest a short, descriptive filename (no extension) based on the content and provide a 1-sentence summary. Return as JSON: { "suggestedName": "...", "summary": "..." }`;
+  return `${prompt}\n${langSuffix}`;
 }
 
 function buildAnalysisParts(item: PasteItem): { parts: unknown[]; config: Record<string, unknown> } {
@@ -28,7 +34,7 @@ function buildAnalysisParts(item: PasteItem): { parts: unknown[]; config: Record
   if (item.type === "url") {
     return {
       parts: [{ text: prompt }],
-      config: { responseMimeType: "application/json", tools: [{ googleSearch: {} }] },
+      config: { responseMimeType: "application/json" },
     };
   }
 
@@ -54,7 +60,7 @@ export const geminiAnalysisProvider: AnalysisProvider = {
     const result = JSON.parse((response.text || "{}").replace(/^```json\s*/i, "").replace(/\s*```$/i, ""));
     return {
       suggestedName: result.suggestedName || item.suggestedName,
-      summary: result.summary || "No summary available.",
+      summary: result.summary || i18n.t("analyze.noSummary"),
     } as AnalysisResult;
   },
 };
