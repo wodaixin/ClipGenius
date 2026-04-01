@@ -40,7 +40,7 @@ interface ChatContextValue {
   openChatWithItem: (item: import("../types").PasteItem | null) => void;
   closeChat: () => void;
   clearChat: () => void;
-  sendMessage: () => void;
+  sendMessage: (rawInput?: string) => void;
   startLiveSessionHandler: () => void;
   stopLiveSession: () => void;
   clearChatError: () => void;
@@ -61,17 +61,40 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [liveTranscription, setLiveTranscription] = useState("");
   const [chatError, setChatError] = useState<string | null>(null);
+  const [currentChatId, setCurrentChatId] = useState<string>("default");
+  const isSendingRef = useRef(false);
   const liveSessionRef = useRef<LiveSessionConnection | null>(null);
+
+  // Reset sending guard on mount (handles case where a previous page's
+  // in-flight request was aborted by navigation, leaving ref stuck at true)
+  useEffect(() => {
+    isSendingRef.current = false;
+  }, []);
 
   // Sync chat messages from cloud when chat is open
   useEffect(() => {
     if (!user || !isChatOpen) return;
 
     const q = query(
-      collection(db, `users/${user.uid}/chats/default/messages`),
+      collection(db, `users/${user.uid}/chats/${currentChatId}/messages`),
       orderBy("timestamp", "asc")
     );
 
+    // Initial load — onSnapshot doesn't fire on first subscription if data is empty
+    getDocs(q).then((snapshot) => {
+      const firestoreMessages: ChatMessage[] = snapshot.docs.map((d) => {
+        const data = d.data();
+        return {
+          ...data,
+          timestamp: data.timestamp
+            ? new Date(data.timestamp.seconds * 1000)
+            : new Date(),
+        } as ChatMessage;
+      });
+      setChatMessages(firestoreMessages);
+    });
+
+    // Real-time updates
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const firestoreMessages: ChatMessage[] = snapshot.docs.map((d) => {
         const data = d.data();
@@ -83,8 +106,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         } as ChatMessage;
       });
 
-      // Merge: keep local-only fields (e.g. attachments) that Firestore may not return
+      // Merge: Firestore is source of truth, append local-only messages (optimistic updates not yet in cloud)
       setChatMessages((prev) => {
+        const firestoreIds = new Set(firestoreMessages.map((fm) => fm.id));
+        const localOnly = prev.filter((m) => !firestoreIds.has(m.id));
         const merged: ChatMessage[] = firestoreMessages.map((fm) => {
           const local = prev.find((m) => m.id === fm.id);
           if (local) {
@@ -92,12 +117,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           }
           return fm;
         });
-        return merged;
+        return [...merged, ...localOnly];
       });
     });
 
     return () => unsubscribe();
-  }, [user, isChatOpen]);
+  }, [user, isChatOpen, currentChatId]);
 
   // Load local chat messages on mount (for guest users)
   useEffect(() => {
@@ -108,17 +133,24 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const openChatWithItem = useCallback(
     (item: import("../types").PasteItem | null) => {
       if (!user && item) return;
+      const newChatId = item ? item.id : "default";
+      const isNewChat = newChatId !== currentChatId || !isChatOpen;
       setIsChatOpen(true);
-      setContextItem(item);
-      setChatMessages([]);
-      setChatInput("");
+      // Only attach the card context when opening a fresh chat session
+      if (isNewChat) {
+        setContextItem(item);
+        setChatMessages([]);
+        setChatInput("");
+        setCurrentChatId(newChatId);
+      }
     },
-    [user, setContextItem]
+    [user, setContextItem, currentChatId, isChatOpen]
   );
 
   const closeChat = useCallback(() => {
     setIsChatOpen(false);
     setContextItem(null);
+    setCurrentChatId("default");
   }, [setContextItem]);
 
   const clearChat = useCallback(async () => {
@@ -126,14 +158,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
     if (user) {
       try {
-        const q = query(collection(db, `users/${user.uid}/chats/default/messages`));
+        const q = query(collection(db, `users/${user.uid}/chats/${currentChatId}/messages`));
         const snapshot = await getDocs(q);
         await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
       } catch (error) {
         console.error("Failed to clear chat:", error);
       }
     }
-  }, [user]);
+  }, [user, currentChatId]);
 
   const _handleStartLiveSession = useCallback(async () => {
     try {
@@ -154,55 +186,58 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     liveSessionRef.current = null;
   }, []);
 
-  const sendMessage = useCallback(async () => {
-    const hasText = chatInput.trim().length > 0;
-    if (!hasText && !contextItem) return;
+  const sendMessage = useCallback(async (rawInput?: string) => {
+    if (isSendingRef.current) return;
+    isSendingRef.current = true;
+
+    const chatInputValue = (rawInput ?? chatInput).trim();
+    if (!chatInputValue && !contextItem) {
+      isSendingRef.current = false;
+      return;
+    }
 
     const userMsgId = crypto.randomUUID();
     const userMsg: ChatMessage = {
       id: userMsgId,
       role: "user",
-      text: chatInput.trim(),
+      text: chatInputValue,
       timestamp: new Date(),
       attachments: contextItem
         ? [{ id: contextItem.id, type: contextItem.type, content: contextItem.content, mimeType: contextItem.mimeType, suggestedName: contextItem.suggestedName }]
-        : undefined,
+        : null,
     };
-
     setChatInput("");
     setIsChatLoading(true);
 
     const sentItem = contextItem;
     setContextItem(null);
 
-    // Save user message
+    setChatMessages((prev) => [...prev, userMsg]);
+
     if (user) {
-      await setDoc(doc(db, `users/${user.uid}/chats/default/messages`, userMsgId), {
+      void setDoc(doc(db, `users/${user.uid}/chats/${currentChatId}/messages`, userMsgId), {
         ...userMsg,
         timestamp: serverTimestamp(),
-      });
+      }).catch(console.error);
     } else {
       await saveChatMessage(userMsg);
-      setChatMessages((prev) => [...prev, userMsg]);
     }
 
-    // Build chat history
-    const allMessages = [...chatMessages, userMsg];
+    const allMessages = [...chatMessages, userMsg].slice(-30);
     const history: { role: "user" | "model"; content: string }[] = allMessages.map((m) => ({
       role: m.role as "user" | "model",
       content: m.text,
     }));
 
-    let finalPrompt = chatInput.trim();
+    let finalPrompt = chatInputValue;
     if (sentItem) {
       if (sentItem.type === "image" || sentItem.type === "video") {
-        finalPrompt = t("chat.contextMedia", { type: sentItem.type, question: chatInput });
+        finalPrompt = t("chat.contextMedia", { type: sentItem.type, question: chatInputValue });
       } else {
-        finalPrompt = t("chat.contextText", { content: sentItem.content, question: chatInput });
+        finalPrompt = t("chat.contextText", { content: sentItem.content, question: chatInputValue });
       }
     }
 
-    // Create placeholder model message for streaming updates
     const modelMsgId = crypto.randomUUID();
     const modelMsg: ChatMessage = {
       id: modelMsgId,
@@ -210,25 +245,25 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       text: "",
       thinking: "",
       timestamp: new Date(),
+      isResponding: true,
     };
+    setChatMessages((prev) => [...prev, modelMsg]);
 
     if (user) {
-      await setDoc(doc(db, `users/${user.uid}/chats/default/messages`, modelMsgId), {
+      void setDoc(doc(db, `users/${user.uid}/chats/${currentChatId}/messages`, modelMsgId), {
         ...modelMsg,
         timestamp: serverTimestamp(),
-      });
-    } else {
-      setChatMessages((prev) => [...prev, modelMsg]);
+      }).catch(console.error);
     }
 
     const provider = getChatProvider();
     const params = buildChatParams(history);
-    // Append the new prompt with context
     params.messages.push({ role: "user", content: finalPrompt });
 
     try {
       const chunks = provider.streamChat(params);
       let fullText = "";
+      let hasStarted = false;
 
       for await (const chunk of chunks) {
         if (chunk.type === "thinking") {
@@ -236,47 +271,52 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           setChatMessages((prev) =>
             prev.map((m) => (m.id === modelMsgId ? { ...m, thinking: modelMsg.thinking } : m))
           );
+          if (!hasStarted) {
+            hasStarted = true;
+            setIsChatLoading(false);
+          }
         } else if (chunk.type === "text") {
           fullText += chunk.text;
           modelMsg.text = fullText;
+          if (!hasStarted) {
+            hasStarted = true;
+            setIsChatLoading(false);
+          }
           setChatMessages((prev) =>
-            prev.map((m) => (m.id === modelMsgId ? { ...m, text: fullText } : m))
+            prev.map((m) => (m.id === modelMsgId ? { ...m, text: fullText, isResponding: false } : m))
           );
         } else if (chunk.type === "done") {
           break;
         }
       }
 
-      // Final save
-      const finalMsg = { ...modelMsg, text: fullText || t("chat.noResponse") };
+      const finalMsg = { ...modelMsg, text: fullText || t("chat.noResponse"), isResponding: false };
       if (user) {
-        await setDoc(doc(db, `users/${user.uid}/chats/default/messages`, modelMsgId), {
+        void setDoc(doc(db, `users/${user.uid}/chats/${currentChatId}/messages`, modelMsgId), {
           ...finalMsg,
           timestamp: serverTimestamp(),
-        });
+        }).catch(console.error);
       } else {
         await saveChatMessage(finalMsg);
       }
     } catch (error) {
-      console.error("Chat error:", error);
       const message = error instanceof Error ? error.message : t("errors.tryAgain");
       setChatError(
-        message.includes("429") || message.includes("quota") || message.includes("rate")
+        message.includes("429") || message.includes("quota") || message.includes("rate") || message.includes("529") || message.includes("overloaded")
           ? t("errors.rateLimit")
           : message.includes("fetch")
           ? t("errors.network")
           : message
       );
-      // Remove placeholder message on error
-      if (user) {
-        await deleteDoc(doc(db, `users/${user.uid}/chats/default/messages`, modelMsgId));
-      } else {
-        setChatMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
-      }
+      void deleteDoc(doc(db, `users/${user.uid}/chats/${currentChatId}/messages`, modelMsgId)).catch(
+        console.error
+      );
+      setChatMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
     } finally {
       setIsChatLoading(false);
+      isSendingRef.current = false;
     }
-  }, [chatInput, chatMessages, contextItem, user, setContextItem]);
+  }, [chatInput, chatMessages, contextItem, user, setContextItem, currentChatId, t]);
 
   const clearChatError = useCallback(() => setChatError(null), []);
 

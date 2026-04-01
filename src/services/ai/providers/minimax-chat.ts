@@ -4,7 +4,7 @@ import i18n from "../../../i18n";
 function getMinimaxBaseUrl(): string {
   // In dev mode, route through Vite proxy (Node.js, bypasses system proxy)
   if (import.meta.env.DEV) return "/api/minimax";
-  return (import.meta.env.VITE_MINIMAX_BASE_URL || "https://api.minimax.chat").replace(/\/$/, "");
+  return (import.meta.env.VITE_MINIMAX_BASE_URL || "https://api.minimaxi.com/anthropic").replace(/\/$/, "");
 }
 
 export const minimaxChatProvider: ChatProvider = {
@@ -25,7 +25,7 @@ export const minimaxChatProvider: ChatProvider = {
         "x-api-key": apiKey,
       },
       body: JSON.stringify({
-        model: params.model || "MiniMax-Text-01",
+        model: params.model || "MiniMax-M2.7",
         messages,
         max_tokens: 4096,
         stream: false,
@@ -61,7 +61,7 @@ export const minimaxChatProvider: ChatProvider = {
         "x-api-key": apiKey,
       },
       body: JSON.stringify({
-        model: params.model || "MiniMax-Text-01",
+        model: params.model || "MiniMax-M2.7",
         messages,
         max_tokens: 4096,
         stream: true,

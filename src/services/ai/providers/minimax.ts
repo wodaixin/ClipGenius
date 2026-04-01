@@ -4,7 +4,7 @@ import i18n from "../../../i18n";
 
 function getMinimaxBaseUrl(): string {
   if (import.meta.env.DEV) return "/api/minimax";
-  return (import.meta.env.VITE_MINIMAX_BASE_URL || "https://api.minimax.chat").replace(/\/$/, "");
+  return (import.meta.env.VITE_MINIMAX_BASE_URL || "https://api.minimaxi.com/anthropic").replace(/\/$/, "");
 }
 
 function buildAnalysisPrompt(item: PasteItem): string {
@@ -28,7 +28,7 @@ export const minimaxAnalysisProvider: AnalysisProvider = {
     if (!apiKey) throw new Error("Minimax API key not configured (VITE_MINIMAX_API_KEY)");
 
     const baseUrl = getMinimaxBaseUrl();
-    const model = import.meta.env.VITE_ANALYSIS_MODEL || "MiniMax-Text-01";
+    const model = import.meta.env.VITE_ANALYSIS_MODEL || "MiniMax-M2.7";
 
     const prompt = buildAnalysisPrompt(item);
     const isMultimodal = item.type === "image" || item.type === "video";

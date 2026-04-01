@@ -46,26 +46,28 @@ export function ImageGenModal() {
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.9, y: 20 }}
             className="w-full max-w-xl bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[#141414]/10"
+            layout
+            transition={{ layout: { type: "spring", stiffness: 350, damping: 30 } }}
           >
             {/* Login required state */}
             {!user ? (
               <div className="flex flex-col items-center justify-center p-16 text-center gap-6">
                 <div className="w-16 h-16 bg-[#141414]/5 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 opacity-20" />
+                  <Sparkles className="w-8 h-8 opacity-40" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold uppercase tracking-widest mb-2">{t("imageGen.loginRequired")}</h3>
-                  <p className="text-sm opacity-50">{t("imageGen.loginDesc")}</p>
+                  <p className="text-sm opacity-70">{t("imageGen.loginDesc")}</p>
                 </div>
                 <button
                   onClick={login}
-                  className="px-8 py-4 bg-[#141414] text-white text-xs font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
+                  className="px-8 py-4 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
                 >
                   {t("imageGen.loginWithGoogle")}
                 </button>
                 <button
                   onClick={closeImageGen}
-                  className="text-[10px] font-mono uppercase tracking-widest opacity-30 hover:opacity-100 transition-opacity"
+                  className="text-xs font-sans uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
                 >
                   {t("imageGen.cancel")}
                 </button>
@@ -86,7 +88,7 @@ export function ImageGenModal() {
                     onClick={closeImageGen}
                     className="p-2 hover:bg-[#141414]/5 rounded-full transition-colors"
                   >
-                    <XCircle className="w-5 h-5 opacity-30" />
+                    <XCircle className="w-5 h-5 opacity-50" />
                   </button>
                 </div>
 
@@ -94,19 +96,22 @@ export function ImageGenModal() {
                 <div className="p-8 space-y-8">
                   {/* Quality selector */}
                   <div className="flex flex-col gap-4">
-                    <label className="text-[10px] font-mono uppercase tracking-widest opacity-40 block">
+                    <label className="text-xs font-sans uppercase tracking-widest opacity-75 block">
                       {t("imageGen.qualityLabel")}
                     </label>
-                    <div className="flex p-1 bg-[#F9F9F7] border border-[#141414]/5 rounded-2xl">
+                    <div className="relative flex p-1 bg-[#F9F9F7] border border-[#141414]/5 rounded-2xl">
+                      <motion.div
+                        className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm"
+                        animate={{ x: imageQuality === "pro" ? "calc(100% + 8px)" : 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
                       {(["standard", "pro"] as const).map((q) => (
                         <button
                           key={q}
                           onClick={() => setImageQuality(q)}
                           className={cn(
-                            "flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all",
-                            imageQuality === q
-                              ? "bg-white shadow-sm text-[#141414]"
-                              : "text-[#141414]/40 hover:text-[#141414]"
+                            "relative flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors duration-200",
+                            imageQuality === q ? "text-[#141414]" : "text-[#141414]/40 hover:text-[#141414]"
                           )}
                         >
                           {q === "standard" ? t("imageGen.standard") : t("imageGen.pro")}
@@ -116,18 +121,27 @@ export function ImageGenModal() {
                   </div>
 
                   {/* API key warning for Pro */}
-                  {imageQuality === "pro" && !hasApiKey && (
+                  <div
+                    className="overflow-hidden"
+                    style={{
+                      maxHeight: imageQuality === "pro" && !hasApiKey ? "300px" : "0px",
+                      opacity: imageQuality === "pro" && !hasApiKey ? 1 : 0,
+                      transition: imageQuality === "pro" && !hasApiKey
+                        ? "max-height 0.35s ease-in-out, opacity 0.35s ease-in-out"
+                        : "max-height 0.5s ease-in-out, opacity 0.3s ease-in-out",
+                    }}
+                  >
                     <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col gap-4">
                       <div className="flex items-center gap-3 text-amber-800">
                         <Zap className="w-5 h-5" />
                         <span className="text-xs font-bold uppercase tracking-widest">{t("imageGen.apiKeyRequired")}</span>
                       </div>
-                      <p className="text-[11px] text-amber-700 leading-relaxed">
+                      <p className="text-[12px] text-amber-700 leading-relaxed">
                         {t("imageGen.apiKeyDesc")}
                       </p>
                       <button
                         onClick={() => window.aistudio?.openSelectKey?.()}
-                        className="w-full py-3 bg-amber-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-amber-700 transition-colors"
+                        className="w-full py-3 bg-amber-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-amber-700 transition-colors"
                       >
                         {t("imageGen.selectApiKey")}
                       </button>
@@ -135,23 +149,23 @@ export function ImageGenModal() {
                         href="https://ai.google.dev/gemini-api/docs/billing"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[9px] text-amber-600 underline text-center"
+                        className="text-xs text-amber-600 underline text-center"
                       >
                         {t("imageGen.learnBilling")}
                       </a>
                     </div>
-                  )}
+                  </div>
 
                   {/* Prompt */}
                   <div className="flex flex-col gap-4">
-                    <label className="text-[10px] font-mono uppercase tracking-widest opacity-40 block">
+                    <label className="text-xs font-sans uppercase tracking-widest opacity-75 block">
                       {t("imageGen.promptLabel")}
                     </label>
                     <textarea
                       value={imagePrompt}
                       onChange={(e) => setImagePrompt(e.target.value)}
                       placeholder={t("imageGen.promptPlaceholder")}
-                      className="w-full h-32 bg-[#F9F9F7] border border-[#141414]/10 rounded-2xl p-6 text-xs font-mono uppercase tracking-widest focus:outline-none focus:border-[#141414] transition-colors resize-none"
+                      className="w-full h-32 bg-[#F9F9F7] border border-[#141414]/10 rounded-2xl p-6 text-xs font-sans uppercase tracking-widest focus:outline-none focus:border-[#141414] transition-colors resize-none"
                     />
                   </div>
 
@@ -159,7 +173,7 @@ export function ImageGenModal() {
                   <div className="flex items-center justify-between">
                     {imageQuality === "pro" ? (
                       <div className="flex flex-col gap-4">
-                        <label className="text-[10px] font-mono uppercase tracking-widest opacity-40 block">
+                        <label className="text-xs font-sans uppercase tracking-widest opacity-75 block">
                           {t("imageGen.resolution")}
                         </label>
                         <div className="flex gap-2">
@@ -168,10 +182,10 @@ export function ImageGenModal() {
                               key={size}
                               onClick={() => setImageSize(size)}
                               className={cn(
-                                "px-4 py-2 rounded-full text-[10px] font-mono border transition-all",
+                                "px-4 py-2 rounded-full text-xs font-sans border transition-all",
                                 imageSize === size
                                   ? "bg-[#141414] text-white border-[#141414]"
-                                  : "bg-white border-[#141414]/10 opacity-40"
+                                  : "bg-white border-[#141414]/10 opacity-75"
                               )}
                             >
                               {size}
@@ -185,7 +199,7 @@ export function ImageGenModal() {
                     <button
                       onClick={generateImage}
                       disabled={isGeneratingImage || !imagePrompt.trim()}
-                      className="px-8 py-4 bg-[#141414] text-white text-xs font-mono uppercase tracking-widest rounded-full hover:bg-[#333] disabled:opacity-20 transition-all shadow-lg flex items-center gap-3"
+                      className="px-8 py-4 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-full hover:bg-[#333] disabled:opacity-40 transition-all shadow-lg flex items-center gap-3"
                     >
                       {isGeneratingImage ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -212,7 +226,7 @@ export function ImageGenModal() {
                       </div>
                       <button
                         onClick={downloadGenerated}
-                        className="w-full py-4 border border-[#141414]/10 rounded-2xl text-[10px] font-mono uppercase tracking-widest hover:bg-[#F9F9F7] transition-colors flex items-center justify-center gap-3"
+                        className="w-full py-4 border border-[#141414]/10 rounded-2xl text-xs font-sans uppercase tracking-widest hover:bg-[#F9F9F7] transition-colors flex items-center justify-center gap-3"
                       >
                         <Download className="w-4 h-4" />
                         {t("imageGen.download")}

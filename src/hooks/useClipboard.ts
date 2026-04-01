@@ -55,14 +55,16 @@ export function useClipboard() {
       const text = clipboardData.getData("text/plain");
       if (text && clipboardData.files.length === 0) {
         const isUrl = /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(text.trim());
+        const isMarkdown = !isUrl && /^#{1,6} |^\*\*|^- |\*[^*]+\*|```|\[.+\]\(.+\)|^>\s/m.test(text);
+        const type = isUrl ? "url" : isMarkdown ? "markdown" : "text";
         const id = crypto.randomUUID();
         const newItem: PasteItem = {
           id,
-          type: isUrl ? "url" : "text",
+          type,
           content: text,
-          mimeType: isUrl ? "text/uri-list" : "text/plain",
+          mimeType: isUrl ? "text/uri-list" : "text/markdown",
           timestamp: new Date(),
-          suggestedName: `${isUrl ? "link" : "note"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
+          suggestedName: `${type === "url" ? "link" : type === "markdown" ? "doc" : "note"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
           isAnalyzing: user ? isAutoAnalyzeEnabled : false,
           isPinned: false,
           userId: user?.uid || "guest",

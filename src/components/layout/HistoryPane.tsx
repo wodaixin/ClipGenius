@@ -21,18 +21,18 @@ export function HistoryPane() {
       {/* Search & Filter Header */}
       <div className="p-8 md:p-12 border-b border-[#141414]/5 flex flex-col md:flex-row items-stretch md:items-center gap-6 justify-between bg-white/50 backdrop-blur-xl sticky top-0 z-10">
         <div className="relative flex-1 max-w-xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-30" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50" />
           <input
             type="text"
             placeholder={t("history.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-b border-[#141414]/10 py-3 pl-12 pr-4 text-xs font-mono uppercase tracking-widest focus:outline-none focus:border-[#141414] transition-colors"
+            className="w-full bg-transparent border-b border-[#141414]/10 py-3 pl-12 pr-4 text-xs font-sans uppercase tracking-widest focus:outline-none focus:border-[#141414] transition-colors"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 opacity-30 hover:opacity-100 transition-opacity"
+              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 opacity-50 hover:opacity-100 transition-opacity"
             >
               <XCircle className="w-4 h-4" />
             </button>
@@ -41,7 +41,7 @@ export function HistoryPane() {
 
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
-            <span className="text-[10px] font-mono opacity-60 uppercase tracking-widest">
+            <span className="text-xs font-sans opacity-75 uppercase tracking-widest">
               {t("history.records")}
             </span>
             <span className="text-sm font-bold">{items.length}</span>
@@ -63,11 +63,11 @@ export function HistoryPane() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="h-full flex flex-col items-center justify-center text-center opacity-20 py-20"
+              className="h-full flex flex-col items-center justify-center text-center opacity-40 py-20"
             >
               <Layers className="w-16 h-16 mb-6 stroke-[1px]" />
               <h4 className="text-2xl font-serif italic mb-2">{t("history.emptyTitle")}</h4>
-              <p className="text-[10px] font-mono uppercase tracking-[0.3em] opacity-60">
+              <p className="text-xs font-sans uppercase tracking-[0.3em] opacity-75">
                 {t("history.emptyDesc")}
               </p>
             </motion.div>
@@ -81,7 +81,7 @@ export function HistoryPane() {
         {/* End of List Indicator */}
         {items.length > 0 && (
           <div className="pt-12 pb-24 text-center">
-            <span className="text-[9px] font-mono opacity-40 uppercase tracking-[0.5em]">
+            <span className="text-xs font-sans opacity-75 uppercase tracking-[0.5em]">
               {t("history.endOfArchives")}
             </span>
           </div>

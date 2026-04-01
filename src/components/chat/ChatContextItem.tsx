@@ -21,12 +21,12 @@ export function ChatContextItem({ item, onDismiss }: ChatContextItemProps) {
               referrerPolicy="no-referrer"
             />
           ) : (
-            <span className="text-[9px] font-mono opacity-60 uppercase">{item.type}</span>
+            <span className="text-xs font-sans opacity-75 uppercase">{item.type}</span>
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-mono uppercase tracking-widest opacity-60">Referencing Context</p>
-          <p className="text-[11px] font-bold truncate uppercase tracking-tighter">
+          <p className="text-xs font-sans uppercase tracking-widest opacity-75">Referencing Context</p>
+          <p className="text-[12px] font-bold truncate uppercase tracking-tighter">
             {item.suggestedName ||
               (item.type === "text" ? item.content : item.type)}
           </p>
@@ -36,7 +36,7 @@ export function ChatContextItem({ item, onDismiss }: ChatContextItemProps) {
         onClick={onDismiss}
         className="p-2 hover:bg-red-50 hover:text-red-600 rounded-full transition-colors"
       >
-        <XCircle className="w-4 h-4 opacity-30 hover:opacity-100" />
+        <XCircle className="w-4 h-4 opacity-50 hover:opacity-100" />
       </button>
     </div>
   );

@@ -31,7 +31,7 @@ export function buildChatParams(
     model:
       import.meta.env.VITE_CHAT_MODEL ||
       (import.meta.env.VITE_CHAT_PROVIDER === "minimax"
-        ? "MiniMax-Text-01"
+        ? "MiniMax-M2.7"
         : "gemini-3.1-pro-preview"),
     apiKey:
       import.meta.env.VITE_CHAT_PROVIDER === "minimax"

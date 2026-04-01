@@ -47,7 +47,7 @@ export function PasteZone() {
     <aside className="w-full lg:w-[45%] lg:h-screen lg:overflow-y-auto shrink-0 border-r border-[#141414]/10 bg-white flex flex-col relative">
       {/* Vertical Rail Text */}
       <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden xl:block">
-        <span className="writing-vertical text-[10px] font-mono opacity-20 uppercase tracking-[0.4em] select-none">
+        <span className="writing-vertical text-xs font-sans opacity-40 uppercase tracking-[0.4em] select-none">
           {t("pasteZone.rail")}
         </span>
       </div>
@@ -63,7 +63,7 @@ export function PasteZone() {
               <h1 className="text-2xl font-serif font-bold italic tracking-tight leading-none">
                 ClipGenius
               </h1>
-              <p className="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-1">
+              <p className="text-xs font-sans opacity-75 uppercase tracking-widest mt-1">
                 {t("pasteZone.subtitle")}
               </p>
             </div>
@@ -77,7 +77,7 @@ export function PasteZone() {
                   className="p-2 hover:bg-[#141414]/5 rounded-full transition-colors"
                   title="Settings"
                 >
-                  <Settings className="w-5 h-5 opacity-40" />
+                  <Settings className="w-5 h-5 opacity-75" />
                 </button>
                 <AnimatePresence>
                   {settingsOpen && (
@@ -90,7 +90,7 @@ export function PasteZone() {
                     >
                       {/* Auto AI */}
                       <div className="px-4 py-3 border-b border-[#141414]/5 flex items-center justify-between">
-                        <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">
+                        <span className="text-xs font-sans uppercase tracking-widest opacity-75">
                           {t("pasteZone.settings.autoAi")}
                         </span>
                         <button
@@ -108,14 +108,14 @@ export function PasteZone() {
                       </div>
                       {/* Language */}
                       <div className="px-4 py-3">
-                        <span className="text-[10px] font-mono uppercase tracking-widest opacity-40 block mb-3">
+                        <span className="text-xs font-sans uppercase tracking-widest opacity-75 block mb-3">
                           {t("pasteZone.settings.language")}
                         </span>
                         <div className="flex gap-2">
                           <button
                             onClick={() => i18n.changeLanguage("en")}
                             className={cn(
-                              "flex-1 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border",
+                              "flex-1 py-2 rounded-xl text-xs font-sans uppercase tracking-widest transition-all border",
                               i18n.language === "en"
                                 ? "bg-[#141414] text-white border-[#141414]"
                                 : "border-[#141414]/10 hover:border-[#141414]/30"
@@ -126,7 +126,7 @@ export function PasteZone() {
                           <button
                             onClick={() => i18n.changeLanguage("zh")}
                             className={cn(
-                              "flex-1 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border",
+                              "flex-1 py-2 rounded-xl text-xs font-sans uppercase tracking-widest transition-all border",
                               i18n.language === "zh"
                                 ? "bg-[#141414] text-white border-[#141414]"
                                 : "border-[#141414]/10 hover:border-[#141414]/30"
@@ -145,12 +145,12 @@ export function PasteZone() {
             {user ? (
               <div className="flex items-center gap-4">
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-mono opacity-60 uppercase tracking-widest">
+                  <span className="text-xs font-sans opacity-75 uppercase tracking-widest">
                     {user.displayName}
                   </span>
                   <button
                     onClick={logout}
-                    className="text-[9px] font-mono font-bold hover:underline flex items-center gap-1"
+                    className="text-xs font-sans font-bold hover:underline flex items-center gap-1"
                   >
                     <span>{t("pasteZone.logout")}</span>
                   </button>
@@ -174,7 +174,7 @@ export function PasteZone() {
             ) : (
               <button
                 onClick={login}
-                className="px-4 py-2 bg-[#141414] text-white text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
+                className="px-4 py-2 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
               >
                 {t("pasteZone.loginWithGoogle")}
               </button>
@@ -187,7 +187,7 @@ export function PasteZone() {
             {t("pasteZone.heading")} <br />
             <span className="text-[#141414]/20 italic font-serif lowercase">{t("pasteZone.subheading")}</span>
           </h2>
-          <p className="text-sm opacity-50 max-w-sm leading-relaxed">
+          <p className="text-sm opacity-70 max-w-sm leading-relaxed">
             {t("pasteZone.description")}
           </p>
         </div>
@@ -228,10 +228,10 @@ export function PasteZone() {
                 className="flex flex-col items-center"
               >
                 <div className="w-24 h-24 border border-[#141414]/10 rounded-full flex items-center justify-center mb-8 bg-white shadow-sm group-hover:scale-110 transition-transform duration-500">
-                  <Plus className="w-8 h-8 opacity-20 group-hover:opacity-100 transition-opacity" />
+                  <Plus className="w-8 h-8 opacity-40 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-widest mb-2">{t("pasteZone.pasteZone")}</h3>
-                <p className="text-[11px] font-mono opacity-40 uppercase tracking-[0.2em] mb-12">
+                <p className="text-[12px] font-sans opacity-75 uppercase tracking-[0.2em] mb-12">
                   {t("pasteZone.commandHint")}
                 </p>
 
@@ -243,8 +243,8 @@ export function PasteZone() {
                     { icon: LinkIcon, label: t("pasteZone.typeLink"), key: "link" },
                   ].map(({ icon: Icon, label, key }) => (
                     <div key={key} className="flex flex-col items-center gap-2">
-                      <Icon className="w-5 h-5 opacity-20" />
-                      <span className="text-[9px] font-mono uppercase tracking-widest opacity-50">
+                      <Icon className="w-5 h-5 opacity-40" />
+                      <span className="text-xs font-sans uppercase tracking-widest opacity-70">
                         {label}
                       </span>
                     </div>
@@ -262,15 +262,15 @@ export function PasteZone() {
           onClick={() => openChatWithItem(null)}
           className="flex-1 flex items-center justify-center gap-3 bg-white border border-[#141414]/10 py-4 rounded-2xl hover:bg-[#141414] hover:text-white transition-all group"
         >
-          <MessageSquare className="w-5 h-5 opacity-40 group-hover:opacity-100" />
-          <span className="text-[10px] font-mono uppercase tracking-widest">{t("pasteZone.aiChatbot")}</span>
+          <MessageSquare className="w-5 h-5 opacity-75 group-hover:opacity-100" />
+          <span className="text-xs font-sans uppercase tracking-widest">{t("pasteZone.aiChatbot")}</span>
         </button>
         <button
           onClick={openImageGen}
           className="flex-1 flex items-center justify-center gap-3 bg-white border border-[#141414]/10 py-4 rounded-2xl hover:bg-[#141414] hover:text-white transition-all group"
         >
-          <Sparkles className="w-5 h-5 opacity-40 group-hover:opacity-100" />
-          <span className="text-[10px] font-mono uppercase tracking-widest">{t("pasteZone.generateImage")}</span>
+          <Sparkles className="w-5 h-5 opacity-75 group-hover:opacity-100" />
+          <span className="text-xs font-sans uppercase tracking-widest">{t("pasteZone.generateImage")}</span>
         </button>
       </div>
 
@@ -278,7 +278,7 @@ export function PasteZone() {
       <div className="p-8 md:p-12 border-t border-[#141414]/5 bg-[#F9F9F7]/50">
         <div className="flex items-center gap-4 mb-6">
           <div className="h-[1px] flex-1 bg-[#141414]/10" />
-          <span className="text-[9px] font-mono opacity-50 uppercase tracking-[0.4em]">
+          <span className="text-xs font-sans opacity-70 uppercase tracking-[0.4em]">
             {t("pasteZone.features.systemIntelligence")}
           </span>
           <div className="h-[1px] flex-1 bg-[#141414]/10" />
@@ -291,10 +291,10 @@ export function PasteZone() {
           ].map((f, i) => (
             <div key={f.label} className="flex flex-col gap-3 group/feature">
               <div className="flex items-center justify-between">
-                <f.icon className="w-4 h-4 opacity-20 group-hover/feature:opacity-100 transition-opacity" />
-                <span className="text-[9px] font-mono opacity-50">{f.value}</span>
+                <f.icon className="w-4 h-4 opacity-40 group-hover/feature:opacity-100 transition-opacity" />
+                <span className="text-xs font-sans opacity-70">{f.value}</span>
               </div>
-              <span className="text-[9px] font-bold uppercase tracking-widest">{f.label}</span>
+              <span className="text-xs font-bold uppercase tracking-widest">{f.label}</span>
               <div className="h-1 w-full bg-[#141414]/5 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}

@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-export type PasteType = "image" | "text" | "url" | "video";
+export type PasteType = "image" | "text" | "url" | "video" | "markdown";
 
 export interface PasteItem {
   id: string;
@@ -32,6 +32,7 @@ export interface ChatMessage {
   thinking?: string;
   timestamp: Date;
   attachments?: StoredAttachment[];
+  isResponding?: boolean; // true when model started but no content yet
 }
 
 export interface StoredAttachment {

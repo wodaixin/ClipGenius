@@ -1,5 +1,6 @@
-import React from "react";
-import { motion } from "motion/react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "motion/react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import {
@@ -55,6 +56,14 @@ export function PasteCard({ item }: PasteCardProps) {
 
   const isEditing = editingItemId === item.id;
   const isCopied = copiedId === item.id;
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setLightboxOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen]);
 
   const handleAnalyze = async () => {
     if (!user) return;
@@ -77,19 +86,22 @@ export function PasteCard({ item }: PasteCardProps) {
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, x: 50 }}
-      className="group relative"
+      className="relative"
     >
       <div className={cn(
         "flex flex-col md:flex-row gap-8 transition-all duration-500",
         item.isPinned ? "opacity-100" : "opacity-80 hover:opacity-100"
       )}>
         {/* Preview Column */}
-        <div className="w-full md:w-64 aspect-square bg-white border border-[#141414]/5 rounded-2xl relative shadow-sm group-hover:shadow-xl transition-all duration-500 shrink-0">
+        <div
+          className="w-full md:w-64 aspect-square bg-white border border-[#141414]/5 rounded-2xl relative shadow-sm group-hover:shadow-xl transition-all duration-500 shrink-0 group cursor-zoom-in"
+          onClick={() => setLightboxOpen(true)}
+        >
           <PastePreview item={item} />
 
           {/* Type Badge */}
           <div className="absolute top-4 left-4">
-            <span className="px-3 py-1 bg-white/90 backdrop-blur-md border border-[#141414]/5 text-[9px] font-bold uppercase tracking-widest rounded-full shadow-sm">
+            <span className="px-3 py-1 bg-white/90 backdrop-blur-md border border-[#141414]/5 text-xs font-bold uppercase tracking-widest rounded-full shadow-sm">
               {item.type}
             </span>
           </div>
@@ -154,17 +166,17 @@ export function PasteCard({ item }: PasteCardProps) {
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[10px] font-mono opacity-50 uppercase tracking-widest">
+                <span className="text-xs font-sans opacity-70 uppercase tracking-widest">
                   {format(item.timestamp, "HH:mm:ss")}
                 </span>
                 <div className="h-[1px] w-8 bg-[#141414]/10" />
-                <span className="text-[10px] font-mono opacity-50 uppercase tracking-widest">
+                <span className="text-xs font-sans opacity-70 uppercase tracking-widest">
                   {format(item.timestamp, "MMM d, yyyy")}
                 </span>
               </div>
               <h3 className="text-2xl font-bold uppercase tracking-tighter truncate leading-none flex items-center gap-2 group/title mb-2">
                 {item.isAnalyzing ? (
-                  <span className="flex items-center gap-3 opacity-20">
+                  <span className="flex items-center gap-3 opacity-40">
                     <Loader2 className="w-5 h-5 animate-spin" />
                     {t("pasteCard.analyzing")}
                   </span>
@@ -188,7 +200,7 @@ export function PasteCard({ item }: PasteCardProps) {
                 <>
                   <button
                     onClick={() => startEditing(item)}
-                    className="p-1.5 opacity-20 hover:opacity-100 transition-opacity"
+                    className="p-1.5 opacity-40 hover:opacity-100 transition-opacity"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                   </button>
@@ -225,13 +237,13 @@ export function PasteCard({ item }: PasteCardProps) {
                 <>
                   <button
                     onClick={() => saveEdit(item.id)}
-                    className="px-4 py-1.5 bg-[#141414] text-white text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-all"
+                    className="px-4 py-1.5 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-full hover:bg-[#333] transition-all"
                   >
                     {t("pasteCard.save")}
                   </button>
                   <button
                     onClick={() => setEditingItemId(null)}
-                    className="px-4 py-1.5 border border-[#141414]/10 text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#141414]/5 transition-all"
+                    className="px-4 py-1.5 border border-[#141414]/10 text-xs font-sans uppercase tracking-widest rounded-full hover:bg-[#141414]/5 transition-all"
                   >
                     {t("pasteCard.cancel")}
                   </button>
@@ -257,9 +269,9 @@ export function PasteCard({ item }: PasteCardProps) {
 
           <div className="flex items-center gap-4 mb-6">
             {item.isAnalyzing ? (
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full opacity-50">
+              <div className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full opacity-70">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.analyzing")}</span>
+                <span className="text-xs font-sans uppercase tracking-widest">{t("pasteCard.analyzing")}</span>
               </div>
             ) : user ? (
               <div className="flex flex-wrap gap-2">
@@ -268,7 +280,7 @@ export function PasteCard({ item }: PasteCardProps) {
                   className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all group/btn"
                 >
                   <Zap className="w-3 h-3" />
-                  <span className="text-[9px] font-bold uppercase tracking-widest">
+                  <span className="text-xs font-bold uppercase tracking-widest">
                     {item.summary ? t("pasteCard.reAnalyze") : t("pasteCard.analyzeNow")}
                   </span>
                 </button>
@@ -276,16 +288,16 @@ export function PasteCard({ item }: PasteCardProps) {
                   onClick={() => openChatWithItem(item)}
                   className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
                 >
-                  <MessageSquare className="w-3 h-3 opacity-40 group-hover/btn:opacity-100" />
-                  <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.chatWithAi")}</span>
+                  <MessageSquare className="w-3 h-3 opacity-75 group-hover/btn:opacity-100" />
+                  <span className="text-xs font-sans uppercase tracking-widest">{t("pasteCard.chatWithAi")}</span>
                 </button>
                 {item.type === "image" && (
                   <button
                     onClick={() => startImageEdit(item)}
                     className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
                   >
-                    <Sparkles className="w-3 h-3 opacity-40 group-hover/btn:opacity-100" />
-                    <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.editImage")}</span>
+                    <Sparkles className="w-3 h-3 opacity-75 group-hover/btn:opacity-100" />
+                    <span className="text-xs font-sans uppercase tracking-widest">{t("pasteCard.editImage")}</span>
                   </button>
                 )}
                 {(item.type === "text" || item.type === "url") && (
@@ -293,21 +305,21 @@ export function PasteCard({ item }: PasteCardProps) {
                     onClick={() => openImageGenWithText(item.type === "text" ? item.content : item.summary || item.content)}
                     className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
                   >
-                    <Sparkles className="w-3 h-3 opacity-40 group-hover/btn:opacity-100" />
-                    <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.generateImage")}</span>
+                    <Sparkles className="w-3 h-3 opacity-75 group-hover/btn:opacity-100" />
+                    <span className="text-xs font-sans uppercase tracking-widest">{t("pasteCard.generateImage")}</span>
                   </button>
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full opacity-30">
+              <div className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full opacity-50">
                 <UserIcon className="w-3 h-3" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.loginForAi")}</span>
+                <span className="text-xs font-sans uppercase tracking-widest">{t("pasteCard.loginForAi")}</span>
               </div>
             )}
           </div>
 
           {(item.type === "text" || item.type === "url") && (
-            <div className="p-4 bg-white/40 border border-[#141414]/5 rounded-xl text-[11px] font-mono opacity-40 line-clamp-2 truncate">
+            <div className="p-4 bg-white/40 border border-[#141414]/5 rounded-xl text-[12px] font-sans opacity-75 line-clamp-2 truncate">
               {item.content}
             </div>
           )}
@@ -315,6 +327,35 @@ export function PasteCard({ item }: PasteCardProps) {
       </div>
 
       <div className="mt-12 h-[1px] w-full bg-[#141414]/5" />
+
+      {lightboxOpen && createPortal(
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-8"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="relative max-w-5xl max-h-full w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PastePreview item={item} full className="max-w-full max-h-[90vh] w-auto h-auto" />
+              <button
+                onClick={() => setLightboxOpen(false)}
+                className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+              >
+                ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>,
+        document.body
+      )}
     </motion.div>
   );
 }
