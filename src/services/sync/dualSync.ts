@@ -26,6 +26,7 @@ export async function syncPasteUpdateToCloud(
   uid: string,
   fields: Partial<PasteItem>
 ): Promise<void> {
+  if (!uid) return;
   try {
     // Filter out undefined values as Firebase doesn't accept them
     const definedFields = Object.fromEntries(

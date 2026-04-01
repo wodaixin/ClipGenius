@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ClipGenius is a professional-grade AI clipboard manager built with React + Vite. It captures clipboard content (images, videos, text, URLs), analyzes it with Gemini AI, and syncs across devices via Firebase. Designed for Google Cloud Run deployment via AI Studio.
+ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite. It captures clipboard content (images, videos, text, URLs), analyzes it with Gemini AI, and syncs across devices via Firebase. Designed for Google Cloud Run deployment via AI Studio.
 
 ## Commands
 
@@ -20,10 +20,10 @@ npm run clean    # Remove dist/ directory
 
 ### Data Flow
 
-- **Clipboard capture**: `useClipboard` hook listens for `paste` events on `window` — detects images, videos, text, and URLs
-- **Paste handling**: `usePasteStore` manages all paste items with Zustand-like state; persisted to IndexedDB via `src/lib/db.ts` (using `idb`)
-- **Cloud sync**: `useFirestoreSync` syncs local IndexedDB to Firebase Firestore under `/users/{userId}/pastes/` and `/users/{userId}/chats/`
-- **AI analysis**: `GoogleGenAI` from `@google/genai` generates suggested names, summaries, chat responses, and images; initialized inside functions (not at module level) to pick up the latest API key
+- **Clipboard capture**: `useClipboard` hook listens for `paste` events on `window` — detects images, videos, text, URLs, markdown, and code (with language detection)
+- **Paste handling**: `usePasteStore` manages all paste items; state lives in `AppContext` and is persisted to IndexedDB via `src/lib/db.ts` (using `idb`)
+- **Cloud sync**: `useFirestoreSync` subscribes to Firestore `onSnapshot` — cloud wins for metadata (remote changes overwrite local). `dualSync` writes local changes to cloud only when user is authenticated
+- **AI analysis**: triggered automatically for logged-in users (when `isAutoAnalyzeEnabled` is true); `GoogleGenAI` instances are created per-call to pick up the latest API key
 
 ### App Structure
 
@@ -40,36 +40,91 @@ npm run clean    # Remove dist/ directory
 | `src/services/ai/` | `analyzeContent`, `generateImage`, `startLiveSession`, plus `providers/` | AI service layer |
 | `src/services/clipboard/` | `clipboardUtils` | Clipboard utility functions |
 | `src/services/sync/` | `dualSync` | Firestore + IndexedDB dual-write logic |
-| `src/lib/` | `db.ts`, `utils.ts` | IndexedDB wrapper, `cn()` utility |
+| `src/lib/` | `db.ts`, `utils.ts`, `estimateCardHeight.ts` | IndexedDB wrapper, utilities |
+| `src/i18n/` | `index.ts`, `locales/en.json`, `locales/zh.json` | i18next configuration and translations |
+
+### Provider Architecture
+
+All AI features are routed through configurable providers (selected via `VITE_*_PROVIDER` env vars):
+
+| Feature | Default Provider | Default Model |
+|---|---|---|
+| Content analysis | `gemini` | `gemini-3-flash-preview` |
+| Chat | `gemini` | `gemini-3.1-pro-preview` |
+| Live voice | `gemini` | `gemini-3.1-flash-live-preview` |
+| Image generation (standard) | `gemini` | `gemini-2.5-flash-image` |
+| Image generation (pro) | `gemini` | `gemini-3-pro-image-preview` |
+
+Alternative: `minimax`. Per-feature overrides can be set in `.env`.
 
 ### Data Models
 
 ```typescript
-PasteItem: { id, type, mimeType, content, timestamp, suggestedName, summary?, isAnalyzing, isPinned?, userId }
-ChatMessage: { id, role, text, thinking?, timestamp, attachments? }
-StoredAttachment: { id, type, content, mimeType, suggestedName }
+PasteType = "image" | "text" | "url" | "video" | "markdown" | "code"
+
+PasteItem: {
+  id: string
+  type: PasteType
+  content: string       // Base64 for images/videos, raw text for others
+  mimeType: string
+  timestamp: Date
+  suggestedName: string
+  summary?: string
+  isAnalyzing: boolean
+  isPinned: boolean     // always present (initialized to false), optional in type
+  userId: string         // Firebase UID; empty string for guests (guests are not synced to cloud)
+}
+
+ChatMessage: {
+  id: string
+  role: "user" | "model"
+  text: string
+  thinking?: string
+  timestamp: Date
+  attachments?: StoredAttachment[]
+  isResponding?: boolean // true when model started streaming but no content yet
+}
+
+StoredAttachment: {
+  id: string
+  type: PasteType
+  content: string        // base64 data URI
+  mimeType: string
+  suggestedName: string
+}
+
+LiveSessionConnection: { close: () => void }
 ```
 
 Firestore paths: `/users/{userId}/pastes/{pasteId}`, `/users/{userId}/chats/{chatId}/messages/{messageId}`
 
+Chat ID equals the attached paste's `id`, or `"default"` when no paste is attached.
+
 ### AI Integration
 
-- Package: `@google/genai` (v1.29.0)
-- Used for: clipboard naming/summarization (`analyzeContent`), chatbot responses (`ChatContext`), image generation (`useImageGen`), live voice sessions (`startLiveSession`)
-- AI providers: `gemini` (primary), `minimax` (alternative), selectable via `chat-router`
-- The `window.aistudio` global is used for AI Studio API key integration
+- Primary package: `@google/genai` (v1.29.0)
 - `GoogleGenAI` instances are created per-call (not singleton) to ensure fresh API key reads
+- `window.aistudio` global: provides `hasSelectedApiKey()`, `openSelectKey()`, `getSelectedApiKey()` for AI Studio paid key integration
+- Image generation: standard mode uses env `VITE_GEMINI_API_KEY`; pro mode prompts user to select AI Studio paid key via `window.aistudio`
+- Content analysis auto-detects code language (json, xml, html, sql, python, go, rust, cpp, typescript, javascript, java, csharp, php, bash, yaml, toml)
+- Chat supports thinking/reasoning chunks streamed from the model
 
 ### Auth
 
-Firebase Auth handles Google sign-in. Auth state is consumed via `useAuth()` from `AuthContext`.
+Firebase Auth handles Google sign-in via popup. Auth state consumed via `useAuth()` from `AuthContext`. Guests (no login) can use the app locally; cloud sync is gated on `user.uid`.
 
 ## Environment Variables
 
-Required in `.env` (see `.env.example`):
+All prefixed with `VITE_` (required in `.env`, see `.env.example`):
 
-- `GEMINI_API_KEY` — Google Gemini API key
-- `APP_URL` — Application URL (auto-injected by AI Studio)
+| Variable | Purpose |
+|---|---|
+| `VITE_FIREBASE_*` | Firebase project config (projectId, appId, apiKey, authDomain, firestoreDb, storageBucket, messagingSenderId) |
+| `VITE_GEMINI_API_KEY` | Default API key for all AI features |
+| `VITE_*_PROVIDER` | Per-feature provider selection (`gemini` or `minimax`) |
+| `VITE_*_MODEL` | Per-feature model override |
+| `VITE_MINIMAX_API_KEY`, `VITE_MINIMAX_BASE_URL` | Minimax config |
+| `VITE_APP_URL` | Application URL |
 
 ## Deployment
 
@@ -77,22 +132,25 @@ Deployed on Google Cloud Run via AI Studio. Connect GitHub repo, configure secre
 
 ## Styling
 
-Tailwind CSS v4 with `@tailwindcss/vite` plugin. Global styles in `src/index.css`. Motion animations via `motion/react`. React Markdown rendering via `react-markdown`.
+Tailwind CSS v4 with `@tailwindcss/vite` plugin. Global styles in `src/index.css`. Motion animations via `motion/react`. React Markdown rendering via `react-markdown`. Syntax highlighting via `react-syntax-highlighter` + `rehype-highlight`. i18next with `i18next-browser-languagedetector` for auto language detection.
 
 ## Dependencies
 
 Key packages:
 
-- `react`, `react-dom` — UI framework
-- `@google/genai` — Gemini AI SDK
-- `firebase` — Auth + Firestore
-- `idb` — IndexedDB wrapper
-- `motion/react` — Animations
-- `react-markdown` — Markdown rendering
+- `react`, `react-dom` — UI framework (v19)
+- `@google/genai` — Gemini AI SDK (v1.29.0)
+- `firebase` — Auth + Firestore (v12)
+- `idb` — IndexedDB wrapper (v8)
+- `motion` — Animations (v12)
+- `react-markdown`, `rehype-highlight`, `react-syntax-highlighter` — Markdown and code rendering
 - `lucide-react` — Icons
 - `date-fns` — Date formatting
 - `clsx`, `tailwind-merge` — Class utilities via `cn()`
-- `@tailwindcss/vite` — Tailwind CSS v4 integration
+- `@tanstack/react-virtual` — Virtual scrolling
+- `i18next`, `react-i18next` — Internationalization
+- `@chenglou/pretext` — Text preprocessing
+- `@tailwindcss/vite`, `tailwindcss` — Tailwind CSS v4
 
 ## No Test Suite
 

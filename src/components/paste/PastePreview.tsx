@@ -63,7 +63,7 @@ export function PastePreview({ item, className, full }: PastePreviewProps) {
             <span className="text-[10px] font-mono uppercase tracking-widest text-white/40">markdown</span>
             <CopyButton text={item.content} />
           </div>
-          <div className="flex-1 overflow-auto p-8 prose prose-invert prose-sm max-w-none scrollbar-thin-light">
+          <div className="flex-1 overflow-auto p-8 prose prose-invert prose-sm max-w-none scrollbar-thin-light [&_pre]:!p-0 [&_pre]:!bg-transparent [&_pre]:!rounded-none [&_pre]:!-mx-0 [&_li_pre]:!-ml-6 [&_pre_code]:!text-xs [&_pre_code.hljs]:rounded-lg">
             <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{item.content}</ReactMarkdown>
           </div>
         </div>
@@ -98,9 +98,9 @@ export function PastePreview({ item, className, full }: PastePreviewProps) {
             {item.content}
           </SyntaxHighlighter>
         ) : (
-          <pre className="flex-1 overflow-hidden p-4 text-xs font-mono text-[#d4d4d4] leading-relaxed line-clamp-6">
-            <code>{item.content}</code>
-          </pre>
+          <div className="flex-1 overflow-hidden p-4 text-xs font-mono text-[#d4d4d4] leading-relaxed line-clamp-6 whitespace-pre-wrap break-all">
+            {item.content}
+          </div>
         )}
       </div>
     );

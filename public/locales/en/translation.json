@@ -4,7 +4,7 @@
     "subtitle": "Intelligence Layer",
     "heading": "Capture",
     "subheading": "everything.",
-    "description": "ClipGenius is a professional-grade AI clipboard utility powered by Gemini. Intelligently capture, analyze, and organize images, videos, text, Markdown, or links.",
+    "description": "ClipGenius is a professional-grade AI clipboard utility powered by Gemini. Intelligently capture, analyze, and organize images, videos, text, Markdown,code or links.",
     "dropToAnalyze": "Drop to Analyze",
     "pasteZone": "Paste Zone",
     "commandHint": "Command + V to Begin",
@@ -46,6 +46,7 @@
     "listening": "Listening to your voice...",
     "emptyPrompt": "Ask me anything about your captures",
     "thinking": "Thinking...",
+    "noResponse": "I couldn't generate a response.",
     "inputPlaceholder": "TYPE YOUR MESSAGE...",
     "inputContextPlaceholder": "ASK ABOUT THIS CONTEXT...",
     "attaching": "Attaching"

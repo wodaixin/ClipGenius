@@ -1,5 +1,5 @@
 {
   "name": "ClipGenius",
-  "description": "ClipGenius 是由 Gemini 驱动的专业级 AI 剪贴板工具。智能捕获、分析和整理图片、视频、文本、Markdown 或链接。",
+  "description": "ClipGenius 是由 Gemini 驱动的专业级 AI 剪贴板工具。智能捕获、分析和整理图片、视频、文本、Markdown、代码 或链接。",
   "requestFramePermissions": []
 }

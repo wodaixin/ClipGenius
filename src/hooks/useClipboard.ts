@@ -44,7 +44,7 @@ export function useClipboard() {
               suggestedName: `${type === "video" ? "vid" : "img"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
               isAnalyzing: user ? isAutoAnalyzeEnabled : false,
               isPinned: false,
-              userId: user?.uid || "guest",
+              userId: user?.uid ?? "",
             };
             addItem(newItem);
           };
@@ -68,7 +68,7 @@ export function useClipboard() {
           suggestedName: `${type === "url" ? "link" : type === "markdown" ? "doc" : type === "code" ? `${codeLang}_snippet` : "note"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
           isAnalyzing: user ? isAutoAnalyzeEnabled : false,
           isPinned: false,
-          userId: user?.uid || "guest",
+          userId: user?.uid ?? "",
         };
         addItem(newItem);
       }

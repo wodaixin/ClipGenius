@@ -4,7 +4,7 @@
     "subtitle": "智能层",
     "heading": "捕获",
     "subheading": "一切内容。",
-    "description": "ClipGenius 是由 Gemini 驱动的专业级 AI 剪贴板工具。智能捕获、分析和整理图片、视频、文本、Markdown 或链接。",
+    "description": "ClipGenius 是由 Gemini 驱动的专业级 AI 剪贴板工具。智能捕获、分析和整理图片、视频、文本、Markdown、代码 或链接。",
     "dropToAnalyze": "拖放以分析",
     "pasteZone": "粘贴区",
     "commandHint": "Command + V 开始",
@@ -46,6 +46,7 @@
     "listening": "正在聆听...",
     "emptyPrompt": "向我询问关于你的剪贴内容",
     "thinking": "思考中...",
+    "noResponse": "无法生成响应。",
     "inputPlaceholder": "输入消息...",
     "inputContextPlaceholder": "基于上下文提问...",
     "attaching": "附加中"
