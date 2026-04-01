@@ -2,6 +2,8 @@
 
 > A professional-grade AI clipboard manager built with React 19 + Vite. Captures images, videos, text, URLs, markdown, and code snippets — then analyzes and syncs them across devices via Gemini AI and Firebase.
 
+[中文版](README_zh.md)
+
 ## Features
 
 ### Intelligent Clipboard Capture
@@ -66,6 +68,18 @@ All data persisted to IndexedDB via `idb` library. App is fully functional offli
 | i18n | `i18next` + `react-i18next` + `i18next-browser-languagedetector` |
 | Virtual Scroll | `@tanstack/react-virtual` |
 | Text Preprocessing | `@chenglou/pretext` |
+
+## Documentation
+
+For full documentation, see the [docs/](docs/en/) directory.
+
+- [Quick Start](docs/en/quick-start.md) — Set up ClipGenius from scratch
+- [Feature Guides](docs/en/features/) — Deep dives on every feature
+- [Deployment](docs/en/deployment/cloud-run-ai-studio.md) — Deploy to Cloud Run via AI Studio
+- [Environment Variables](docs/en/deployment/environment-variables.md) — Complete `.env` reference
+- [Architecture Reference](docs/en/reference/architecture.md) — System design
+- [Firestore Security Rules](docs/en/reference/firestore-security.md) — Rules walkthrough
+- [中文文档](docs/zh/) — 中文文档
 
 ## Architecture
 
