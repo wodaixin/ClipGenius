@@ -1,11 +1,13 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Trash2, Layers, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { usePasteStore } from "../../hooks/usePasteStore";
 import { PasteCard } from "../paste/PasteCard";
 import { cn } from "../../lib/utils";
 
 export function HistoryPane() {
+  const { t } = useTranslation();
   const {
     filteredItems,
     items,
@@ -22,7 +24,7 @@ export function HistoryPane() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-30" />
           <input
             type="text"
-            placeholder="SEARCH HISTORY..."
+            placeholder={t("history.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-transparent border-b border-[#141414]/10 py-3 pl-12 pr-4 text-xs font-mono uppercase tracking-widest focus:outline-none focus:border-[#141414] transition-colors"
@@ -40,7 +42,7 @@ export function HistoryPane() {
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
             <span className="text-[10px] font-mono opacity-60 uppercase tracking-widest">
-              Records
+              {t("history.records")}
             </span>
             <span className="text-sm font-bold">{items.length}</span>
           </div>
@@ -64,9 +66,9 @@ export function HistoryPane() {
               className="h-full flex flex-col items-center justify-center text-center opacity-20 py-20"
             >
               <Layers className="w-16 h-16 mb-6 stroke-[1px]" />
-              <h4 className="text-2xl font-serif italic mb-2">Empty Archives</h4>
+              <h4 className="text-2xl font-serif italic mb-2">{t("history.emptyTitle")}</h4>
               <p className="text-[10px] font-mono uppercase tracking-[0.3em] opacity-60">
-                Waiting for input signal
+                {t("history.emptyDesc")}
               </p>
             </motion.div>
           ) : (
@@ -80,7 +82,7 @@ export function HistoryPane() {
         {items.length > 0 && (
           <div className="pt-12 pb-24 text-center">
             <span className="text-[9px] font-mono opacity-40 uppercase tracking-[0.5em]">
-              End of Archives
+              {t("history.endOfArchives")}
             </span>
           </div>
         )}

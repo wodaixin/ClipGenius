@@ -7,11 +7,13 @@ import {
   Download,
   Zap,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useImageGen } from "../../hooks/useImageGen";
 import { useAuth } from "../../context/AuthContext";
 import { cn } from "../../lib/utils";
 
 export function ImageGenModal() {
+  const { t } = useTranslation();
   const { user, login } = useAuth();
   const {
     isImageGenOpen,
@@ -52,20 +54,20 @@ export function ImageGenModal() {
                   <Sparkles className="w-8 h-8 opacity-20" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold uppercase tracking-widest mb-2">Login Required</h3>
-                  <p className="text-sm opacity-50">Sign in to use AI Image Generator</p>
+                  <h3 className="text-lg font-bold uppercase tracking-widest mb-2">{t("imageGen.loginRequired")}</h3>
+                  <p className="text-sm opacity-50">{t("imageGen.loginDesc")}</p>
                 </div>
                 <button
                   onClick={login}
                   className="px-8 py-4 bg-[#141414] text-white text-xs font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
                 >
-                  Login with Google
+                  {t("imageGen.loginWithGoogle")}
                 </button>
                 <button
                   onClick={closeImageGen}
                   className="text-[10px] font-mono uppercase tracking-widest opacity-30 hover:opacity-100 transition-opacity"
                 >
-                  Cancel
+                  {t("imageGen.cancel")}
                 </button>
               </div>
             ) : (
@@ -77,7 +79,7 @@ export function ImageGenModal() {
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <h3 className="font-bold uppercase tracking-widest text-sm">
-                      {isEditingImage ? "AI Image Editor" : "AI Image Generator"}
+                      {isEditingImage ? t("imageGen.editTitle") : t("imageGen.title")}
                     </h3>
                   </div>
                   <button
@@ -93,7 +95,7 @@ export function ImageGenModal() {
                   {/* Quality selector */}
                   <div className="flex flex-col gap-4">
                     <label className="text-[10px] font-mono uppercase tracking-widest opacity-40 block">
-                      Generation Quality
+                      {t("imageGen.qualityLabel")}
                     </label>
                     <div className="flex p-1 bg-[#F9F9F7] border border-[#141414]/5 rounded-2xl">
                       {(["standard", "pro"] as const).map((q) => (
@@ -107,7 +109,7 @@ export function ImageGenModal() {
                               : "text-[#141414]/40 hover:text-[#141414]"
                           )}
                         >
-                          {q === "standard" ? "Standard (Free)" : "Pro (Paid Key)"}
+                          {q === "standard" ? t("imageGen.standard") : t("imageGen.pro")}
                         </button>
                       ))}
                     </div>
@@ -118,16 +120,16 @@ export function ImageGenModal() {
                     <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col gap-4">
                       <div className="flex items-center gap-3 text-amber-800">
                         <Zap className="w-5 h-5" />
-                        <span className="text-xs font-bold uppercase tracking-widest">API Key Required</span>
+                        <span className="text-xs font-bold uppercase tracking-widest">{t("imageGen.apiKeyRequired")}</span>
                       </div>
                       <p className="text-[11px] text-amber-700 leading-relaxed">
-                        High-quality image generation requires a paid Gemini API key. Please select your key to continue.
+                        {t("imageGen.apiKeyDesc")}
                       </p>
                       <button
                         onClick={() => window.aistudio?.openSelectKey?.()}
                         className="w-full py-3 bg-amber-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-amber-700 transition-colors"
                       >
-                        Select API Key
+                        {t("imageGen.selectApiKey")}
                       </button>
                       <a
                         href="https://ai.google.dev/gemini-api/docs/billing"
@@ -135,7 +137,7 @@ export function ImageGenModal() {
                         rel="noopener noreferrer"
                         className="text-[9px] text-amber-600 underline text-center"
                       >
-                        Learn about billing
+                        {t("imageGen.learnBilling")}
                       </a>
                     </div>
                   )}
@@ -143,12 +145,12 @@ export function ImageGenModal() {
                   {/* Prompt */}
                   <div className="flex flex-col gap-4">
                     <label className="text-[10px] font-mono uppercase tracking-widest opacity-40 block">
-                      Describe your image
+                      {t("imageGen.promptLabel")}
                     </label>
                     <textarea
                       value={imagePrompt}
                       onChange={(e) => setImagePrompt(e.target.value)}
-                      placeholder="A VIBRANT NEON CITYSCAPE IN THE STYLE OF CYBERPUNK..."
+                      placeholder={t("imageGen.promptPlaceholder")}
                       className="w-full h-32 bg-[#F9F9F7] border border-[#141414]/10 rounded-2xl p-6 text-xs font-mono uppercase tracking-widest focus:outline-none focus:border-[#141414] transition-colors resize-none"
                     />
                   </div>
@@ -158,7 +160,7 @@ export function ImageGenModal() {
                     {imageQuality === "pro" ? (
                       <div className="flex flex-col gap-4">
                         <label className="text-[10px] font-mono uppercase tracking-widest opacity-40 block">
-                          Resolution
+                          {t("imageGen.resolution")}
                         </label>
                         <div className="flex gap-2">
                           {(["1K", "2K", "4K"] as const).map((size) => (
@@ -190,7 +192,7 @@ export function ImageGenModal() {
                       ) : (
                         <Sparkles className="w-4 h-4" />
                       )}
-                      Generate
+                      {t("imageGen.generate")}
                     </button>
                   </div>
 
@@ -213,7 +215,7 @@ export function ImageGenModal() {
                         className="w-full py-4 border border-[#141414]/10 rounded-2xl text-[10px] font-mono uppercase tracking-widest hover:bg-[#F9F9F7] transition-colors flex items-center justify-center gap-3"
                       >
                         <Download className="w-4 h-4" />
-                        Download Generation
+                        {t("imageGen.download")}
                       </button>
                     </motion.div>
                   )}

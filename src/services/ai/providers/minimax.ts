@@ -72,9 +72,16 @@ export const minimaxAnalysisProvider: AnalysisProvider = {
     try {
       result = JSON.parse(text);
     } catch {
-      const match = text.match(/\{[\s\S]*?\}/);
-      if (match) {
-        try { result = JSON.parse(match[0]); } catch {}
+      // Strip markdown code fences: ```json ... ``` or ``` ... ```
+      const stripped = text.replace(/^```json\s*/i, "").replace(/\s*```$/i, "");
+      try {
+        result = JSON.parse(stripped);
+      } catch {
+        // Fallback: find the first { to last } with greedy matching
+        const match = stripped.match(/\{[\s\S]*?\}/);
+        if (match) {
+          try { result = JSON.parse(match[0]); } catch {}
+        }
       }
     }
 

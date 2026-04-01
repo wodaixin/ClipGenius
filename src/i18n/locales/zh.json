@@ -1,0 +1,93 @@
+{
+  "pasteZone": {
+    "rail": "CLIPGENIUS • AI CLIPBOARD SYSTEM • V1.2.0",
+    "subtitle": "Intelligence Layer",
+    "heading": "Capture",
+    "subheading": "everything.",
+    "description": "ClipGenius 是由 Gemini 驱动的专业级 AI 剪贴板工具。智能捕获、分析和整理图片、视频、文本或链接。",
+    "dropToAnalyze": "拖放以分析",
+    "pasteZone": "粘贴区",
+    "commandHint": "Command + V 开始",
+    "typeImage": "图片",
+    "typeVideo": "视频",
+    "typeText": "文本",
+    "typeLink": "链接",
+    "aiChatbot": "AI 聊天",
+    "generateImage": "生成图片",
+    "loginWithGoogle": "使用 Google 登录",
+    "logout": "退出",
+    "features": {
+      "systemIntelligence": "系统智能",
+      "smartName": "智能命名",
+      "autoSummary": "自动摘要",
+      "contextAware": "上下文感知"
+    },
+    "settings": {
+      "autoAi": "自动 AI",
+      "language": "语言",
+      "english": "English",
+      "chinese": "中文"
+    }
+  },
+  "history": {
+    "searchPlaceholder": "搜索历史...",
+    "records": "条记录",
+    "emptyTitle": "暂无存档",
+    "emptyDesc": "等待输入信号",
+    "endOfArchives": "存档已加载完毕"
+  },
+  "chat": {
+    "loginRequired": "需要登录",
+    "loginDesc": "登录后使用 AI 聊天功能",
+    "loginWithGoogle": "使用 Google 登录",
+    "cancel": "取消",
+    "title": "PasteEx 智能助手",
+    "liveVoiceActive": "语音模式已激活",
+    "listening": "正在聆听...",
+    "emptyPrompt": "向我询问关于你的剪贴内容",
+    "thinking": "思考中...",
+    "inputPlaceholder": "输入消息...",
+    "inputContextPlaceholder": "基于上下文提问...",
+    "attaching": "附加中"
+  },
+  "imageGen": {
+    "loginRequired": "需要登录",
+    "loginDesc": "登录后使用 AI 图片生成功能",
+    "loginWithGoogle": "使用 Google 登录",
+    "cancel": "取消",
+    "title": "AI 图片生成",
+    "editTitle": "AI 图片编辑",
+    "qualityLabel": "生成质量",
+    "standard": "标准（免费）",
+    "pro": "专业（付费密钥）",
+    "apiKeyRequired": "需要 API 密钥",
+    "apiKeyDesc": "高质量图片生成需要付费的 Gemini API 密钥。请选择您的密钥以继续。",
+    "selectApiKey": "选择密钥",
+    "learnBilling": "了解计费方式",
+    "promptLabel": "描述您的图片",
+    "promptPlaceholder": "一幅充满活力的赛博朋克风格霓虹城市景观...",
+    "resolution": "分辨率",
+    "generate": "生成",
+    "download": "下载图片"
+  },
+  "pasteCard": {
+    "save": "保存",
+    "cancel": "取消",
+    "summaryPlaceholder": "输入摘要...",
+    "analyzingContent": "正在通过智能层处理内容...",
+    "noSummary": "未生成摘要。",
+    "analyzing": "分析中...",
+    "reAnalyze": "重新分析",
+    "analyzeNow": "立即分析",
+    "chatWithAi": "AI 聊天",
+    "editImage": "编辑图片",
+    "generateImage": "生成图片",
+    "loginForAi": "登录以使用 AI 分析"
+  },
+  "errors": {
+    "generic": "无法生成响应。",
+    "network": "网络错误，请检查网络连接。",
+    "rateLimit": "API 速率超限，请稍后重试。",
+    "tryAgain": "请求失败，请重试。"
+  }
+}

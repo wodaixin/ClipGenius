@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from "react-markdown";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import {
   MessageSquare,
   Sparkles,
@@ -59,6 +60,7 @@ function AttachmentPreview({ item }: { item: StoredAttachment }) {
 }
 
 export function ChatModal() {
+  const { t } = useTranslation();
   const { user, login } = useAuth();
   const {
     chatMessages,
@@ -100,20 +102,20 @@ export function ChatModal() {
                   <MessageSquare className="w-8 h-8 opacity-20" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold uppercase tracking-widest mb-2">Login Required</h3>
-                  <p className="text-sm opacity-50">Sign in to use AI Chatbot</p>
+                  <h3 className="text-lg font-bold uppercase tracking-widest mb-2">{t("chat.loginRequired")}</h3>
+                  <p className="text-sm opacity-50">{t("chat.loginDesc")}</p>
                 </div>
                 <button
                   onClick={login}
                   className="px-8 py-4 bg-[#141414] text-white text-xs font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
                 >
-                  Login with Google
+                  {t("chat.loginWithGoogle")}
                 </button>
                 <button
                   onClick={closeChat}
                   className="text-[10px] font-mono uppercase tracking-widest opacity-30 hover:opacity-100 transition-opacity"
                 >
-                  Cancel
+                  {t("chat.cancel")}
                 </button>
               </div>
             ) : (
@@ -124,7 +126,7 @@ export function ChatModal() {
                 <div className="w-8 h-8 bg-[#141414] rounded-full flex items-center justify-center">
                   <MessageSquare className="w-4 h-4 text-white" />
                 </div>
-                <h3 className="font-bold uppercase tracking-widest text-sm">PasteEx Intelligence</h3>
+                <h3 className="font-bold uppercase tracking-widest text-sm">{t("chat.title")}</h3>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -162,9 +164,9 @@ export function ChatModal() {
                   <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
                     <Volume2 className="w-10 h-10 text-white" />
                   </div>
-                  <h4 className="text-lg font-bold uppercase tracking-widest mb-2">Live Voice Active</h4>
+                  <h4 className="text-lg font-bold uppercase tracking-widest mb-2">{t("chat.liveVoiceActive")}</h4>
                   <p className="text-xs font-mono opacity-70 max-w-xs">
-                    {liveTranscription || "Listening to your voice..."}
+                    {liveTranscription || t("chat.listening")}
                   </p>
                 </div>
               )}
@@ -173,7 +175,7 @@ export function ChatModal() {
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
                   <Sparkles className="w-12 h-12 mb-4" />
                   <p className="text-xs font-mono uppercase tracking-widest opacity-60">
-                    Ask me anything about your captures
+                    {t("chat.emptyPrompt")}
                   </p>
                 </div>
               )}
@@ -204,7 +206,7 @@ export function ChatModal() {
                   {/* Thinking bubble (shown while model is thinking) */}
                   {msg.role === "model" && msg.thinking && (
                     <div className="mb-1 p-3 rounded-2xl rounded-bl-sm bg-[#E8E8E4] text-[11px] font-mono opacity-80 leading-relaxed whitespace-pre-wrap break-words">
-                      <div className="uppercase tracking-widest opacity-50 mb-1 text-[9px]">Thinking...</div>
+                      <div className="uppercase tracking-widest opacity-50 mb-1 text-[9px]">{t("chat.thinking")}</div>
                       {msg.thinking}
                     </div>
                   )}
@@ -233,7 +235,7 @@ export function ChatModal() {
               {isChatLoading && (
                 <div className="flex items-center gap-3 opacity-40">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">Thinking...</span>
+                  <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">{t("chat.thinking")}</span>
                 </div>
               )}
 
@@ -285,7 +287,7 @@ export function ChatModal() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[9px] font-mono uppercase tracking-widest opacity-40">Attaching</p>
+                      <p className="text-[9px] font-mono uppercase tracking-widest opacity-40">{t("chat.attaching")}</p>
                       <p className="text-[11px] font-bold truncate uppercase tracking-tighter">
                         {contextItem.type === "text"
                           ? contextItem.content.slice(0, 60) + (contextItem.content.length > 60 ? "..." : "")
@@ -310,7 +312,7 @@ export function ChatModal() {
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !isChatLoading && sendMessage()}
                   placeholder={
-                    contextItem ? "ASK ABOUT THIS CONTEXT..." : "TYPE YOUR MESSAGE..."
+                    contextItem ? t("chat.inputContextPlaceholder") : t("chat.inputPlaceholder")
                   }
                   className="w-full bg-white border border-[#141414]/10 rounded-2xl py-4 pl-6 pr-16 text-xs font-mono uppercase tracking-widest focus:outline-none focus:border-[#141414] transition-colors"
                 />

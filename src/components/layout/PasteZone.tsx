@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Clipboard,
@@ -12,7 +12,10 @@ import {
   Zap,
   Layers,
   Search,
+  Settings,
+  Globe,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import { usePasteStore } from "../../hooks/usePasteStore";
 import { useClipboard } from "../../hooks/useClipboard";
@@ -21,18 +24,31 @@ import { useImageGen } from "../../hooks/useImageGen";
 import { cn } from "../../lib/utils";
 
 export function PasteZone() {
+  const { t, i18n } = useTranslation();
   const { user, login, logout } = useAuth();
   const { isDragging, isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled } = usePasteStore();
   const { handleDragOver, handleDragLeave, handleDrop } = useClipboard();
   const { openChatWithItem } = useChat();
   const { openImageGen } = useImageGen();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+        setSettingsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <aside className="w-full lg:w-[45%] lg:h-screen lg:overflow-y-auto shrink-0 border-r border-[#141414]/10 bg-white flex flex-col relative">
       {/* Vertical Rail Text */}
       <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden xl:block">
         <span className="writing-vertical text-[10px] font-mono opacity-20 uppercase tracking-[0.4em] select-none">
-          CLIPGENIUS • AI CLIPBOARD SYSTEM • V1.2.0
+          {t("pasteZone.rail")}
         </span>
       </div>
 
@@ -48,30 +64,81 @@ export function PasteZone() {
                 ClipGenius
               </h1>
               <p className="text-[10px] font-mono opacity-60 uppercase tracking-widest mt-1">
-                Intelligence Layer
+                {t("pasteZone.subtitle")}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Auto AI Toggle */}
             {user && (
-              <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-[#F9F9F7] rounded-full border border-[#141414]/5">
-                <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">
-                  Auto AI
-                </span>
+              <div className="relative" ref={settingsRef}>
                 <button
-                  onClick={() => setIsAutoAnalyzeEnabled(!isAutoAnalyzeEnabled)}
-                  className={cn(
-                    "w-8 h-4 rounded-full transition-all relative",
-                    isAutoAnalyzeEnabled ? "bg-green-500" : "bg-gray-300"
-                  )}
+                  onClick={() => setSettingsOpen(!settingsOpen)}
+                  className="p-2 hover:bg-[#141414]/5 rounded-full transition-colors"
+                  title="Settings"
                 >
-                  <motion.div
-                    animate={{ x: isAutoAnalyzeEnabled ? 16 : 2 }}
-                    className="absolute top-1 w-2 h-2 bg-white rounded-full"
-                  />
+                  <Settings className="w-5 h-5 opacity-40" />
                 </button>
+                <AnimatePresence>
+                  {settingsOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-[#141414]/10 overflow-hidden z-50"
+                    >
+                      {/* Auto AI */}
+                      <div className="px-4 py-3 border-b border-[#141414]/5 flex items-center justify-between">
+                        <span className="text-[10px] font-mono uppercase tracking-widest opacity-60">
+                          {t("pasteZone.settings.autoAi")}
+                        </span>
+                        <button
+                          onClick={() => setIsAutoAnalyzeEnabled(!isAutoAnalyzeEnabled)}
+                          className={cn(
+                            "w-8 h-4 rounded-full transition-all relative",
+                            isAutoAnalyzeEnabled ? "bg-green-500" : "bg-gray-300"
+                          )}
+                        >
+                          <motion.div
+                            animate={{ x: isAutoAnalyzeEnabled ? 16 : 2 }}
+                            className="absolute top-1 w-2 h-2 bg-white rounded-full"
+                          />
+                        </button>
+                      </div>
+                      {/* Language */}
+                      <div className="px-4 py-3">
+                        <span className="text-[10px] font-mono uppercase tracking-widest opacity-40 block mb-3">
+                          {t("pasteZone.settings.language")}
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => i18n.changeLanguage("en")}
+                            className={cn(
+                              "flex-1 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border",
+                              i18n.language === "en"
+                                ? "bg-[#141414] text-white border-[#141414]"
+                                : "border-[#141414]/10 hover:border-[#141414]/30"
+                            )}
+                          >
+                            {t("pasteZone.settings.english")}
+                          </button>
+                          <button
+                            onClick={() => i18n.changeLanguage("zh")}
+                            className={cn(
+                              "flex-1 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border",
+                              i18n.language === "zh"
+                                ? "bg-[#141414] text-white border-[#141414]"
+                                : "border-[#141414]/10 hover:border-[#141414]/30"
+                            )}
+                          >
+                            {t("pasteZone.settings.chinese")}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
@@ -85,7 +152,7 @@ export function PasteZone() {
                     onClick={logout}
                     className="text-[9px] font-mono font-bold hover:underline flex items-center gap-1"
                   >
-                    <span>LOGOUT</span>
+                    <span>{t("pasteZone.logout")}</span>
                   </button>
                 </div>
                 {user.photoURL && (
@@ -109,7 +176,7 @@ export function PasteZone() {
                 onClick={login}
                 className="px-4 py-2 bg-[#141414] text-white text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
               >
-                Login with Google
+                {t("pasteZone.loginWithGoogle")}
               </button>
             )}
           </div>
@@ -117,12 +184,11 @@ export function PasteZone() {
 
         <div className="space-y-4">
           <h2 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.9] uppercase">
-            Capture <br />
-            <span className="text-[#141414]/20 italic font-serif lowercase">everything.</span>
+            {t("pasteZone.heading")} <br />
+            <span className="text-[#141414]/20 italic font-serif lowercase">{t("pasteZone.subheading")}</span>
           </h2>
           <p className="text-sm opacity-50 max-w-sm leading-relaxed">
-            ClipGenius is a professional-grade AI clipboard utility powered by Gemini.
-            Intelligently capture, analyze, and organize images, videos, text, or links.
+            {t("pasteZone.description")}
           </p>
         </div>
       </header>
@@ -151,7 +217,7 @@ export function PasteZone() {
               >
                 <Plus className="w-20 h-20 mb-4 animate-bounce" />
                 <span className="text-xl font-mono uppercase tracking-[0.3em]">
-                  Drop to Analyze
+                  {t("pasteZone.dropToAnalyze")}
                 </span>
               </motion.div>
             ) : (
@@ -164,19 +230,19 @@ export function PasteZone() {
                 <div className="w-24 h-24 border border-[#141414]/10 rounded-full flex items-center justify-center mb-8 bg-white shadow-sm group-hover:scale-110 transition-transform duration-500">
                   <Plus className="w-8 h-8 opacity-20 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <h3 className="text-xl font-bold uppercase tracking-widest mb-2">Paste Zone</h3>
+                <h3 className="text-xl font-bold uppercase tracking-widest mb-2">{t("pasteZone.pasteZone")}</h3>
                 <p className="text-[11px] font-mono opacity-40 uppercase tracking-[0.2em] mb-12">
-                  Command + V to Begin
+                  {t("pasteZone.commandHint")}
                 </p>
 
                 <div className="flex gap-8">
                   {[
-                    { icon: ImageIcon, label: "Image" },
-                    { icon: VideoIcon, label: "Video" },
-                    { icon: FileText, label: "Text" },
-                    { icon: LinkIcon, label: "Link" },
-                  ].map(({ icon: Icon, label }) => (
-                    <div key={label} className="flex flex-col items-center gap-2">
+                    { icon: ImageIcon, label: t("pasteZone.typeImage"), key: "image" },
+                    { icon: VideoIcon, label: t("pasteZone.typeVideo"), key: "video" },
+                    { icon: FileText, label: t("pasteZone.typeText"), key: "text" },
+                    { icon: LinkIcon, label: t("pasteZone.typeLink"), key: "link" },
+                  ].map(({ icon: Icon, label, key }) => (
+                    <div key={key} className="flex flex-col items-center gap-2">
                       <Icon className="w-5 h-5 opacity-20" />
                       <span className="text-[9px] font-mono uppercase tracking-widest opacity-50">
                         {label}
@@ -197,14 +263,14 @@ export function PasteZone() {
           className="flex-1 flex items-center justify-center gap-3 bg-white border border-[#141414]/10 py-4 rounded-2xl hover:bg-[#141414] hover:text-white transition-all group"
         >
           <MessageSquare className="w-5 h-5 opacity-40 group-hover:opacity-100" />
-          <span className="text-[10px] font-mono uppercase tracking-widest">AI Chatbot</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest">{t("pasteZone.aiChatbot")}</span>
         </button>
         <button
           onClick={openImageGen}
           className="flex-1 flex items-center justify-center gap-3 bg-white border border-[#141414]/10 py-4 rounded-2xl hover:bg-[#141414] hover:text-white transition-all group"
         >
           <Sparkles className="w-5 h-5 opacity-40 group-hover:opacity-100" />
-          <span className="text-[10px] font-mono uppercase tracking-widest">Generate Image</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest">{t("pasteZone.generateImage")}</span>
         </button>
       </div>
 
@@ -213,15 +279,15 @@ export function PasteZone() {
         <div className="flex items-center gap-4 mb-6">
           <div className="h-[1px] flex-1 bg-[#141414]/10" />
           <span className="text-[9px] font-mono opacity-50 uppercase tracking-[0.4em]">
-            System Intelligence
+            {t("pasteZone.features.systemIntelligence")}
           </span>
           <div className="h-[1px] flex-1 bg-[#141414]/10" />
         </div>
         <div className="grid grid-cols-3 gap-8">
           {[
-            { label: "Smart Name", icon: Zap, value: "98%" },
-            { label: "Auto Summary", icon: Layers, value: "Active" },
-            { label: "Context Aware", icon: Search, value: "v3.0" },
+            { label: t("pasteZone.features.smartName"), icon: Zap, value: "98%" },
+            { label: t("pasteZone.features.autoSummary"), icon: Layers, value: "Active" },
+            { label: t("pasteZone.features.contextAware"), icon: Search, value: "v3.0" },
           ].map((f, i) => (
             <div key={f.label} className="flex flex-col gap-3 group/feature">
               <div className="flex items-center justify-between">

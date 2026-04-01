@@ -51,7 +51,7 @@ export const geminiAnalysisProvider: AnalysisProvider = {
       config,
     });
 
-    const result = JSON.parse(response.text || "{}");
+    const result = JSON.parse((response.text || "{}").replace(/^```json\s*/i, "").replace(/\s*```$/i, ""));
     return {
       suggestedName: result.suggestedName || item.suggestedName,
       summary: result.summary || "No summary available.",

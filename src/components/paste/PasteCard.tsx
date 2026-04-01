@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import {
   Download,
   Copy,
@@ -30,6 +31,7 @@ interface PasteCardProps {
 }
 
 export function PasteCard({ item }: PasteCardProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const {
     copiedId,
@@ -164,7 +166,7 @@ export function PasteCard({ item }: PasteCardProps) {
                 {item.isAnalyzing ? (
                   <span className="flex items-center gap-3 opacity-20">
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Analyzing...
+                    {t("pasteCard.analyzing")}
                   </span>
                 ) : isEditing ? (
                   <input
@@ -225,13 +227,13 @@ export function PasteCard({ item }: PasteCardProps) {
                     onClick={() => saveEdit(item.id)}
                     className="px-4 py-1.5 bg-[#141414] text-white text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#333] transition-all"
                   >
-                    Save
+                    {t("pasteCard.save")}
                   </button>
                   <button
                     onClick={() => setEditingItemId(null)}
                     className="px-4 py-1.5 border border-[#141414]/10 text-[10px] font-mono uppercase tracking-widest rounded-full hover:bg-[#141414]/5 transition-all"
                   >
-                    Cancel
+                    {t("pasteCard.cancel")}
                   </button>
                 </>
               )}
@@ -243,13 +245,13 @@ export function PasteCard({ item }: PasteCardProps) {
               value={editSummary}
               onChange={(e) => setEditSummary(e.target.value)}
               className="w-full bg-transparent border-b border-[#141414]/10 text-lg font-serif italic text-[#141414] leading-relaxed mb-6 focus:outline-none focus:border-[#141414] resize-none h-24 py-2"
-              placeholder="Enter summary..."
+              placeholder={t("pasteCard.summaryPlaceholder")}
             />
           ) : (
             <p className="text-lg font-serif italic text-[#141414]/60 leading-relaxed mb-6 line-clamp-2 truncate">
               {item.isAnalyzing
-                ? "Processing content through intelligence layer..."
-                : item.summary || "No summary generated."}
+                ? t("pasteCard.analyzingContent")
+                : item.summary || t("pasteCard.noSummary")}
             </p>
           )}
 
@@ -257,7 +259,7 @@ export function PasteCard({ item }: PasteCardProps) {
             {item.isAnalyzing ? (
               <div className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full opacity-50">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">Analyzing...</span>
+                <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.analyzing")}</span>
               </div>
             ) : user ? (
               <div className="flex flex-wrap gap-2">
@@ -267,7 +269,7 @@ export function PasteCard({ item }: PasteCardProps) {
                 >
                   <Zap className="w-3 h-3" />
                   <span className="text-[9px] font-bold uppercase tracking-widest">
-                    {item.summary ? "Re-analyze" : "Analyze Now"}
+                    {item.summary ? t("pasteCard.reAnalyze") : t("pasteCard.analyzeNow")}
                   </span>
                 </button>
                 <button
@@ -275,7 +277,7 @@ export function PasteCard({ item }: PasteCardProps) {
                   className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
                 >
                   <MessageSquare className="w-3 h-3 opacity-40 group-hover/btn:opacity-100" />
-                  <span className="text-[9px] font-mono uppercase tracking-widest">Chat with AI</span>
+                  <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.chatWithAi")}</span>
                 </button>
                 {item.type === "image" && (
                   <button
@@ -283,32 +285,23 @@ export function PasteCard({ item }: PasteCardProps) {
                     className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
                   >
                     <Sparkles className="w-3 h-3 opacity-40 group-hover/btn:opacity-100" />
-                    <span className="text-[9px] font-mono uppercase tracking-widest">Edit Image</span>
+                    <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.editImage")}</span>
                   </button>
                 )}
-                {item.type === "text" && (
+                {(item.type === "text" || item.type === "url") && (
                   <button
-                    onClick={() => openImageGenWithText(item.content)}
+                    onClick={() => openImageGenWithText(item.type === "text" ? item.content : item.summary || item.content)}
                     className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
                   >
                     <Sparkles className="w-3 h-3 opacity-40 group-hover/btn:opacity-100" />
-                    <span className="text-[9px] font-mono uppercase tracking-widest">Generate Image</span>
-                  </button>
-                )}
-                {item.type === "url" && (
-                  <button
-                    onClick={() => openImageGenWithText(item.summary || item.content)}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full hover:bg-[#141414] hover:text-white transition-all group/btn"
-                  >
-                    <Sparkles className="w-3 h-3 opacity-40 group-hover/btn:opacity-100" />
-                    <span className="text-[9px] font-mono uppercase tracking-widest">Generate Image</span>
+                    <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.generateImage")}</span>
                   </button>
                 )}
               </div>
             ) : (
               <div className="flex items-center gap-2 px-4 py-2 bg-[#141414]/5 rounded-full opacity-30">
                 <UserIcon className="w-3 h-3" />
-                <span className="text-[9px] font-mono uppercase tracking-widest">Login for AI Analysis</span>
+                <span className="text-[9px] font-mono uppercase tracking-widest">{t("pasteCard.loginForAi")}</span>
               </div>
             )}
           </div>
