@@ -27,6 +27,7 @@ export interface PasteItem {
 
 export interface ChatMessage {
   id: string;
+  chatId?: string; // Optional for backward compatibility
   role: "user" | "model";
   text: string;
   thinking?: string;

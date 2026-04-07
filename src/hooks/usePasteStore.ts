@@ -84,9 +84,29 @@ export function usePasteStore() {
 
   const clearUnpinned = useCallback(async () => {
     const unpinned = items.filter((i) => !i.isPinned);
+    console.log('[clearUnpinned] Starting clear, unpinned count:', unpinned.length);
+    console.log('[clearUnpinned] Unpinned items:', unpinned.map(i => ({ id: i.id.substring(0, 8), name: i.suggestedName })));
+    
+    // First delete from cloud to prevent re-sync
+    if (user) {
+      console.log('[clearUnpinned] Deleting from cloud...');
+      await syncClearUnpinnedFromCloud(unpinned, user.uid);
+      console.log('[clearUnpinned] Cloud deletion complete');
+    }
+    
+    // Then delete from local IndexedDB
+    console.log('[clearUnpinned] Deleting from IndexedDB...');
     await clearUnpinnedPastes();
-    setItems((prev: PasteItem[]) => prev.filter((i) => i.isPinned));
-    if (user) syncClearUnpinnedFromCloud(unpinned, user.uid);
+    console.log('[clearUnpinned] IndexedDB deletion complete');
+    
+    // Finally update React state
+    console.log('[clearUnpinned] Updating React state...');
+    setItems((prev: PasteItem[]) => {
+      const filtered = prev.filter((i) => i.isPinned);
+      console.log('[clearUnpinned] State updated, remaining items:', filtered.length);
+      return filtered;
+    });
+    console.log('[clearUnpinned] Clear complete');
   }, [user, items, setItems]);
 
   const saveEdit = useCallback(

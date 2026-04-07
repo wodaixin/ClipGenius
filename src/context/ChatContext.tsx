@@ -18,6 +18,7 @@ import {
 import {
   saveChatMessage,
   getChatMessages,
+  clearChatMessages,
 } from "../lib/db";
 import { startLiveSession } from "../services/ai/startLiveSession";
 import { LiveSessionConnection } from "../types";
@@ -127,8 +128,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   // Load local chat messages on mount (for guest users)
   useEffect(() => {
     if (user) return;
-    getChatMessages().then(setChatMessages);
-  }, [user]);
+    getChatMessages(currentChatId).then(setChatMessages);
+  }, [user, currentChatId]);
 
   const openChatWithItem = useCallback(
     (item: import("../types").PasteItem | null) => {
@@ -138,9 +139,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       // Only attach the card context when opening a fresh chat session
       if (isNewChat) {
         setContextItem(item);
-        setChatMessages([]);
         setChatInput("");
         setCurrentChatId(newChatId);
+        // Don't clear messages here - let the effect load them from Firestore/IndexedDB
       }
     },
     [user, setContextItem, currentChatId, isChatOpen]
@@ -162,6 +163,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
       } catch (error) {
         console.error("Failed to clear chat:", error);
+      }
+    } else {
+      // For guest users, clear from IndexedDB
+      try {
+        await clearChatMessages(currentChatId);
+      } catch (error) {
+        console.error("Failed to clear local chat:", error);
       }
     }
   }, [user, currentChatId]);
@@ -198,6 +206,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const userMsgId = crypto.randomUUID();
     const userMsg: ChatMessage = {
       id: userMsgId,
+      chatId: currentChatId,
       role: "user",
       text: chatInputValue,
       timestamp: new Date(),
@@ -240,6 +249,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const modelMsgId = crypto.randomUUID();
     const modelMsg: ChatMessage = {
       id: modelMsgId,
+      chatId: currentChatId,
       role: "model",
       text: "",
       thinking: "",

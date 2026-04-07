@@ -122,6 +122,21 @@ export function useClipboard() {
 
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
+      // Don't capture paste events in input fields, textareas, or contenteditable elements
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return; // Let the default paste behavior happen
+      }
+
+      // Don't capture if the page is not visible (user is on another tab)
+      if (document.hidden) {
+        return;
+      }
+
       e.preventDefault();
       handlePaste(e);
     };

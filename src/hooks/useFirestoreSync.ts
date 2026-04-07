@@ -50,8 +50,12 @@ export function useFirestoreSync() {
               }
               return [cloudItem, ...prev];
             });
+          } else if (change.type === "removed") {
+            // Remove from local state when deleted from cloud
+            const removedId = doc.id;
+            setItems((prev: PasteItem[]) => prev.filter((i) => i.id !== removedId));
+            // Note: IndexedDB deletion is handled by clearUnpinned/deleteItem
           }
-          // 'removed' handled by deleteItem in usePasteStore
         }
       },
       (error) => {
