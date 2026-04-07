@@ -1,6 +1,6 @@
 # ClipGenius — AI 剪贴板管理器
 
-> 由 React 19 + Vite 构建的专业级 AI 剪贴板管理器。自动捕获图片、视频、文本、链接、Markdown 和代码片段，并通过 Gemini AI 进行分析，通过 Firebase 实现跨设备同步。
+> 由 React 19 + Vite 构建的专业级 AI 剪贴板管理器。自动捕获图片、视频、文本、链接、Markdown 和代码片段，并通过 AI（Gemini、Minimax）进行分析，通过 Firebase 实现跨设备同步。
 
 [English Version](README.md)
 
@@ -21,11 +21,11 @@
 图片和视频以 base64 data URI 格式存储，其他类型以原始文本存储。
 
 ### AI 内容分析
-登录并启用自动分析后，Gemini AI 自动生成：
+登录并启用自动分析后，AI 自动生成：
 - **推荐文件名** — 例如 `img_20260402_143052`
 - **内容摘要** — 一段描述文字
 
-分析在每次捕获后按项目触发，支持配置 Provider（`gemini` 或 `minimax`，可通过环境变量按功能独立配置）。
+分析在每次捕获后按项目触发，支持多种 AI 提供商（`gemini` 和 `minimax`，可通过环境变量或设置界面按功能独立配置）。
 
 ### 多模态 AI 聊天
 内置完整对话式 AI 助手：

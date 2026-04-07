@@ -1,6 +1,6 @@
 # ClipGenius — AI Clipboard Manager
 
-> A professional-grade AI clipboard manager built with React 19 + Vite. Captures images, videos, text, URLs, markdown, and code snippets — then analyzes and syncs them across devices via Gemini AI and Firebase.
+> A professional-grade AI clipboard manager built with React 19 + Vite. Captures images, videos, text, URLs, markdown, and code snippets — then analyzes and syncs them across devices via AI (Gemini, Minimax) and Firebase.
 
 [中文版](README_zh.md)
 
@@ -21,11 +21,11 @@ Listens globally for `paste` events and automatically classifies clipboard conte
 Images and videos are stored as base64 data URIs. All other types are stored as raw text.
 
 ### AI Analysis
-When signed in and auto-analyze is enabled, Gemini AI generates:
+When signed in and auto-analyze is enabled, AI generates:
 - **Suggested filename** — e.g. `img_20260402_143052`
 - **Content summary** — one-paragraph description
 
-Analysis is triggered per-item after capture and is provider-agnostic (`gemini` or `minimax`, configurable per feature).
+Analysis is triggered per-item after capture and is provider-agnostic (supports `gemini` and `minimax`, configurable per feature).
 
 ### Multimodal AI Chat
 Full conversational AI assistant integrated into the app:
