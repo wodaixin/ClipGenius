@@ -21,6 +21,7 @@ import { usePasteStore } from "../../hooks/usePasteStore";
 import { useClipboard } from "../../hooks/useClipboard";
 import { useChat } from "../../context/ChatContext";
 import { useImageGen } from "../../hooks/useImageGen";
+import { SettingsModal } from "./SettingsModal";
 import { cn } from "../../lib/utils";
 
 export function PasteZone() {
@@ -31,6 +32,7 @@ export function PasteZone() {
   const { openChatWithItem } = useChat();
   const { openImageGen } = useImageGen();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -108,7 +110,7 @@ export function PasteZone() {
                       </button>
                     </div>
                     {/* Language */}
-                    <div className="px-4 py-3">
+                    <div className="px-4 py-3 border-b border-[#141414]/5">
                       <span className="text-xs font-sans uppercase tracking-widest opacity-75 block mb-3">
                         {t("pasteZone.settings.language")}
                       </span>
@@ -136,6 +138,18 @@ export function PasteZone() {
                           {t("pasteZone.settings.chinese")}
                         </button>
                       </div>
+                    </div>
+                    {/* Advanced Settings Button */}
+                    <div className="px-4 py-3">
+                      <button
+                        onClick={() => {
+                          setSettingsOpen(false);
+                          setAdvancedSettingsOpen(true);
+                        }}
+                        className="w-full py-2 px-4 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-xl hover:bg-[#333] transition-all"
+                      >
+                        {t("pasteZone.settings.advanced")}
+                      </button>
                     </div>
                   </motion.div>
                 )}
@@ -307,6 +321,12 @@ export function PasteZone() {
           ))}
         </div>
       </div>
+      
+      {/* Advanced Settings Modal */}
+      <SettingsModal 
+        isOpen={advancedSettingsOpen} 
+        onClose={() => setAdvancedSettingsOpen(false)} 
+      />
     </aside>
   );
 }

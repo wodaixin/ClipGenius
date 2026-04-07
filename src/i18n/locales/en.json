@@ -26,7 +26,8 @@
       "autoAi": "Auto AI",
       "language": "Language",
       "english": "English",
-      "chinese": "中文"
+      "chinese": "中文",
+      "advanced": "Advanced Settings"
     }
   },
   "history": {
@@ -110,5 +111,35 @@
     "network": "Network error. Please check your connection.",
     "rateLimit": "API rate limit exceeded. Please try again later.",
     "tryAgain": "Request failed. Please try again."
+  },
+  "settings": {
+    "title": "Settings",
+    "save": "Save",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "reloadPrompt": "Settings saved. Page reload required to apply changes. Reload now?",
+    "warning": "These settings are stored in browser local storage. Do not save sensitive information on public devices. Settings will take effect after page reload.",
+    "firebase": {
+      "title": "Firebase Configuration",
+      "apiKey": "API Key",
+      "authDomain": "Auth Domain",
+      "projectId": "Project ID",
+      "storageBucket": "Storage Bucket",
+      "messagingSenderId": "Messaging Sender ID",
+      "appId": "App ID"
+    },
+    "ai": {
+      "title": "AI Configuration",
+      "geminiApiKey": "Gemini API Key",
+      "minimaxApiKey": "Minimax API Key",
+      "minimaxBaseUrl": "Minimax Base URL"
+    },
+    "providers": {
+      "title": "Provider Selection",
+      "analysis": "Content Analysis Provider",
+      "chat": "Chat Provider",
+      "analysisModel": "Analysis Model (Optional)",
+      "chatModel": "Chat Model (Optional)"
+    }
   }
 }

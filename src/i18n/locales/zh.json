@@ -26,7 +26,8 @@
       "autoAi": "自动 AI",
       "language": "语言",
       "english": "English",
-      "chinese": "中文"
+      "chinese": "中文",
+      "advanced": "高级设置"
     }
   },
   "history": {
@@ -110,5 +111,35 @@
     "network": "网络错误，请检查网络连接。",
     "rateLimit": "API 速率超限，请稍后重试。",
     "tryAgain": "请求失败，请重试。"
+  },
+  "settings": {
+    "title": "设置",
+    "save": "保存",
+    "saved": "已保存",
+    "cancel": "取消",
+    "reloadPrompt": "设置已保存。需要刷新页面以应用更改，是否立即刷新？",
+    "warning": "这些设置将存储在浏览器本地存储中。请勿在公共设备上保存敏感信息。刷新页面后设置将生效。",
+    "firebase": {
+      "title": "Firebase 配置",
+      "apiKey": "API 密钥",
+      "authDomain": "认证域名",
+      "projectId": "项目 ID",
+      "storageBucket": "存储桶",
+      "messagingSenderId": "消息发送者 ID",
+      "appId": "应用 ID"
+    },
+    "ai": {
+      "title": "AI 配置",
+      "geminiApiKey": "Gemini API 密钥",
+      "minimaxApiKey": "Minimax API 密钥",
+      "minimaxBaseUrl": "Minimax 基础 URL"
+    },
+    "providers": {
+      "title": "提供商选择",
+      "analysis": "内容分析提供商",
+      "chat": "聊天提供商",
+      "analysisModel": "分析模型（可选）",
+      "chatModel": "聊天模型（可选）"
+    }
   }
 }
