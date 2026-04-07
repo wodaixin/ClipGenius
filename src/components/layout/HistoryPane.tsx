@@ -54,9 +54,9 @@ export function HistoryPane() {
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
             <span className="text-xs font-sans opacity-75 uppercase tracking-widest">
+              <span className="font-bold text-sm">{items.length}</span>
               {t("history.records")}
             </span>
-            <span className="text-sm font-bold">{items.length}</span>
           </div>
           <div className="h-8 w-[1px] bg-[#141414]/10" />
           <button

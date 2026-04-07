@@ -132,7 +132,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const openChatWithItem = useCallback(
     (item: import("../types").PasteItem | null) => {
-      if (!user && item) return;
       const newChatId = item ? item.id : "default";
       const isNewChat = newChatId !== currentChatId || !isChatOpen;
       setIsChatOpen(true);

@@ -57,24 +57,44 @@ export function useClipboard() {
         const trimmed = text.trim();
         const isUrl = /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(trimmed);
         const isFBVideoUrl = isUrl && isFBVideoCDNUrl(trimmed);
+        console.log("[Clipboard] Pasted text:", trimmed.substring(0, 100), "isUrl:", isUrl, "isFBVideoUrl:", isFBVideoUrl);
 
         // FB video URL: download via CORS proxy and store as video
         if (isFBVideoUrl) {
+          console.log("[Clipboard] Detected FB video URL, downloading...");
           downloadFBVideo(trimmed).then((videoData) => {
-            if (!videoData) return;
-            const id = crypto.randomUUID();
-            const newItem: PasteItem = {
-              id,
-              type: "video",
-              content: videoData.base64,
-              mimeType: "video/mp4",
-              timestamp: new Date(),
-              suggestedName: `vid_${format(new Date(), "yyyyMMdd_HHmmss")}`,
-              isAnalyzing: isAutoAnalyzeEnabled,
-              isPinned: false,
-              userId: user?.uid ?? "",
-            };
-            addItem(newItem);
+            console.log("[Clipboard] downloadFBVideo result:", videoData ? "success" : "null");
+            if (videoData) {
+              const id = crypto.randomUUID();
+              const newItem: PasteItem = {
+                id,
+                type: "video",
+                content: videoData.base64,
+                mimeType: "video/mp4",
+                timestamp: new Date(),
+                suggestedName: `vid_${format(new Date(), "yyyyMMdd_HHmmss")}`,
+                isAnalyzing: isAutoAnalyzeEnabled,
+                isPinned: false,
+                userId: user?.uid ?? "",
+              };
+              addItem(newItem);
+            } else {
+              // Fallback: save as URL if download fails
+              console.log("[Clipboard] FB video download failed, saving as URL");
+              const id = crypto.randomUUID();
+              const newItem: PasteItem = {
+                id,
+                type: "url",
+                content: trimmed,
+                mimeType: "text/uri-list",
+                timestamp: new Date(),
+                suggestedName: `link_${format(new Date(), "yyyyMMdd_HHmmss")}`,
+                isAnalyzing: isAutoAnalyzeEnabled,
+                isPinned: false,
+                userId: user?.uid ?? "",
+              };
+              addItem(newItem);
+            }
           });
           return;
         }
@@ -164,12 +184,36 @@ function isFBVideoCDNUrl(url: string): boolean {
 }
 
 async function downloadFBVideo(url: string): Promise<{ base64: string } | null> {
-  const corsProxy = "https://corsproxy.io/?";
+  // Try direct fetch first (will use system proxy like Clash if configured)
+  console.log("[FB Video] Trying direct fetch...");
+  try {
+    const response = await fetch(url);
+    console.log("[FB Video] Direct fetch status:", response.status);
+    if (response.ok) {
+      const blob = await response.blob();
+      console.log("[FB Video] Blob size:", blob.size);
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve({ base64: reader.result as string });
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(blob);
+      });
+    }
+  } catch (err) {
+    console.log("[FB Video] Direct fetch failed:", err);
+  }
+
+  // Fallback: try CORS proxy
+  const corsProxyBase = import.meta.env.VITE_CORS_PROXY_URL || "https://corsproxy.io";
+  const corsProxy = corsProxyBase.endsWith("/?") ? corsProxyBase : corsProxyBase + "/?";
   const proxyUrl = corsProxy + encodeURIComponent(url);
+  console.log("[FB Video] Trying CORS proxy:", proxyUrl);
   try {
     const response = await fetch(proxyUrl, { mode: "cors" });
+    console.log("[FB Video] CORS proxy status:", response.status);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const blob = await response.blob();
+    console.log("[FB Video] Blob size:", blob.size);
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve({ base64: reader.result as string });
@@ -177,7 +221,7 @@ async function downloadFBVideo(url: string): Promise<{ base64: string } | null> 
       reader.readAsDataURL(blob);
     });
   } catch (err) {
-    console.error("FB video download failed:", err);
+    console.error("[FB Video] CORS proxy also failed:", err);
     return null;
   }
 }
