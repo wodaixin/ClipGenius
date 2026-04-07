@@ -55,7 +55,7 @@ function isValidMessage(data) {
 function isAdmin() {
   return isAuthenticated() && (
     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-    (request.auth.token.email == "wodaixin@gmail.com" && request.auth.token.email_verified == true)
+    (request.auth.token.email == "YOUR_ADMIN_EMAIL@example.com" && request.auth.token.email_verified == true)
   );
 }
 ```
@@ -90,7 +90,7 @@ Key rules:
 
 **Security Notes**
 
-- **Hardcoded admin email:** `"wodaixin@gmail.com"` with `email_verified: true` has admin access. This is a known trade-off — in production, consider managing admin status via a Firestore document instead.
+- **Hardcoded admin email:** Replace `"YOUR_ADMIN_EMAIL@example.com"` with your actual email in `firestore.rules`. The admin email with `email_verified: true` has full read/write access. This is a known trade-off — in production, consider managing admin status via a Firestore document instead.
 - **Content size limit:** 1MB prevents abuse from large paste content
 - **userId immutability:** The `userId` field cannot be changed on update, preventing one user from overwriting another's paste metadata
 
