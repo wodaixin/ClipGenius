@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite. It captures clipboard content (images, videos, text, URLs), analyzes it with Gemini AI, and syncs across devices via Firebase. Designed for Google Cloud Run deployment via AI Studio.
+ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite. It captures clipboard content (images, videos, text, URLs), analyzes it with AI (Gemini, Minimax), and syncs across devices via Firebase. Designed for Google Cloud Run deployment via AI Studio.
 
 ## Commands
 
@@ -31,13 +31,15 @@ npm run clean    # Remove dist/ directory
 
 | Directory | Files | Purpose |
 |---|---|---|
+| `src/config/` | `prompts.ts`, `prompts.en.json`, `prompts.zh.json` | AI prompts configuration |
 | `src/context/` | `AuthContext`, `AppContext`, `ChatContext` | Auth, app state, chat state |
 | `src/hooks/` | `useClipboard`, `usePasteStore`, `useImageGen`, `useFirestoreSync` | Core business logic |
 | `src/components/chat/` | `ChatModal`, `ChatContextItem` | Chat UI and inline context preview |
 | `src/components/imagegen/` | `ImageGenModal` | Image generation UI |
-| `src/components/layout/` | `PasteZone`, `HistoryPane` | Main layout panels |
+| `src/components/layout/` | `PasteZone`, `HistoryPane`, `SettingsModal` | Main layout panels and settings |
 | `src/components/paste/` | `PasteCard`, `PastePreview` | Paste item display |
 | `src/services/ai/` | `analyzeContent`, `generateImage`, `startLiveSession`, plus `providers/` | AI service layer |
+| `src/services/ai/providers/` | `index.ts`, `types.ts`, `capabilities.ts`, `gemini.ts`, `minimax.ts`, etc. | Provider implementations |
 | `src/services/clipboard/` | `clipboardUtils` | Clipboard utility functions |
 | `src/services/sync/` | `dualSync` | Firestore + IndexedDB dual-write logic |
 | `src/lib/` | `db.ts`, `utils.ts`, `estimateCardHeight.ts` | IndexedDB wrapper, utilities |
@@ -56,6 +58,15 @@ All AI features are routed through configurable providers (selected via `VITE_*_
 | Image generation (pro) | `gemini` | `gemini-3-pro-image-preview` |
 
 Alternative: `minimax`. Per-feature overrides can be set in `.env`.
+
+**Provider Capabilities:**
+
+| Provider | Text | Image | Video |
+|---|---|---|---|
+| **Gemini** | ✅ | ✅ | ✅ |
+| **Minimax** | ✅ | ❌ | ❌ |
+
+Minimax text models only support text. `src/services/ai/providers/capabilities.ts` defines capability checks that show user-friendly errors for unsupported features.
 
 ### Data Models
 

@@ -105,24 +105,11 @@ const { t } = useTranslation();
 t('myComponent.title')
 ```
 
-## AI 响应的语言后缀
+## AI 提示词配置
 
-当调用 AI 服务时，需要指定响应语言。通过在提示词中添加语言后缀实现：
+AI 响应的语言由提示词模板控制。切换 UI 语言会自动切换 AI 的响应语言。
 
-```typescript
-// 在提示词末尾添加
-const langSuffix = '请用中文回复。';
-```
-
-zh.json 中定义的语言后缀：
-
-```json
-{
-  "analyze": {
-    "langSuffix": "请用中文回复。"
-  }
-}
-```
+详见 [AI 提示词配置](ai-prompts.md)。
 
 ## 已知问题
 
@@ -139,5 +126,5 @@ i18next 库在某些情况下可能存在时序问题。如果遇到翻译不显
 
 ## 相关文档
 
-- [中文 UI 字符串参考](./locales/zh.json) — 现有翻译
+- [AI 提示词配置](ai-prompts.md) — AI 提示词定制
 - [React i18next 文档](https://react.i18next.com/) — 官方教程

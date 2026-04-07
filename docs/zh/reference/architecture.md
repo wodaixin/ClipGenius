@@ -2,6 +2,27 @@
 
 本文档详细说明 ClipGenius 的系统架构和设计模式。
 
+## 项目结构
+
+```
+src/
+├── App.tsx                     # 薄组合层
+├── types.ts                    # PasteItem, ChatMessage, StoredAttachment
+├── config/                     # AI 提示词配置
+│   ├── prompts.ts              # 提示词加载器和工具函数
+│   ├── prompts.en.json         # 英文提示词
+│   └── prompts.zh.json         # 中文提示词
+├── context/                    # React Context providers
+├── hooks/                      # 自定义 React hooks
+├── components/                 # UI 组件
+├── services/
+│   ├── ai/                    # AI providers (gemini, minimax)
+│   ├── clipboard/
+│   └── sync/
+├── lib/                        # 工具函数 (db.ts, utils.ts)
+└── i18n/                       # 国际化
+```
+
 ## 高层次数据流
 
 ```
@@ -184,6 +205,7 @@ function truncateForPreview(text: string): string {
 | `src/hooks/useFirestoreSync.ts` | Firestore 实时订阅 |
 | `src/services/sync/dualSync.ts` | 双重写入逻辑 |
 | `src/services/ai/providers/index.ts` | Provider 路由 |
+| `src/config/prompts.ts` | AI 提示词配置加载器 |
 | `src/lib/db.ts` | IndexedDB 操作封装 |
 | `src/context/AppContext.tsx` | 应用级状态 |
 

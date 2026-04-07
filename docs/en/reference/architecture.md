@@ -2,6 +2,27 @@
 
 **Overview** — ClipGenius follows a clean separation of concerns: clipboard events are captured in hooks, state is managed in React Contexts, AI features are routed through configurable providers, and persistence is handled by IndexedDB and Firestore.
 
+**Project Structure**
+
+```
+src/
+├── App.tsx                     # Thin composition layer
+├── types.ts                    # PasteItem, ChatMessage, StoredAttachment
+├── config/                     # AI Prompts configuration
+│   ├── prompts.ts              # Prompt loader and utilities
+│   ├── prompts.en.json         # English prompts
+│   └── prompts.zh.json         # Chinese prompts
+├── context/                    # React Context providers
+├── hooks/                      # Custom React hooks
+├── components/                 # UI components
+├── services/
+│   ├── ai/                    # AI providers (gemini, minimax)
+│   ├── clipboard/
+│   └── sync/
+├── lib/                        # Utilities (db.ts, utils.ts)
+└── i18n/                       # Internationalization
+```
+
 **High-Level Data Flow**
 
 ```
@@ -27,7 +48,7 @@ Clipboard paste event (Cmd/Ctrl+V)
 
 **Provider Architecture**
 
-All AI features are routed through typed provider interfaces:
+All AI features are routed through typed provider interfaces. AI prompts are centralized in `src/config/prompts.ts` (see [AI Prompts Configuration](../../src/config/README.md)):
 
 ```
 Content Analysis  ──→ getAnalysisProvider() ──→ gemini │ minimax

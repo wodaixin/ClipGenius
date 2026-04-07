@@ -87,6 +87,13 @@
 src/
 ├── App.tsx                      # 薄组合层
 ├── types.ts                     # PasteItem, ChatMessage, StoredAttachment
+├── firebase.ts                  # Firebase 初始化
+├── main.tsx                     # React 入口点
+├── vite-env.d.ts               # Vite 类型定义
+├── config/                      # AI 提示词配置
+│   ├── prompts.ts              # 提示词加载器和工具函数
+│   ├── prompts.en.json          # 英文提示词
+│   └── prompts.zh.json          # 中文提示词
 ├── context/
 │   ├── AuthContext.tsx           # Firebase Auth 状态
 │   ├── AppContext.tsx            # 应用级状态（拖拽、模态框、设置）
@@ -99,7 +106,8 @@ src/
 ├── components/
 │   ├── layout/
 │   │   ├── PasteZone.tsx         # 左侧面板 — 粘贴区
-│   │   └── HistoryPane.tsx       # 右侧面板 — 剪贴历史列表
+│   │   ├── HistoryPane.tsx       # 右侧面板 — 剪贴历史列表
+│   │   └── SettingsModal.tsx     # 高级设置模态框
 │   ├── paste/
 │   │   ├── PasteCard.tsx         # 单个 Paste 项目卡片
 │   │   └── PastePreview.tsx      # 完整预览模态框，含语法高亮
@@ -116,6 +124,7 @@ src/
 │   │   └── providers/
 │   │       ├── index.ts          # Provider 路由
 │   │       ├── types.ts
+│   │       ├── capabilities.ts   # Provider 能力定义
 │   │       ├── gemini.ts         # Gemini 内容分析
 │   │       ├── gemini-chat.ts    # Gemini 聊天 + 思考流
 │   │       ├── minimax.ts        # Minimax 内容分析
@@ -146,6 +155,15 @@ src/
 | 图片生成（专业） | `gemini` | `gemini-3-pro-image-preview` |
 
 替代 Provider：`minimax`。可通过 `VITE_ANALYSIS_PROVIDER`、`VITE_CHAT_PROVIDER` 等按功能独立覆盖。
+
+**提供商能力说明：**
+
+| Provider | 文本 | 图片 | 视频 |
+|---|---|---|---|
+| **Gemini** | ✅ | ✅ | ✅ |
+| **Minimax** | ✅ | ❌ | ❌ |
+
+Minimax 文本模型仅支持文本输入。应用内置能力检查，在尝试使用不支持的功能时会显示友好的错误提示。
 
 ## 快速开始
 
@@ -191,12 +209,17 @@ npm run clean     # 清除 dist/
 
 ## 部署
 
-专为 **Google Cloud Run via AI Studio** 设计：
+部署到任何静态托管服务（Vercel、Netlify、Cloudflare Pages 等），只需运行 `npm run build` 并托管 `dist/` 目录。
 
-1. 在 AI Studio 中连接 GitHub 仓库
-2. 在 AI Studio 设置中配置密钥（API keys）
-3. 使用 **Export to GitHub** 同步配置变更
-4. AI Studio 自动部署到 Cloud Run
+## 高级设置
+
+应用内置高级设置模态框（PasteZone 顶部的"高级设置"按钮），可配置：
+- Firebase 配置
+- AI 提供商选择（分析、聊天、语音、图片生成）
+- Gemini 和 Minimax 的 API 密钥
+- 各功能的模型覆盖
+
+设置存储在浏览器 `localStorage` 中，跨会话保留。详见[高级设置](docs/zh/guides/advanced-settings.md)。
 
 ## 数据模型
 
@@ -233,6 +256,4 @@ StoredAttachment {
 }
 ```
 
-## License
 
-MIT

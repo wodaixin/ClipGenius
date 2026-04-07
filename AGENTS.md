@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite + TypeScript. It captures clipboard content (images, videos, text, URLs), analyzes it with Gemini AI, and syncs across devices via Firebase. Designed for Google Cloud Run deployment.
+ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite + TypeScript. It captures clipboard content (images, videos, text, URLs), analyzes it with AI (Gemini, Minimax), and syncs across devices via Firebase. Designed for Google Cloud Run deployment.
 
 ## Commands
 
@@ -140,6 +140,7 @@ try {
 
 ```
 src/
+├── config/          # AI Prompts configuration (prompts.ts, prompts.*.json)
 ├── components/     # UI components grouped by feature
 │   ├── chat/
 │   ├── imagegen/
@@ -179,8 +180,13 @@ All AI features route through configurable providers (set via `VITE_*_PROVIDER` 
 | Chat | `gemini` | `gemini-3.1-pro-preview` |
 | Live voice | `gemini` | `gemini-3.1-flash-live-preview` |
 | Image generation (standard) | `gemini` | `gemini-2.5-flash-image` |
+| Image generation (pro) | `gemini` | `gemini-3-pro-image-preview` |
 
-Provider implementations in `src/services/ai/providers/`. To add a new provider:
+Provider implementations in `src/services/ai/providers/`. Provider capabilities are defined in `capabilities.ts`:
+- **Gemini**: supports text, image, video
+- **Minimax**: supports text only (no image/video)
+
+To add a new provider:
 1. Create provider file implementing the appropriate interface
 2. Register in `index.ts` exports
 3. Set `VITE_*_PROVIDER=providername` in environment
@@ -226,7 +232,8 @@ All prefixed with `VITE_` (required in `.env`, see `.env.example`):
 ## Adding New Features
 
 1. **New AI feature**: Add provider in `src/services/ai/providers/`, register in `index.ts`
-2. **New component**: Create in appropriate `components/` subdirectory, use named export
-3. **New hook**: Create in `hooks/`, prefix with `use`, return object with state and callbacks
-4. **New context**: Create in `context/`, follow existing pattern (createContext, Provider, use hook)
-5. **New PasteType**: Add to `PasteType` union in `types.ts`
+2. **New AI prompt**: Add prompts in `src/config/prompts.en.json` and `src/config/prompts.zh.json`
+3. **New component**: Create in appropriate `components/` subdirectory, use named export
+4. **New hook**: Create in `hooks/`, prefix with `use`, return object with state and callbacks
+5. **New context**: Create in `context/`, follow existing pattern (createContext, Provider, use hook)
+6. **New PasteType**: Add to `PasteType` union in `types.ts`

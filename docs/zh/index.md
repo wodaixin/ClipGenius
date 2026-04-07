@@ -90,6 +90,12 @@
 
 <div class="grid-cards">
 
+### 高级设置
+
+在应用内配置 Firebase、AI 提供商和 API 密钥。
+
+[高级设置](./guides/advanced-settings.md)
+
 ### AI Studio 专业模式
 
 使用付费 AI Studio 密钥进行高质量图片生成。

@@ -32,9 +32,23 @@ ClipGenius 使用环境变量配置 Firebase、AI 服务和应用行为。所有
 | `VITE_CHAT_MODEL` | 模型名 | `gemini-3.1-pro-preview` | 聊天模型 |
 | `VITE_LIVE_PROVIDER` | `gemini` / `minimax` | `gemini` | 实时语音 Provider |
 | `VITE_LIVE_MODEL` | 模型名 | `gemini-3.1-flash-live-preview` | 实时语音模型 |
-| `VITE_IMAGE_PROVIDER` | `gemini` / `minimax` | `gemini` | 图片生成 Provider |
+| `VITE_IMAGE_STANDARD_PROVIDER` | `gemini` / `minimax` | `gemini` | 标准图片生成 Provider |
+| `VITE_IMAGE_PRO_PROVIDER` | `gemini` / `minimax` | `gemini` | 专业图片生成 Provider |
 | `VITE_IMAGE_STANDARD_MODEL` | 模型名 | `gemini-2.5-flash-image` | 标准图片模型 |
 | `VITE_IMAGE_PRO_MODEL` | 模型名 | `gemini-3-pro-image-preview` | 专业图片模型 |
+
+## Provider 能力说明
+
+不同 Provider 有不同的能力：
+
+| Provider | 文本 | 图片 | 视频 |
+|---|---|---|---|
+| **Gemini** | ✅ | ✅ | ✅ |
+| **Minimax** | ✅ | ❌ | ❌ |
+
+> **注意：** Minimax 文本模型（M2.7、M2.5 等）仅支持文本输入。如果你使用 Minimax 作为 Provider 并附加图片或视频到聊天，将收到能力错误。
+
+应用内置能力检查（`src/services/ai/providers/capabilities.ts`），会在尝试使用不支持的功能时显示友好的错误提示。
 
 ## Minimax 配置
 

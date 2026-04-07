@@ -87,6 +87,13 @@ For full documentation, see the [docs/](docs/en/) directory.
 src/
 ├── App.tsx                      # Thin composition layer
 ├── types.ts                     # PasteItem, ChatMessage, StoredAttachment
+├── firebase.ts                  # Firebase initialization
+├── main.tsx                     # React entry point
+├── vite-env.d.ts               # Vite type definitions
+├── config/                      # AI Prompts configuration
+│   ├── prompts.ts              # Prompt loader and utilities
+│   ├── prompts.en.json          # English prompts
+│   └── prompts.zh.json          # Chinese prompts
 ├── context/
 │   ├── AuthContext.tsx           # Firebase Auth state
 │   ├── AppContext.tsx            # App-level state (drag, modals, settings)
@@ -99,7 +106,8 @@ src/
 ├── components/
 │   ├── layout/
 │   │   ├── PasteZone.tsx         # Left panel — paste drop zone
-│   │   └── HistoryPane.tsx       # Right panel — clipboard history list
+│   │   ├── HistoryPane.tsx       # Right panel — clipboard history list
+│   │   └── SettingsModal.tsx     # Advanced settings modal
 │   ├── paste/
 │   │   ├── PasteCard.tsx         # Individual paste item card
 │   │   └── PastePreview.tsx      # Full preview modal with syntax highlighting
@@ -116,6 +124,7 @@ src/
 │   │   └── providers/
 │   │       ├── index.ts          # Provider router
 │   │       ├── types.ts
+│   │       ├── capabilities.ts   # Provider capability definitions
 │   │       ├── gemini.ts         # Gemini content analysis
 │   │       ├── gemini-chat.ts    # Gemini chat + thinking stream
 │   │       ├── minimax.ts        # Minimax content analysis
@@ -146,6 +155,15 @@ All AI features are routed through configurable providers selected via `VITE_*_P
 | Image generation (pro) | `gemini` | `gemini-3-pro-image-preview` |
 
 Alternative provider: `minimax`. Override per-feature with `VITE_ANALYSIS_PROVIDER`, `VITE_CHAT_PROVIDER`, etc.
+
+**Provider Capabilities:**
+
+| Provider | Text | Image | Video |
+|---|---|---|---|
+| **Gemini** | ✅ | ✅ | ✅ |
+| **Minimax** | ✅ | ❌ | ❌ |
+
+Minimax text models only support text input. The app includes capability checks that display user-friendly errors when attempting to use unsupported features.
 
 ## Setup
 
@@ -191,12 +209,17 @@ npm run clean     # Remove dist/
 
 ## Deployment
 
-Designed for **Google Cloud Run via AI Studio**:
+Deploy to any static hosting service (Vercel, Netlify, Cloudflare Pages, etc.) by running `npm run build` and serving the `dist/` directory.
 
-1. Connect your GitHub repo in AI Studio
-2. Configure secrets (API keys) in AI Studio settings
-3. Use **Export to GitHub** to sync changes
-4. AI Studio deploys to Cloud Run automatically
+## Advanced Settings
+
+The app includes an in-app Settings modal (accessible from the PasteZone header) for configuring:
+- Firebase configuration
+- AI provider selection per feature (analysis, chat, live voice, image generation)
+- API keys for Gemini and Minimax
+- Per-feature model overrides
+
+Settings are stored in browser `localStorage` and persist across sessions. See [Advanced Settings](docs/en/guides/advanced-settings.md) for details.
 
 ## Data Models
 
@@ -233,6 +256,3 @@ StoredAttachment {
 }
 ```
 
-## License
-
-MIT

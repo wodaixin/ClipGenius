@@ -45,6 +45,7 @@ Deploy ClipGenius to Google Cloud Run via AI Studio for production-grade hosting
 
 ## Guides
 
+- **[Advanced Settings](guides/advanced-settings.md)** — In-app settings for Firebase, AI providers, and API keys
 - **[AI Studio Pro Mode](guides/ai-studio-pro-mode.md)** — Use AI Studio paid API keys for enhanced image generation
 - **[Internationalization](guides/i18n-guide.md)** — Understanding and extending i18n support
 

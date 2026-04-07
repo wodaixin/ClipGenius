@@ -54,12 +54,9 @@ The project includes static copies of the translation files in `public/locales/`
 
 **Language Suffix for AI Responses**
 
-The language of AI responses is controlled by these i18n keys:
-- `analyze.langSuffix` — appended to content analysis prompts
-- `chatRouter.systemInstruction` — system instruction for chat routing
-- `liveVoice.systemInstruction` — system instruction for voice assistant
+The language of AI responses is controlled by AI prompt templates. Changing the UI language automatically switches the AI's response language.
 
-Changing the UI language automatically switches the AI's response language because these strings are passed as system instructions to the model.
+See [AI Prompts Configuration](ai-prompts.md) for details on customizing prompts.
 
 **Adding New Translation Keys**
 
@@ -70,3 +67,9 @@ Changing the UI language automatically switches the AI's response language becau
 **RTL Languages**
 
 The app currently does not support right-to-left languages. Adding RTL support would require additional CSS and layout changes.
+
+---
+
+## Related
+
+- [AI Prompts Configuration](ai-prompts.md) — Customize AI prompt templates

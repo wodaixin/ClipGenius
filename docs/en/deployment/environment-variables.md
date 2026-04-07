@@ -39,8 +39,24 @@ Copy `.env.example` to `.env` for local development. For AI Studio deployments, 
 |---|---|---|
 | `VITE_ANALYSIS_PROVIDER` | `gemini` | Provider for content analysis (`gemini` or `minimax`) |
 | `VITE_CHAT_PROVIDER` | `gemini` | Provider for chat (`gemini` or `minimax`) |
+| `VITE_LIVE_PROVIDER` | `gemini` | Provider for live voice (`gemini` or `minimax`) |
+| `VITE_IMAGE_STANDARD_PROVIDER` | `gemini` | Provider for standard image generation |
+| `VITE_IMAGE_PRO_PROVIDER` | `gemini` | Provider for Pro image generation |
 | `VITE_MINIMAX_API_KEY` | — | API key when `minimax` is selected as provider |
 | `VITE_MINIMAX_BASE_URL` | — | Base URL for MiniMax API |
+
+### Provider Capabilities
+
+Each provider has different capabilities:
+
+| Provider | Text | Image | Video |
+|---|---|---|---|
+| **Gemini** | ✅ | ✅ | ✅ |
+| **Minimax** | ✅ | ❌ | ❌ |
+
+> **Note:** Minimax text models (M2.7, M2.5, etc.) only support text input. If you attach images or videos to chat with Minimax as the provider, you will receive a capability error.
+
+The app includes capability checks (`src/services/ai/providers/capabilities.ts`) that display user-friendly error messages when attempting to use unsupported features.
 
 ---
 
