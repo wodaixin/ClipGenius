@@ -1,0 +1,10 @@
+{
+  "id": "T-14b210a1-d208-403f-9bdb-20358dcb9bfc",
+  "subject": "AI功能与登录解耦 - 移除usePasteStore中的user检查",
+  "description": "移除 usePasteStore.ts 第143行的 `if (!user) return;`，让访客也能使用AI分析功能",
+  "status": "completed",
+  "activeForm": "移除AI登录限制",
+  "blocks": [],
+  "blockedBy": [],
+  "threadID": "ses_2985b8db6ffeD3KIXN5bM0w9pZ"
+}

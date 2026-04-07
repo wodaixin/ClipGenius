@@ -54,7 +54,31 @@ export function useClipboard() {
 
       const text = clipboardData.getData("text/plain");
       if (text && clipboardData.files.length === 0) {
-        const isUrl = /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(text.trim());
+        const trimmed = text.trim();
+        const isUrl = /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(trimmed);
+        const isFBVideoUrl = isUrl && isFBVideoCDNUrl(trimmed);
+
+        // FB video URL: download via CORS proxy and store as video
+        if (isFBVideoUrl) {
+          downloadFBVideo(trimmed).then((videoData) => {
+            if (!videoData) return;
+            const id = crypto.randomUUID();
+            const newItem: PasteItem = {
+              id,
+              type: "video",
+              content: videoData.base64,
+              mimeType: "video/mp4",
+              timestamp: new Date(),
+              suggestedName: `vid_${format(new Date(), "yyyyMMdd_HHmmss")}`,
+              isAnalyzing: isAutoAnalyzeEnabled,
+              isPinned: false,
+              userId: user?.uid ?? "",
+            };
+            addItem(newItem);
+          });
+          return;
+        }
+
         const isMarkdown = !isUrl && /^#{1,6} |^\*\*|^- |\*[^*]+\*|```|\[.+\]\(.+\)|^>\s/m.test(text);
         const codeLang = !isUrl && !isMarkdown ? detectCodeLanguage(text) : null;
         const type = isUrl ? "url" : isMarkdown ? "markdown" : codeLang ? "code" : "text";
@@ -66,7 +90,7 @@ export function useClipboard() {
           mimeType: isUrl ? "text/uri-list" : codeLang ? `code/${codeLang}` : "text/plain",
           timestamp: new Date(),
           suggestedName: `${type === "url" ? "link" : type === "markdown" ? "doc" : type === "code" ? `${codeLang}_snippet` : "note"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
-          isAnalyzing: user ? isAutoAnalyzeEnabled : false,
+          isAnalyzing: isAutoAnalyzeEnabled,
           isPinned: false,
           userId: user?.uid ?? "",
         };
@@ -128,4 +152,32 @@ function detectCodeLanguage(text: string): string | null {
   // Fallback: has enough code-like structure
   if (/[{};()=>]/.test(t) && t.split("\n").length > 2) return "code";
   return null;
+}
+
+const FB_CDN_PATTERNS = [
+  /scontent-[\w-]+\.xx\.fbcdn\.net/i,
+  /video[\w-]*\.fbcdn\.net/i,
+];
+
+function isFBVideoCDNUrl(url: string): boolean {
+  return FB_CDN_PATTERNS.some((p) => p.test(url)) && url.includes(".mp4");
+}
+
+async function downloadFBVideo(url: string): Promise<{ base64: string } | null> {
+  const corsProxy = "https://corsproxy.io/?";
+  const proxyUrl = corsProxy + encodeURIComponent(url);
+  try {
+    const response = await fetch(proxyUrl, { mode: "cors" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve({ base64: reader.result as string });
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch (err) {
+    console.error("FB video download failed:", err);
+    return null;
+  }
 }

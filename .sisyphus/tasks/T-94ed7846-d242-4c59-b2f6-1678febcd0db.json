@@ -1,0 +1,10 @@
+{
+  "id": "T-94ed7846-d242-4c59-b2f6-1678febcd0db",
+  "subject": "FB视频URL识别与下载 - 检测FB CDN URL并下载为video类型",
+  "description": "在useClipboard.ts中添加FB CDN视频URL检测，下载视频内容并存储为base64",
+  "status": "completed",
+  "activeForm": "实现FB视频URL下载",
+  "blocks": [],
+  "blockedBy": [],
+  "threadID": "ses_2985b8db6ffeD3KIXN5bM0w9pZ"
+}

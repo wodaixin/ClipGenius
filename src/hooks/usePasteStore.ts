@@ -140,7 +140,6 @@ export function usePasteStore() {
   // Auto-analyze: watch for items with isAnalyzing=true and no summary
   const analyzingRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    if (!user) return;
     const toAnalyze = items.filter(
       (item) => item.isAnalyzing && !analyzingRef.current.has(item.id)
     );
