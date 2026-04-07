@@ -155,6 +155,13 @@ match /users/{userId}/chats/{chatId} {
 - 所有操作都需要登录
 - 未登录用户无法读写任何数据
 
+### 5. ⚠️ 管理员邮箱
+
+- `firestore.rules` 中硬编码了管理员邮箱 `"wodaixin@gmail.com"`
+- **部署前必须修改**：将其改为你自己的 Google 邮箱
+- 修改后运行 `firebase deploy --only firestore:rules` 部署
+- 只有指定的邮箱且通过 Google 验证才能获得管理员权限
+
 ## 使用 Firebase Emulator Suite 测试
 
 在本地测试安全规则：
