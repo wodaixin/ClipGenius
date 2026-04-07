@@ -14,7 +14,7 @@ import { cn } from "../../lib/utils";
 
 export function ImageGenModal() {
   const { t } = useTranslation();
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const {
     isImageGenOpen,
     imagePrompt,
@@ -49,30 +49,6 @@ export function ImageGenModal() {
             layout
             transition={{ layout: { type: "spring", stiffness: 350, damping: 30 } }}
           >
-            {/* Login required state */}
-            {!user ? (
-              <div className="flex flex-col items-center justify-center p-16 text-center gap-6">
-                <div className="w-16 h-16 bg-[#141414]/5 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 opacity-40" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold uppercase tracking-widest mb-2">{t("imageGen.loginRequired")}</h3>
-                  <p className="text-sm opacity-70">{t("imageGen.loginDesc")}</p>
-                </div>
-                <button
-                  onClick={login}
-                  className="px-8 py-4 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
-                >
-                  {t("imageGen.loginWithGoogle")}
-                </button>
-                <button
-                  onClick={closeImageGen}
-                  className="text-xs font-sans uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
-                >
-                  {t("imageGen.cancel")}
-                </button>
-              </div>
-            ) : (
               <>
                 {/* Header */}
                 <div className="p-6 border-b border-[#141414]/5 flex items-center justify-between bg-[#F9F9F7]">
@@ -235,7 +211,7 @@ export function ImageGenModal() {
                   )}
                 </div>
               </>
-            )}
+            )
           </motion.div>
         </motion.div>
       )}

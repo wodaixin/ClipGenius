@@ -42,7 +42,7 @@ export function useClipboard() {
               mimeType: file.type,
               timestamp: new Date(),
               suggestedName: `${type === "video" ? "vid" : "img"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
-              isAnalyzing: user ? isAutoAnalyzeEnabled : false,
+              isAnalyzing: isAutoAnalyzeEnabled,
               isPinned: false,
               userId: user?.uid ?? "",
             };

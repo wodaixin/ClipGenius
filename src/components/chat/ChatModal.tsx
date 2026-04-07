@@ -77,7 +77,7 @@ function AttachmentPreview({ item }: { item: StoredAttachment }) {
 
 export function ChatModal() {
   const { t } = useTranslation();
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const {
     chatMessages,
     chatInput,
@@ -143,30 +143,7 @@ export function ChatModal() {
             exit={{ scale: 0.9, y: 20 }}
             className="w-full max-w-2xl h-[80vh] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[#141414]/10"
           >
-            {!user ? (
-              <div className="flex flex-col items-center justify-center h-full p-16 text-center gap-6">
-                <div className="w-16 h-16 bg-[#141414]/5 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-8 h-8 opacity-40" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold uppercase tracking-widest mb-2">{t("chat.loginRequired")}</h3>
-                  <p className="text-sm opacity-70">{t("chat.loginDesc")}</p>
-                </div>
-                <button
-                  onClick={login}
-                  className="px-8 py-4 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
-                >
-                  {t("chat.loginWithGoogle")}
-                </button>
-                <button
-                  onClick={closeChat}
-                  className="text-xs font-sans uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
-                >
-                  {t("chat.cancel")}
-                </button>
-              </div>
-            ) : (
-              <>
+            <>
               {/* Header */}
               <div className="p-6 border-b border-[#141414]/5 flex items-center justify-between bg-[#F9F9F7]">
               <div className="flex items-center gap-3">
@@ -377,9 +354,9 @@ export function ChatModal() {
                   <Send className="w-4 h-4" />
                 </button>
               </div>
-            </div>
+              </div>
               </>
-            )}
+            )
           </motion.div>
         </motion.div>
       )}
