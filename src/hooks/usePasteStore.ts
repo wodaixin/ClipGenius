@@ -140,11 +140,14 @@ export function usePasteStore() {
   // Auto-analyze: watch for items with isAnalyzing=true
   const analyzingRef = useRef<Set<string>>(new Set());
   const prevItemsRef = useRef<PasteItem[]>([]);
+  const analysisPromises = useRef<Map<string, Promise<any>>>(new Map());
   
   useEffect(() => {
     // Only check items that are newly set to isAnalyzing=true
     const newAnalyzingItems = items.filter((item) => {
-      if (!item.isAnalyzing || analyzingRef.current.has(item.id)) return false;
+      if (!item.isAnalyzing || analyzingRef.current.has(item.id) || analysisPromises.current.has(item.id)) {
+        return false;
+      }
       
       // Check if this item's isAnalyzing status just changed to true
       const prevItem = prevItemsRef.current.find((p) => p.id === item.id);
@@ -165,7 +168,7 @@ export function usePasteStore() {
       analyzingRef.current.add(item.id);
       console.log(`[usePasteStore] Added ${item.id.substring(0, 8)} to analyzingRef, size: ${analyzingRef.current.size}`);
       
-      analyzeContent(item)
+      const promise = analyzeContent(item)
         .then((result) => {
           console.log(`[usePasteStore] Analysis complete for ${item.id.substring(0, 8)}:`, result);
           return updateItem({ ...item, ...result, isAnalyzing: false });
@@ -176,8 +179,11 @@ export function usePasteStore() {
         })
         .finally(() => {
           analyzingRef.current.delete(item.id);
+          analysisPromises.current.delete(item.id);
           console.log(`[usePasteStore] Removed ${item.id.substring(0, 8)} from analyzingRef, size: ${analyzingRef.current.size}`);
         });
+      
+      analysisPromises.current.set(item.id, promise);
     });
 
     prevItemsRef.current = items;
@@ -185,17 +191,31 @@ export function usePasteStore() {
 
   // Catch-up: when user logs in, analyze items that missed auto-analyze (pasted before login)
   const prevUserRef = useRef(user);
+  const hasCatchedUp = useRef(false);
+  
   useEffect(() => {
-    if (!user || prevUserRef.current) return; // only trigger on first login
+    if (!user || prevUserRef.current || hasCatchedUp.current) return; // only trigger on first login
     prevUserRef.current = user;
+    hasCatchedUp.current = true;
+    
     if (!isAutoAnalyzeEnabled) return;
+    
+    console.log(`[usePasteStore] User logged in, running catch-up analysis`);
     const toAnalyze = items.filter(
-      (item) => !item.summary && !analyzingRef.current.has(item.id)
+      (item) => !item.summary && !item.isAnalyzing && !analyzingRef.current.has(item.id)
     );
+    
+    console.log(`[usePasteStore] Catch-up: found ${toAnalyze.length} items to analyze`);
+    
     toAnalyze.forEach((item) => {
       analyzingRef.current.add(item.id);
+      console.log(`[usePasteStore] Catch-up: analyzing ${item.id.substring(0, 8)}`);
       analyzeContent(item)
-        .then((result) => updateItem({ ...item, ...result }))
+        .then((result) => updateItem({ ...item, ...result, isAnalyzing: false }))
+        .catch((error) => {
+          console.error(`[usePasteStore] Catch-up analysis failed for ${item.id.substring(0, 8)}:`, error);
+          return updateItem({ ...item, isAnalyzing: false });
+        })
         .finally(() => analyzingRef.current.delete(item.id));
     });
   }, [user, items, isAutoAnalyzeEnabled, updateItem]);
