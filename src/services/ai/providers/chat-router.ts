@@ -8,6 +8,7 @@ import {
 import { geminiChatProvider } from "./gemini-chat";
 import { minimaxChatProvider } from "./minimax-chat";
 import i18n from "../../../i18n";
+import { getPrompts } from "../../../config/prompts";
 
 const chatProviders: Record<ChatProviderType, ChatProvider> = {
   gemini: geminiChatProvider,
@@ -27,6 +28,8 @@ export function getChatProvider(): ChatProvider {
 export function buildChatParams(
   messages: { role: "user" | "model"; content: string }[]
 ): ChatProviderParams {
+  const prompts = getPrompts(i18n.language);
+  
   return {
     model:
       import.meta.env.VITE_CHAT_MODEL ||
@@ -39,8 +42,7 @@ export function buildChatParams(
         : import.meta.env.VITE_GEMINI_API_KEY,
     baseUrl: import.meta.env.VITE_MINIMAX_BASE_URL,
     messages,
-    systemInstruction:
-      i18n.t("chatRouter.systemInstruction"),
+    systemInstruction: prompts.chatRouter.systemInstruction,
   };
 }
 

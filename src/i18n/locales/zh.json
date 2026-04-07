@@ -52,15 +52,8 @@
     "attaching": "附加中",
     "noResponse": "无法生成响应。",
     "providerNotSupported": "{{provider}} 不支持 {{type}} 内容。请在设置中切换到支持多模态的提供商（如 Gemini）。",
-    "systemInstruction": "你是 ClipGenius 智能助手。请简洁且有帮助。",
     "contextMedia": "[上下文：附加了 {{type}}] {{question}}",
     "contextText": "上下文：\"{{content}}\"\n\n用户问题：{{question}}"
-  },
-  "chatRouter": {
-    "systemInstruction": "你是 ClipGenius AI，一款专业级剪贴板管理器的智能助手。请始终根据附加的上下文（图片、视频或文本）准确回答问题。请用中文回复。"
-  },
-  "liveVoice": {
-    "systemInstruction": "你是 ClipGenius 语音助手。请简洁且有帮助。请用中文回复。"
   },
   "imageGen": {
     "loginRequired": "需要登录",
@@ -98,14 +91,7 @@
     "loginForAi": "登录以使用 AI 分析"
   },
   "analyze": {
-    "prompt": {
-      "image": "分析这张图片。提供一个简短的描述性文件名（不含扩展名），并用一句话总结图片内容。返回 JSON：{ \"suggestedName\": \"...\", \"summary\": \"...\" }",
-      "video": "分析这个视频。提供一个简短的描述性文件名（不含扩展名），并用一句话总结视频内容。返回 JSON：{ \"suggestedName\": \"...\", \"summary\": \"...\" }",
-      "url": "分析这个链接：{{content}}。根据网站内容提供一个简短的描述性文件名（不含扩展名），并用一句话总结链接可能包含的内容。返回 JSON：{ \"suggestedName\": \"...\", \"summary\": \"...\" }",
-      "text": "分析这段文本：\"{{content}}\"。根据内容提供一个简短的描述性文件名（不含扩展名），并用一句话总结。返回 JSON：{ \"suggestedName\": \"...\", \"summary\": \"...\" }"
-    },
-    "noSummary": "未生成摘要。",
-    "langSuffix": "请用中文回复。"
+    "noSummary": "未生成摘要。"
   },
   "errors": {
     "generic": "无法生成响应。",
