@@ -83,6 +83,7 @@
   "pasteCard": {
     "save": "Save",
     "cancel": "Cancel",
+    "namePlaceholder": "Enter name...",
     "summaryPlaceholder": "Enter summary...",
     "analyzingContent": "Processing content through intelligence layer...",
     "noSummary": "No summary generated.",

@@ -83,6 +83,7 @@
   "pasteCard": {
     "save": "保存",
     "cancel": "取消",
+    "namePlaceholder": "输入名称...",
     "summaryPlaceholder": "输入摘要...",
     "analyzingContent": "正在通过智能层处理内容...",
     "noSummary": "未生成摘要。",

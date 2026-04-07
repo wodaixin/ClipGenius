@@ -70,77 +70,77 @@ export function PasteZone() {
           </div>
 
           <div className="flex items-center gap-4">
-            {user && (
-              <div className="relative" ref={settingsRef}>
-                <button
-                  onClick={() => setSettingsOpen(!settingsOpen)}
-                  className="p-2 hover:bg-[#141414]/5 rounded-full transition-colors"
-                  title="Settings"
-                >
-                  <Settings className="w-5 h-5 opacity-75" />
-                </button>
-                <AnimatePresence>
-                  {settingsOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-[#141414]/10 overflow-hidden z-50"
-                    >
-                      {/* Auto AI */}
-                      <div className="px-4 py-3 border-b border-[#141414]/5 flex items-center justify-between">
-                        <span className="text-xs font-sans uppercase tracking-widest opacity-75">
-                          {t("pasteZone.settings.autoAi")}
-                        </span>
+            <div className="relative" ref={settingsRef}>
+              <button
+                onClick={() => setSettingsOpen(!settingsOpen)}
+                className="p-2 hover:bg-[#141414]/5 rounded-full transition-colors"
+                title="Settings"
+              >
+                <Settings className="w-5 h-5 opacity-75" />
+              </button>
+              <AnimatePresence>
+                {settingsOpen && (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-[#141414]/10 overflow-hidden z-50"
+                  >
+                    {/* Auto AI */}
+                    <div className="px-4 py-3 border-b border-[#141414]/5 flex items-center justify-between">
+                      <span className="text-xs font-sans uppercase tracking-widest opacity-75">
+                        {t("pasteZone.settings.autoAi")}
+                      </span>
+                      <button
+                        onClick={() => setIsAutoAnalyzeEnabled(!isAutoAnalyzeEnabled)}
+                        className={cn(
+                          "w-8 h-4 rounded-full transition-all relative",
+                          isAutoAnalyzeEnabled ? "bg-green-500" : "bg-gray-300"
+                        )}
+                      >
+                        <motion.div
+                          animate={{ x: isAutoAnalyzeEnabled ? 16 : 2 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                          className="absolute top-1 w-2 h-2 bg-white rounded-full"
+                        />
+                      </button>
+                    </div>
+                    {/* Language */}
+                    <div className="px-4 py-3">
+                      <span className="text-xs font-sans uppercase tracking-widest opacity-75 block mb-3">
+                        {t("pasteZone.settings.language")}
+                      </span>
+                      <div className="flex gap-2">
                         <button
-                          onClick={() => setIsAutoAnalyzeEnabled(!isAutoAnalyzeEnabled)}
+                          onClick={() => i18n.changeLanguage("en")}
                           className={cn(
-                            "w-8 h-4 rounded-full transition-all relative",
-                            isAutoAnalyzeEnabled ? "bg-green-500" : "bg-gray-300"
+                            "flex-1 py-2 rounded-xl text-xs font-sans uppercase tracking-widest transition-all border",
+                            i18n.language === "en"
+                              ? "bg-[#141414] text-white border-[#141414]"
+                              : "border-[#141414]/10 hover:border-[#141414]/30"
                           )}
                         >
-                          <motion.div
-                            animate={{ x: isAutoAnalyzeEnabled ? 16 : 2 }}
-                            className="absolute top-1 w-2 h-2 bg-white rounded-full"
-                          />
+                          {t("pasteZone.settings.english")}
+                        </button>
+                        <button
+                          onClick={() => i18n.changeLanguage("zh")}
+                          className={cn(
+                            "flex-1 py-2 rounded-xl text-xs font-sans uppercase tracking-widest transition-all border",
+                            i18n.language === "zh"
+                              ? "bg-[#141414] text-white border-[#141414]"
+                              : "border-[#141414]/10 hover:border-[#141414]/30"
+                          )}
+                        >
+                          {t("pasteZone.settings.chinese")}
                         </button>
                       </div>
-                      {/* Language */}
-                      <div className="px-4 py-3">
-                        <span className="text-xs font-sans uppercase tracking-widest opacity-75 block mb-3">
-                          {t("pasteZone.settings.language")}
-                        </span>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => i18n.changeLanguage("en")}
-                            className={cn(
-                              "flex-1 py-2 rounded-xl text-xs font-sans uppercase tracking-widest transition-all border",
-                              i18n.language === "en"
-                                ? "bg-[#141414] text-white border-[#141414]"
-                                : "border-[#141414]/10 hover:border-[#141414]/30"
-                            )}
-                          >
-                            {t("pasteZone.settings.english")}
-                          </button>
-                          <button
-                            onClick={() => i18n.changeLanguage("zh")}
-                            className={cn(
-                              "flex-1 py-2 rounded-xl text-xs font-sans uppercase tracking-widest transition-all border",
-                              i18n.language === "zh"
-                                ? "bg-[#141414] text-white border-[#141414]"
-                                : "border-[#141414]/10 hover:border-[#141414]/30"
-                            )}
-                          >
-                            {t("pasteZone.settings.chinese")}
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {user ? (
               <div className="flex items-center gap-4">
