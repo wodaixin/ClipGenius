@@ -96,78 +96,78 @@ export function PasteCard({ item }: PasteCardProps) {
       className="relative"
     >
       <div className={cn(
-        "flex flex-col md:flex-row gap-8 transition-all duration-500",
+        "flex flex-col md:flex-row gap-4 md:gap-8 transition-all duration-500",
         item.isPinned ? "opacity-100" : "opacity-80 hover:opacity-100"
       )}>
         {/* Preview Column */}
         <div
-          className="w-full md:w-64 aspect-square bg-white border border-[#141414]/5 rounded-2xl relative shadow-sm group-hover:shadow-xl transition-all duration-500 shrink-0 group cursor-zoom-in"
+          className="w-32 h-32 md:w-64 md:h-64 bg-white border border-[#141414]/5 rounded-2xl relative shadow-sm group-hover:shadow-xl transition-all duration-500 shrink-0 group cursor-zoom-in"
           onClick={() => setLightboxOpen(true)}
         >
           <PastePreview item={item} />
 
           {/* Type Badge */}
-          <div className="absolute top-4 left-4">
-            <span className="px-3 py-1 bg-white/90 backdrop-blur-md border border-[#141414]/5 text-xs font-bold uppercase tracking-widest rounded-full shadow-sm">
+          <div className="absolute top-2 left-2 md:top-4 md:left-4">
+            <span className="px-2 py-0.5 md:px-3 md:py-1 bg-white/90 backdrop-blur-md border border-[#141414]/5 text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-full shadow-sm">
               {item.type}
             </span>
           </div>
 
           {/* Quick Actions Overlay */}
-          <div className="absolute inset-0 bg-[#141414]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4 rounded-2xl">
+          <div className="absolute inset-0 bg-[#141414]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 md:gap-4 rounded-2xl">
             <button
               onClick={(e) => { e.stopPropagation(); downloadItem(item); }}
-              className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+              className="w-8 h-8 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
             >
-              <Download className="w-5 h-5" />
+              <Download className="w-4 h-4 md:w-5 md:h-5" />
             </button>
 
             {user && (
               <>
                 <button
                   onClick={(e) => { e.stopPropagation(); openChatWithItem(item); }}
-                  className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                  className="w-8 h-8 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                 >
-                  <MessageSquare className="w-5 h-5" />
+                  <MessageSquare className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
                 {item.type === "text" && (
                   <button
                     onClick={(e) => { e.stopPropagation(); openImageGenWithText(item.content); }}
-                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                    className="w-8 h-8 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 )}
                 {item.type === "markdown" && (
                   <button
                     onClick={(e) => { e.stopPropagation(); openImageGenWithText(item.content); }}
-                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                    className="w-8 h-8 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 )}
                 {item.type === "code" && (
                   <button
                     onClick={(e) => { e.stopPropagation(); openImageGenWithText(item.content); }}
-                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                    className="w-8 h-8 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 )}
                 {item.type === "image" && (
                   <button
                     onClick={(e) => { e.stopPropagation(); startImageEdit(item); }}
-                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                    className="w-8 h-8 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 )}
                 {item.type === "url" && (
                   <button
                     onClick={(e) => { e.stopPropagation(); openImageGenWithText(item.summary || item.content); }}
-                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                    className="w-8 h-8 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
                   >
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 )}
               </>
@@ -176,9 +176,9 @@ export function PasteCard({ item }: PasteCardProps) {
             {item.type !== "video" && (
               <button
                 onClick={(e) => { e.stopPropagation(); copyToClipboard(item); }}
-                className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                className="w-8 h-8 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
               >
-                {isCopied ? <CheckCircle2 className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
+                {isCopied ? <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-600" /> : <Copy className="w-4 h-4 md:w-5 md:h-5" />}
               </button>
             )}
           </div>

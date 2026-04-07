@@ -44,7 +44,7 @@ export function PasteZone() {
   }, []);
 
   return (
-    <aside className="w-full lg:w-[45%] lg:h-screen lg:overflow-y-auto shrink-0 border-r border-[#141414]/10 bg-white flex flex-col relative">
+    <aside className="w-full md:w-[45%] min-h-screen md:h-full md:overflow-y-auto shrink-0 border-r border-[#141414]/10 bg-white flex flex-col relative">
       {/* Vertical Rail Text */}
       <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden xl:block">
         <span className="writing-vertical text-xs font-sans opacity-40 uppercase tracking-[0.4em] select-none">

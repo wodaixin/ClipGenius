@@ -29,7 +29,7 @@ export function HistoryPane() {
   });
 
   return (
-    <main className="flex-1 h-screen overflow-y-auto bg-[#F5F5F0]">
+    <main ref={scrollRef} className="flex-1 min-h-screen md:h-full md:overflow-y-auto bg-[#F5F5F0]">
       {/* Search & Filter Header */}
       <div className="p-8 md:p-12 border-b border-[#141414]/5 flex flex-col md:flex-row items-stretch md:items-center gap-6 justify-between bg-white/50 backdrop-blur-xl sticky top-0 z-10">
         <div className="relative flex-1 max-w-xl">
@@ -54,7 +54,7 @@ export function HistoryPane() {
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-end">
             <span className="text-xs font-sans opacity-75 uppercase tracking-widest">
-              <span className="font-bold text-sm">{items.length}</span>
+              <span className="font-bold text-sm">{filteredItems.length}</span>
               {t("history.records")}
             </span>
           </div>
@@ -69,7 +69,7 @@ export function HistoryPane() {
       </div>
 
       {/* Scrollable List */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 md:p-12">
+      <div className="p-8 md:p-12">
         {filteredItems.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}

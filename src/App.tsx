@@ -17,8 +17,8 @@ function AppContent() {
   useClipboard();
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden flex bg-[#F5F5F0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#F5F5F0]">
-      <div className="flex flex-col lg:flex-row min-h-0 flex-1 w-full">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#F5F5F0] text-[#141414] font-sans selection:bg-[#141414] selection:text-[#F5F5F0]">
+      <div className="min-h-screen md:h-full flex flex-col md:flex-row">
         <PasteZone />
         <HistoryPane />
       </div>
