@@ -53,7 +53,8 @@
     "noResponse": "I couldn't generate a response.",
     "systemInstruction": "You are ClipGenius Assistant. Be concise and helpful.",
     "contextMedia": "[Context: {{type}} attached] {{question}}",
-    "contextText": "Context: \"{{content}}\"\n\nUser Question: {{question}}"
+    "contextText": "Context: \"{{content}}\"\n\nUser Question: {{question}}",
+    "providerNotSupported": "The current chat provider does not support {{type}} content. Please switch to a provider that supports multimodal input (e.g., Gemini) in Settings, or send text-only messages."
   },
   "chatRouter": {
     "systemInstruction": "You are ClipGenius AI, a professional-grade assistant for a clipboard manager. Always refer to the attached context (image, video, or text) to answer questions accurately. Respond in English."
@@ -138,8 +139,14 @@
       "title": "Provider Selection",
       "analysis": "Content Analysis Provider",
       "chat": "Chat Provider",
+      "live": "Live Voice Provider",
+      "imageStandard": "Image Generation Provider (Standard)",
+      "imagePro": "Image Generation Provider (Pro)",
       "analysisModel": "Analysis Model (Optional)",
-      "chatModel": "Chat Model (Optional)"
+      "chatModel": "Chat Model (Optional)",
+      "liveModel": "Live Voice Model (Optional)",
+      "imageStandardModel": "Image Generation Model - Standard (Optional)",
+      "imageProModel": "Image Generation Model - Pro (Optional)"
     }
   }
 }

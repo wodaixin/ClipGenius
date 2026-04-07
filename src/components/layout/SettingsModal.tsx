@@ -25,10 +25,16 @@ interface Settings {
   // Provider Selection
   analysisProvider: "gemini" | "minimax";
   chatProvider: "gemini" | "minimax";
+  liveProvider: "gemini" | "minimax";
+  imageStandardProvider: "gemini" | "minimax";
+  imageProProvider: "gemini" | "minimax";
   
   // Models
   analysisModel: string;
   chatModel: string;
+  liveModel: string;
+  imageStandardModel: string;
+  imageProModel: string;
 }
 
 const STORAGE_KEY = "clipgenius_settings";
@@ -47,8 +53,14 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     minimaxBaseUrl: "https://api.minimaxi.com/anthropic",
     analysisProvider: "gemini",
     chatProvider: "gemini",
+    liveProvider: "gemini",
+    imageStandardProvider: "gemini",
+    imageProProvider: "gemini",
     analysisModel: "",
     chatModel: "",
+    liveModel: "",
+    imageStandardModel: "",
+    imageProModel: "",
   });
   
   const [saved, setSaved] = useState(false);
@@ -215,6 +227,33 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       { value: "minimax", label: "Minimax" },
                     ]}
                   />
+                  <SelectField
+                    label={t("settings.providers.live")}
+                    value={settings.liveProvider}
+                    onChange={(v) => handleChange("liveProvider", v)}
+                    options={[
+                      { value: "gemini", label: "Gemini" },
+                      { value: "minimax", label: "Minimax" },
+                    ]}
+                  />
+                  <SelectField
+                    label={t("settings.providers.imageStandard")}
+                    value={settings.imageStandardProvider}
+                    onChange={(v) => handleChange("imageStandardProvider", v)}
+                    options={[
+                      { value: "gemini", label: "Gemini" },
+                      { value: "minimax", label: "Minimax" },
+                    ]}
+                  />
+                  <SelectField
+                    label={t("settings.providers.imagePro")}
+                    value={settings.imageProProvider}
+                    onChange={(v) => handleChange("imageProProvider", v)}
+                    options={[
+                      { value: "gemini", label: "Gemini" },
+                      { value: "minimax", label: "Minimax" },
+                    ]}
+                  />
                   <InputField
                     label={t("settings.providers.analysisModel")}
                     value={settings.analysisModel}
@@ -226,6 +265,24 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     value={settings.chatModel}
                     onChange={(v) => handleChange("chatModel", v)}
                     placeholder="gemini-3.1-pro-preview (optional)"
+                  />
+                  <InputField
+                    label={t("settings.providers.liveModel")}
+                    value={settings.liveModel}
+                    onChange={(v) => handleChange("liveModel", v)}
+                    placeholder="gemini-3.1-flash-live-preview (optional)"
+                  />
+                  <InputField
+                    label={t("settings.providers.imageStandardModel")}
+                    value={settings.imageStandardModel}
+                    onChange={(v) => handleChange("imageStandardModel", v)}
+                    placeholder="gemini-2.5-flash-image (optional)"
+                  />
+                  <InputField
+                    label={t("settings.providers.imageProModel")}
+                    value={settings.imageProModel}
+                    onChange={(v) => handleChange("imageProModel", v)}
+                    placeholder="gemini-3-pro-image-preview (optional)"
                   />
                 </div>
               </section>

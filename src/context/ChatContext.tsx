@@ -26,6 +26,7 @@ import {
   getChatProvider,
   buildChatParams,
 } from "../services/ai/providers/chat-router";
+import { canProviderHandle } from "../services/ai/providers/capabilities";
 
 interface ChatContextValue {
   chatMessages: ChatMessage[];
@@ -201,6 +202,23 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     if (!chatInputValue && !contextItem) {
       isSendingRef.current = false;
       return;
+    }
+
+    // Check if chat provider can handle the attachment type
+    if (contextItem) {
+      const chatProvider = import.meta.env.VITE_CHAT_PROVIDER || "gemini";
+      if (!canProviderHandle(chatProvider, contextItem.type)) {
+        const providerName = chatProvider.charAt(0).toUpperCase() + chatProvider.slice(1);
+        const contentTypeName = t(`pasteZone.type${contextItem.type.charAt(0).toUpperCase() + contextItem.type.slice(1)}`);
+        setChatError(
+          t("chat.providerNotSupported", { 
+            provider: providerName, 
+            type: contentTypeName 
+          })
+        );
+        isSendingRef.current = false;
+        return;
+      }
     }
 
     const userMsgId = crypto.randomUUID();

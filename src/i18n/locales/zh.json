@@ -51,6 +51,7 @@
     "inputContextPlaceholder": "基于上下文提问...",
     "attaching": "附加中",
     "noResponse": "无法生成响应。",
+    "providerNotSupported": "{{provider}} 不支持 {{type}} 内容。请在设置中切换到支持多模态的提供商（如 Gemini）。",
     "systemInstruction": "你是 ClipGenius 智能助手。请简洁且有帮助。",
     "contextMedia": "[上下文：附加了 {{type}}] {{question}}",
     "contextText": "上下文：\"{{content}}\"\n\n用户问题：{{question}}"
@@ -138,8 +139,14 @@
       "title": "提供商选择",
       "analysis": "内容分析提供商",
       "chat": "聊天提供商",
+      "live": "语音对话提供商",
+      "imageStandard": "图片生成提供商（标准）",
+      "imagePro": "图片生成提供商（专业）",
       "analysisModel": "分析模型（可选）",
-      "chatModel": "聊天模型（可选）"
+      "chatModel": "聊天模型（可选）",
+      "liveModel": "语音对话模型（可选）",
+      "imageStandardModel": "图片生成模型 - 标准（可选）",
+      "imageProModel": "图片生成模型 - 专业（可选）"
     }
   }
 }
