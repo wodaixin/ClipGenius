@@ -57,7 +57,34 @@ export const geminiAnalysisProvider: AnalysisProvider = {
       config,
     });
 
-    const result = JSON.parse((response.text || "{}").replace(/^```json\s*/i, "").replace(/\s*```$/i, ""));
+    const rawText = response.text || "{}";
+    console.log("[Analysis] Raw response:", rawText);
+    
+    let result: { suggestedName?: string; summary?: string } = {};
+    
+    try {
+      // Try direct parse first
+      result = JSON.parse(rawText);
+    } catch {
+      // Strip markdown code fences: ```json ... ``` or ``` ... ```
+      const stripped = rawText.replace(/^```json\s*/i, "").replace(/\s*```$/i, "").trim();
+      try {
+        result = JSON.parse(stripped);
+      } catch {
+        // Fallback: find the first { to last } with greedy matching
+        const match = stripped.match(/\{[\s\S]*\}/);
+        if (match) {
+          try {
+            result = JSON.parse(match[0]);
+          } catch (error) {
+            console.error("[Analysis] All JSON parse attempts failed:", error, "Text:", rawText);
+          }
+        } else {
+          console.error("[Analysis] No JSON object found in response:", rawText);
+        }
+      }
+    }
+    
     return {
       suggestedName: result.suggestedName || item.suggestedName,
       summary: result.summary || i18n.t("analyze.noSummary"),

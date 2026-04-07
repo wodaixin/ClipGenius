@@ -137,20 +137,51 @@ export function usePasteStore() {
     downloadItemUtil(item);
   }, []);
 
-  // Auto-analyze: watch for items with isAnalyzing=true and no summary
+  // Auto-analyze: watch for items with isAnalyzing=true
   const analyzingRef = useRef<Set<string>>(new Set());
+  const prevItemsRef = useRef<PasteItem[]>([]);
+  
   useEffect(() => {
-    const toAnalyze = items.filter(
-      (item) => item.isAnalyzing && !analyzingRef.current.has(item.id)
-    );
-    toAnalyze.forEach((item) => {
-      analyzingRef.current.add(item.id);
-      analyzeContent(item)
-        .then((result) => updateItem({ ...item, ...result, isAnalyzing: false }))
-        .catch(() => updateItem({ ...item, isAnalyzing: false }))
-        .finally(() => analyzingRef.current.delete(item.id));
+    // Only check items that are newly set to isAnalyzing=true
+    const newAnalyzingItems = items.filter((item) => {
+      if (!item.isAnalyzing || analyzingRef.current.has(item.id)) return false;
+      
+      // Check if this item's isAnalyzing status just changed to true
+      const prevItem = prevItemsRef.current.find((p) => p.id === item.id);
+      const isNewlyAnalyzing = !prevItem || !prevItem.isAnalyzing;
+      
+      if (isNewlyAnalyzing) {
+        console.log(`[usePasteStore] Triggering analysis for item ${item.id.substring(0, 8)}`);
+      }
+      
+      return isNewlyAnalyzing;
     });
-  }, [items, user, updateItem]);
+
+    if (newAnalyzingItems.length > 0) {
+      console.log(`[usePasteStore] Starting analysis for ${newAnalyzingItems.length} items`);
+    }
+
+    newAnalyzingItems.forEach((item) => {
+      analyzingRef.current.add(item.id);
+      console.log(`[usePasteStore] Added ${item.id.substring(0, 8)} to analyzingRef, size: ${analyzingRef.current.size}`);
+      
+      analyzeContent(item)
+        .then((result) => {
+          console.log(`[usePasteStore] Analysis complete for ${item.id.substring(0, 8)}:`, result);
+          return updateItem({ ...item, ...result, isAnalyzing: false });
+        })
+        .catch((error) => {
+          console.error(`[usePasteStore] Analysis failed for ${item.id.substring(0, 8)}:`, error);
+          return updateItem({ ...item, isAnalyzing: false });
+        })
+        .finally(() => {
+          analyzingRef.current.delete(item.id);
+          console.log(`[usePasteStore] Removed ${item.id.substring(0, 8)} from analyzingRef, size: ${analyzingRef.current.size}`);
+        });
+    });
+
+    prevItemsRef.current = items;
+  }, [items, updateItem]);
 
   // Catch-up: when user logs in, analyze items that missed auto-analyze (pasted before login)
   const prevUserRef = useRef(user);

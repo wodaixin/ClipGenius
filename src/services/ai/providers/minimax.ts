@@ -70,23 +70,35 @@ export const minimaxAnalysisProvider: AnalysisProvider = {
     }
 
     const data = await response.json();
+    console.log("[Minimax Analysis] Raw response:", JSON.stringify(data, null, 2));
+    
     // Content may contain thinking + text blocks; find the text block
     const textBlock = data.content?.find((block: any) => block.type === "text");
     const text: string = textBlock?.text || "";
+    console.log("[Minimax Analysis] Extracted text:", text);
 
     let result: { suggestedName?: string; summary?: string } = {};
     try {
       result = JSON.parse(text);
+      console.log("[Minimax Analysis] Parsed result:", result);
     } catch {
       // Strip markdown code fences: ```json ... ``` or ``` ... ```
       const stripped = text.replace(/^```json\s*/i, "").replace(/\s*```$/i, "");
+      console.log("[Minimax Analysis] Stripped text:", stripped);
       try {
         result = JSON.parse(stripped);
+        console.log("[Minimax Analysis] Parsed from stripped:", result);
       } catch {
         // Fallback: find the first { to last } with greedy matching
         const match = stripped.match(/\{[\s\S]*?\}/);
+        console.log("[Minimax Analysis] Regex match:", match?.[0]);
         if (match) {
-          try { result = JSON.parse(match[0]); } catch {}
+          try { 
+            result = JSON.parse(match[0]);
+            console.log("[Minimax Analysis] Parsed from regex match:", result);
+          } catch (e) {
+            console.error("[Minimax Analysis] All parse attempts failed:", e);
+          }
         }
       }
     }
