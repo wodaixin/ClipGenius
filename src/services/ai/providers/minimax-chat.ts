@@ -17,6 +17,18 @@ export const minimaxChatProvider: ChatProvider = {
       content: m.content,
     }));
 
+    const body: any = {
+      model: params.model || "MiniMax-M2.7",
+      messages,
+      max_tokens: 4096,
+      stream: false,
+    };
+
+    // Add system instruction if provided
+    if (params.systemInstruction) {
+      body.system = params.systemInstruction;
+    }
+
     const response = await fetch(`${baseUrl}/v1/messages`, {
       method: "POST",
       headers: {
@@ -24,12 +36,7 @@ export const minimaxChatProvider: ChatProvider = {
         "anthropic-version": "2023-06-01",
         "x-api-key": apiKey,
       },
-      body: JSON.stringify({
-        model: params.model || "MiniMax-M2.7",
-        messages,
-        max_tokens: 4096,
-        stream: false,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -53,6 +60,18 @@ export const minimaxChatProvider: ChatProvider = {
       content: m.content,
     }));
 
+    const body: any = {
+      model: params.model || "MiniMax-M2.7",
+      messages,
+      max_tokens: 4096,
+      stream: true,
+    };
+
+    // Add system instruction if provided
+    if (params.systemInstruction) {
+      body.system = params.systemInstruction;
+    }
+
     const res = await fetch(`${baseUrl}/v1/messages`, {
       method: "POST",
       headers: {
@@ -60,12 +79,7 @@ export const minimaxChatProvider: ChatProvider = {
         "anthropic-version": "2023-06-01",
         "x-api-key": apiKey,
       },
-      body: JSON.stringify({
-        model: params.model || "MiniMax-M2.7",
-        messages,
-        max_tokens: 4096,
-        stream: true,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {

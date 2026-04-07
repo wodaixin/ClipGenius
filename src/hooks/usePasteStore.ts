@@ -1,10 +1,9 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { PasteItem } from "../types";
 import {
   savePaste,
   deletePaste as deleteLocalPaste,
   clearUnpinnedPastes,
-  updatePaste as updateLocalPaste,
 } from "../lib/db";
 import {
   syncPasteToCloud,
@@ -13,7 +12,6 @@ import {
   syncClearUnpinnedFromCloud,
 } from "../services/sync/dualSync";
 import { copyItemToClipboard, downloadItem as downloadItemUtil } from "../services/clipboard/clipboardUtils";
-import { analyzeContent } from "../services/ai/analyzeContent";
 import { useAuth } from "../context/AuthContext";
 import { useAppContext } from "../context/AppContext";
 
@@ -23,7 +21,7 @@ import { useAppContext } from "../context/AppContext";
 
 export function usePasteStore() {
   const { user } = useAuth();
-  const { items, setItems, isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled } = useAppContext();
+  const { items, setItems, isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled, updateItem: updateItemFromContext } = useAppContext();
 
   // ---------- UI state ----------
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,25 +53,14 @@ export function usePasteStore() {
       setItems((prev: PasteItem[]) => [item, ...prev]);
       if (user) syncPasteToCloud(item, user.uid);
     },
-    [user]
+    [user, setItems]
   );
 
   const updateItem = useCallback(
     async (updated: PasteItem) => {
-      await updateLocalPaste(updated);
-      setItems((prev: PasteItem[]) =>
-        prev.map((i) => (i.id === updated.id ? updated : i))
-      );
-      if (user) {
-        syncPasteUpdateToCloud(updated.id, user.uid, {
-          suggestedName: updated.suggestedName,
-          summary: updated.summary,
-          isAnalyzing: updated.isAnalyzing,
-          isPinned: updated.isPinned,
-        });
-      }
+      await updateItemFromContext(updated, user?.uid);
     },
-    [user, setItems]
+    [user, updateItemFromContext]
   );
 
   const deleteItem = useCallback(
@@ -90,13 +77,9 @@ export function usePasteStore() {
       const item = items.find((i) => i.id === id);
       if (!item) return;
       const updated = { ...item, isPinned: !item.isPinned };
-      await updateLocalPaste(updated);
-      setItems((prev: PasteItem[]) =>
-        prev.map((i) => (i.id === id ? updated : i))
-      );
-      if (user) syncPasteUpdateToCloud(id, user.uid, { isPinned: updated.isPinned });
+      await updateItem(updated);
     },
-    [user, items, setItems]
+    [user, items, updateItem]
   );
 
   const clearUnpinned = useCallback(async () => {
@@ -111,14 +94,10 @@ export function usePasteStore() {
       const item = items.find((i) => i.id === id);
       if (!item) return;
       const updated = { ...item, suggestedName: editName, summary: editSummary };
-      await updateLocalPaste(updated);
-      setItems((prev: PasteItem[]) =>
-        prev.map((i) => (i.id === id ? updated : i))
-      );
-      if (user) syncPasteUpdateToCloud(id, user.uid, { suggestedName: editName, summary: editSummary });
+      await updateItem(updated);
       setEditingItemId(null);
     },
-    [user, items, editName, editSummary, setItems]
+    [user, items, editName, editSummary, updateItem]
   );
 
   const startEditing = useCallback((item: PasteItem) => {
@@ -136,89 +115,6 @@ export function usePasteStore() {
   const handleDownload = useCallback((item: PasteItem) => {
     downloadItemUtil(item);
   }, []);
-
-  // Auto-analyze: watch for items with isAnalyzing=true
-  const analyzingRef = useRef<Set<string>>(new Set());
-  const prevItemsRef = useRef<PasteItem[]>([]);
-  const analysisPromises = useRef<Map<string, Promise<any>>>(new Map());
-  
-  useEffect(() => {
-    // Only check items that are newly set to isAnalyzing=true
-    const newAnalyzingItems = items.filter((item) => {
-      if (!item.isAnalyzing || analyzingRef.current.has(item.id) || analysisPromises.current.has(item.id)) {
-        return false;
-      }
-      
-      // Check if this item's isAnalyzing status just changed to true
-      const prevItem = prevItemsRef.current.find((p) => p.id === item.id);
-      const isNewlyAnalyzing = !prevItem || !prevItem.isAnalyzing;
-      
-      if (isNewlyAnalyzing) {
-        console.log(`[usePasteStore] Triggering analysis for item ${item.id.substring(0, 8)}`);
-      }
-      
-      return isNewlyAnalyzing;
-    });
-
-    if (newAnalyzingItems.length > 0) {
-      console.log(`[usePasteStore] Starting analysis for ${newAnalyzingItems.length} items`);
-    }
-
-    newAnalyzingItems.forEach((item) => {
-      analyzingRef.current.add(item.id);
-      console.log(`[usePasteStore] Added ${item.id.substring(0, 8)} to analyzingRef, size: ${analyzingRef.current.size}`);
-      
-      const promise = analyzeContent(item)
-        .then((result) => {
-          console.log(`[usePasteStore] Analysis complete for ${item.id.substring(0, 8)}:`, result);
-          return updateItem({ ...item, ...result, isAnalyzing: false });
-        })
-        .catch((error) => {
-          console.error(`[usePasteStore] Analysis failed for ${item.id.substring(0, 8)}:`, error);
-          return updateItem({ ...item, isAnalyzing: false });
-        })
-        .finally(() => {
-          analyzingRef.current.delete(item.id);
-          analysisPromises.current.delete(item.id);
-          console.log(`[usePasteStore] Removed ${item.id.substring(0, 8)} from analyzingRef, size: ${analyzingRef.current.size}`);
-        });
-      
-      analysisPromises.current.set(item.id, promise);
-    });
-
-    prevItemsRef.current = items;
-  }, [items, updateItem]);
-
-  // Catch-up: when user logs in, analyze items that missed auto-analyze (pasted before login)
-  const prevUserRef = useRef(user);
-  const hasCatchedUp = useRef(false);
-  
-  useEffect(() => {
-    if (!user || prevUserRef.current || hasCatchedUp.current) return; // only trigger on first login
-    prevUserRef.current = user;
-    hasCatchedUp.current = true;
-    
-    if (!isAutoAnalyzeEnabled) return;
-    
-    console.log(`[usePasteStore] User logged in, running catch-up analysis`);
-    const toAnalyze = items.filter(
-      (item) => !item.summary && !item.isAnalyzing && !analyzingRef.current.has(item.id)
-    );
-    
-    console.log(`[usePasteStore] Catch-up: found ${toAnalyze.length} items to analyze`);
-    
-    toAnalyze.forEach((item) => {
-      analyzingRef.current.add(item.id);
-      console.log(`[usePasteStore] Catch-up: analyzing ${item.id.substring(0, 8)}`);
-      analyzeContent(item)
-        .then((result) => updateItem({ ...item, ...result, isAnalyzing: false }))
-        .catch((error) => {
-          console.error(`[usePasteStore] Catch-up analysis failed for ${item.id.substring(0, 8)}:`, error);
-          return updateItem({ ...item, isAnalyzing: false });
-        })
-        .finally(() => analyzingRef.current.delete(item.id));
-    });
-  }, [user, items, isAutoAnalyzeEnabled, updateItem]);
 
   return {
     // State (read from AppContext)

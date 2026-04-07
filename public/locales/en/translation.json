@@ -90,5 +90,8 @@
     "network": "Network error. Please check your connection.",
     "rateLimit": "API rate limit exceeded. Please try again later.",
     "tryAgain": "Request failed. Please try again."
+  },
+  "chatRouter": {
+    "systemInstruction": "You are the intelligent assistant for ClipGenius, a professional AI clipboard management system. Your task is to help users understand, analyze, and process their clipboard content. Please provide clear, accurate, and helpful responses in English."
   }
 }

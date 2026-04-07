@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { PasteItem } from "../types";
-import { getPastes } from "../lib/db";
+import { getPastes, updatePaste as updateLocalPaste } from "../lib/db";
 import { generateImage } from "../services/ai/generateImage";
+import { analyzeContent } from "../services/ai/analyzeContent";
+import { syncPasteUpdateToCloud } from "../services/sync/dualSync";
 
 export type ImageQuality = "standard" | "pro";
 export type ImageSize = "1K" | "2K" | "4K";
@@ -11,6 +13,7 @@ interface AppContextValue {
   setItems: React.Dispatch<React.SetStateAction<PasteItem[]>>;
   contextItem: PasteItem | null;
   setContextItem: (item: PasteItem | null) => void;
+  updateItem: (updated: PasteItem, userId?: string) => Promise<void>;
   // Image Gen
   isImageGenOpen: boolean;
   imagePrompt: string;
@@ -36,8 +39,13 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<PasteItem[]>([]);
+  const [items, setItemsState] = useState<PasteItem[]>([]);
   const [contextItem, setContextItem] = useState<PasteItem | null>(null);
+  
+  // Memoize setItems to prevent unnecessary re-renders in consumers
+  const setItems = useCallback((value: React.SetStateAction<PasteItem[]>) => {
+    setItemsState(value);
+  }, []);
 
   // Image Gen state
   const [isImageGenOpen, setIsImageGenOpen] = useState(false);
@@ -60,13 +68,87 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const PREVIEW_LIMIT = 2000;
   useEffect(() => {
     getPastes().then((pastes) =>
-      setItems(pastes.map((p) =>
+      setItemsState(pastes.map((p) =>
         (p.type === "text" || p.type === "url" || p.type === "markdown" || p.type === "code") && p.content.length > PREVIEW_LIMIT
           ? { ...p, content: p.content.slice(0, PREVIEW_LIMIT) }
           : p
       ))
     );
   }, []);
+
+  // Centralized updateItem function
+  const updateItem = useCallback(async (updated: PasteItem, userId?: string) => {
+    await updateLocalPaste(updated);
+    setItemsState((prev: PasteItem[]) =>
+      prev.map((i) => (i.id === updated.id ? updated : i))
+    );
+    if (userId) {
+      syncPasteUpdateToCloud(updated.id, userId, {
+        suggestedName: updated.suggestedName,
+        summary: updated.summary,
+        isAnalyzing: updated.isAnalyzing,
+        isPinned: updated.isPinned,
+      });
+    }
+  }, []);
+
+  // Auto-analyze: watch for items with isAnalyzing=true (CENTRALIZED - runs once per app)
+  const analyzingRef = useRef<Set<string>>(new Set());
+  const prevItemsRef = useRef<PasteItem[]>([]);
+  const analysisPromises = useRef<Map<string, Promise<any>>>(new Map());
+  
+  useEffect(() => {
+    console.log(`[AppContext] Analysis effect run, items.length: ${items.length}`);
+    
+    // Only check items that are newly set to isAnalyzing=true
+    const newAnalyzingItems = items.filter((item) => {
+      if (!item.isAnalyzing) {
+        return false;
+      }
+      
+      if (analyzingRef.current.has(item.id)) {
+        return false;
+      }
+      
+      if (analysisPromises.current.has(item.id)) {
+        return false;
+      }
+      
+      // Check if this item's isAnalyzing status just changed to true
+      const prevItem = prevItemsRef.current.find((p) => p.id === item.id);
+      const isNewlyAnalyzing = !prevItem || !prevItem.isAnalyzing;
+      
+      return isNewlyAnalyzing;
+    });
+
+    if (newAnalyzingItems.length > 0) {
+      console.log(`[AppContext] Starting analysis for ${newAnalyzingItems.length} items:`, newAnalyzingItems.map(i => i.id.substring(0, 8)));
+    }
+
+    newAnalyzingItems.forEach((item) => {
+      analyzingRef.current.add(item.id);
+      console.log(`[AppContext] Analyzing ${item.id.substring(0, 8)}`);
+      
+      const promise = analyzeContent(item)
+        .then((result) => {
+          console.log(`[AppContext] Analysis complete for ${item.id.substring(0, 8)}:`, result);
+          return updateItem({ ...item, ...result, isAnalyzing: false });
+        })
+        .catch((error) => {
+          console.error(`[AppContext] Analysis failed for ${item.id.substring(0, 8)}:`, error);
+          return updateItem({ ...item, isAnalyzing: false });
+        })
+        .finally(() => {
+          analyzingRef.current.delete(item.id);
+          analysisPromises.current.delete(item.id);
+          console.log(`[AppContext] Finished ${item.id.substring(0, 8)}`);
+        });
+      
+      analysisPromises.current.set(item.id, promise);
+    });
+
+    prevItemsRef.current = items;
+  }, [items, updateItem]);
 
   // Check if AI Studio has a paid key selected when modal opens
   useEffect(() => {
@@ -165,7 +247,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider
       value={{
-        items, setItems, contextItem, setContextItem,
+        items, setItems, contextItem, setContextItem, updateItem,
         isImageGenOpen, imagePrompt, imageSize, generatedImage,
         isGeneratingImage, isEditingImage, imageQuality, hasApiKey,
         isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled,

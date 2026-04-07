@@ -355,8 +355,7 @@ export function ChatModal() {
                 </button>
               </div>
               </div>
-              </>
-            )
+            </>
           </motion.div>
         </motion.div>
       )}
