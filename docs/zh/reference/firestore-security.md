@@ -91,6 +91,23 @@ function isValidRole(role) {
 }
 ```
 
+### `isAdmin()`
+
+检查用户是否为管理员（可访问所有用户数据）：
+
+```javascript
+function isAdmin() {
+  return isAuthenticated() && (
+    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+    (request.auth.token.email == "wodaixin@gmail.com" && request.auth.token.email_verified == true)
+  );
+}
+```
+
+**满足以下任一条件即为管理员：**
+- Firestore 中该用户的 `role` 字段为 `'admin'`
+- 邮箱为 `wodaixin@gmail.com` 且通过 Google 验证
+
 ## 规则详解
 
 ### 用户集合规则
