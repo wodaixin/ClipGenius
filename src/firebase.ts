@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, deleteDoc, updateDoc, serverTimestamp, Timestamp, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, deleteDoc, updateDoc, serverTimestamp, Timestamp, getDocFromServer, increment } from 'firebase/firestore';
 
 const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -33,7 +33,8 @@ export {
   updateDoc, 
   serverTimestamp, 
   Timestamp,
-  getDocFromServer
+  getDocFromServer,
+  increment
 };
 export type { User };
 
