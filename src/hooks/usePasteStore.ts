@@ -3,25 +3,16 @@ import { PasteItem } from "../types";
 import {
   savePaste,
   deletePaste as deleteLocalPaste,
-  clearUnpinnedPastes,
 } from "../lib/db";
-import {
-  syncPasteToCloud,
-  syncPasteUpdateToCloud,
-  syncPasteDeleteFromCloud,
-  syncClearUnpinnedFromCloud,
-} from "../services/sync/dualSync";
+import { syncEngine } from "../lib/syncEngine";
+import { broadcastItemUpdated, broadcastItemDeleted, markItemEditing, unmarkItemEditing } from "../lib/tabSync";
 import { copyItemToClipboard, downloadItem as downloadItemUtil } from "../services/clipboard/clipboardUtils";
 import { useAuth } from "../context/AuthContext";
 import { useAppContext } from "../context/AppContext";
 
-// ---------- Hook ----------
-// All state lives in AppContext (which is persisted to IndexedDB).
-// usePasteStore provides UI-specific derived state + action helpers.
-
 export function usePasteStore() {
   const { user } = useAuth();
-  const { items, setItems, isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled, updateItem: updateItemFromContext } = useAppContext();
+  const { items, setItems, isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled } = useAppContext();
 
   // ---------- UI state ----------
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,81 +40,135 @@ export function usePasteStore() {
 
   const addItem = useCallback(
     async (item: PasteItem) => {
-      await savePaste(item);
-      setItems((prev: PasteItem[]) => [item, ...prev]);
-      if (user) syncPasteToCloud(item, user.uid);
+      const newItem: PasteItem = {
+        ...item,
+        updatedAt: new Date(),
+        syncRev: 0,
+      };
+      await savePaste(newItem);
+      setItems((prev: PasteItem[]) => [newItem, ...prev]);
+      if (user?.uid) {
+        syncEngine.writeWithSync(newItem, user.uid);
+      }
     },
     [user, setItems]
   );
 
   const updateItem = useCallback(
     async (updated: PasteItem) => {
-      await updateItemFromContext(updated, user?.uid);
+      const updatedWithSync: PasteItem = {
+        ...updated,
+        updatedAt: new Date(),
+        syncRev: (updated.syncRev ?? 0) + 1,
+      };
+      await savePaste(updatedWithSync);
+      setItems((prev: PasteItem[]) =>
+        prev.map((i) => (i.id === updated.id ? updatedWithSync : i))
+      );
+      if (user?.uid) {
+        syncEngine.writeWithSync(updatedWithSync, user.uid);
+      }
     },
-    [user, updateItemFromContext]
+    [user, setItems]
   );
 
   const deleteItem = useCallback(
     async (id: string) => {
-      await deleteLocalPaste(id);
+      const item = items.find((i) => i.id === id);
+      if (!item) return;
+
+      // Soft-delete: mark isDeleted instead of hard-deleting
+      const deletedItem: PasteItem = {
+        ...item,
+        isDeleted: true,
+        deletedAt: new Date(),
+        updatedAt: new Date(),
+        syncRev: (item.syncRev ?? 0) + 1,
+      };
+
+      await savePaste(deletedItem);
       setItems((prev: PasteItem[]) => prev.filter((i) => i.id !== id));
-      if (user) syncPasteDeleteFromCloud(id, user.uid);
+
+      if (user?.uid) {
+        syncEngine.writeWithSync(deletedItem, user.uid, { isDeletion: true });
+        broadcastItemDeleted(deletedItem.id);
+      }
     },
-    [user, setItems]
+    [user, items, setItems]
   );
 
   const togglePin = useCallback(
     async (id: string) => {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-      const updated = { ...item, isPinned: !item.isPinned };
-      await updateItem(updated);
+      const updated = { ...item, isPinned: !item.isPinned, updatedAt: new Date(), syncRev: (item.syncRev ?? 0) + 1 };
+      await savePaste(updated);
+      setItems((prev: PasteItem[]) =>
+        prev.map((i) => (i.id === id ? updated : i))
+      );
+      if (user?.uid) {
+        syncEngine.writeWithSync(updated, user.uid);
+        broadcastItemUpdated(updated);
+      }
     },
-    [user, items, updateItem]
+    [user, items, setItems]
   );
 
   const clearUnpinned = useCallback(async () => {
-    const unpinned = items.filter((i) => !i.isPinned);
-    console.log('[clearUnpinned] Starting clear, unpinned count:', unpinned.length);
-    console.log('[clearUnpinned] Unpinned items:', unpinned.map(i => ({ id: i.id.substring(0, 8), name: i.suggestedName })));
-    
-    // First delete from cloud to prevent re-sync
-    if (user) {
-      console.log('[clearUnpinned] Deleting from cloud...');
-      await syncClearUnpinnedFromCloud(unpinned, user.uid);
-      console.log('[clearUnpinned] Cloud deletion complete');
+    const unpinned = items.filter((i) => !i.isPinned && !i.isDeleted);
+    if (unpinned.length === 0) return;
+
+    const deletedItems: PasteItem[] = unpinned.map((item) => ({
+      ...item,
+      isDeleted: true,
+      deletedAt: new Date(),
+      updatedAt: new Date(),
+      syncRev: (item.syncRev ?? 0) + 1,
+    }));
+
+    // Optimistic: remove from UI immediately
+    setItems((prev: PasteItem[]) =>
+      prev.filter((i) => !deletedItems.some((d) => d.id === i.id))
+    );
+
+    // Persist soft-delete state to IndexedDB
+    for (const item of deletedItems) {
+      await savePaste(item);
     }
-    
-    // Then delete from local IndexedDB
-    console.log('[clearUnpinned] Deleting from IndexedDB...');
-    await clearUnpinnedPastes();
-    console.log('[clearUnpinned] IndexedDB deletion complete');
-    
-    // Finally update React state
-    console.log('[clearUnpinned] Updating React state...');
-    setItems((prev: PasteItem[]) => {
-      const filtered = prev.filter((i) => i.isPinned);
-      console.log('[clearUnpinned] State updated, remaining items:', filtered.length);
-      return filtered;
-    });
-    console.log('[clearUnpinned] Clear complete');
+
+    // Fan out async cloud writes
+    if (user?.uid) {
+      for (const item of deletedItems) {
+        syncEngine.writeWithSync(item, user.uid, { isDeletion: true });
+        broadcastItemDeleted(item.id);
+      }
+    }
   }, [user, items, setItems]);
 
   const saveEdit = useCallback(
     async (id: string) => {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-      const updated = { ...item, suggestedName: editName, summary: editSummary };
-      await updateItem(updated);
+      const updated = { ...item, suggestedName: editName, summary: editSummary, updatedAt: new Date(), syncRev: (item.syncRev ?? 0) + 1 };
+      unmarkItemEditing(id);
+      await savePaste(updated);
+      setItems((prev: PasteItem[]) =>
+        prev.map((i) => (i.id === id ? updated : i))
+      );
       setEditingItemId(null);
+      if (user?.uid) {
+        syncEngine.writeWithSync(updated, user.uid);
+        broadcastItemUpdated(updated);
+      }
     },
-    [user, items, editName, editSummary, updateItem]
+    [user, items, editName, editSummary, setItems]
   );
 
   const startEditing = useCallback((item: PasteItem) => {
     setEditingItemId(item.id);
     setEditName(item.suggestedName);
     setEditSummary(item.summary || "");
+    markItemEditing(item.id);
   }, []);
 
   const copyToClipboard = useCallback(async (item: PasteItem) => {

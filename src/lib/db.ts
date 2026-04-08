@@ -32,7 +32,14 @@ export async function getPastes(): Promise<PasteItem[]> {
   const db = await initDB();
   const pastes = await db.getAll(STORE_PASTES);
   console.log('[getPastes] Loaded', pastes.length, 'items from IndexedDB');
-  return pastes.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  return pastes
+    .map((p) => ({
+      ...p,
+      syncRev: p.syncRev ?? 0,
+      updatedAt: p.updatedAt ?? p.timestamp,
+      isDeleted: p.isDeleted ?? false,
+    }))
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 }
 
 export async function deletePaste(id: string) {
