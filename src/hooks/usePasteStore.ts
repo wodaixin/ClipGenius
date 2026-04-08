@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import Fuse from "fuse.js";
 import { PasteItem } from "../types";
 import {
   savePaste,
@@ -22,18 +23,27 @@ export function usePasteStore() {
   const [editName, setEditName] = useState("");
   const [editSummary, setEditSummary] = useState("");
   const filteredItems = useMemo(() => {
-    const q = searchQuery.toLowerCase();
-    const filtered = items.filter(
-      (item) =>
-        item.suggestedName.toLowerCase().includes(q) ||
-        item.summary?.toLowerCase().includes(q) ||
-        item.content.toLowerCase().includes(q)
-    );
-    return [...filtered].sort((a, b) => {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
-      return b.timestamp.getTime() - a.timestamp.getTime();
+    if (!searchQuery.trim()) {
+      return [...items].sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return b.timestamp.getTime() - a.timestamp.getTime();
+      });
+    }
+
+    const fuse = new Fuse(items, {
+      keys: [
+        { name: "suggestedName", weight: 0.4 },
+        { name: "summary", weight: 0.3 },
+        { name: "content", weight: 0.3 },
+      ],
+      threshold: 0.4,
+      includeScore: true,
+      ignoreLocation: true,
     });
+
+    const results = fuse.search(searchQuery);
+    return results.map((r) => r.item);
   }, [items, searchQuery]);
 
   // ---------- Actions ----------
