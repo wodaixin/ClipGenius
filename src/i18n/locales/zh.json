@@ -54,7 +54,7 @@
     "thinking": "思考中...",
     "inputPlaceholder": "输入消息...",
     "inputContextPlaceholder": "基于上下文提问...",
-    "attaching": "附加中",
+    "attaching": "已附加",
     "noResponse": "无法生成响应。",
     "providerNotSupported": "{{provider}} 不支持 {{type}} 内容。请在设置中切换到支持多模态的提供商（如 Gemini）。",
     "contextMedia": "[上下文：附加了 {{type}}] {{question}}",

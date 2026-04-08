@@ -54,7 +54,7 @@
     "thinking": "Thinking...",
     "inputPlaceholder": "TYPE YOUR MESSAGE...",
     "inputContextPlaceholder": "ASK ABOUT THIS CONTEXT...",
-    "attaching": "Attaching",
+    "attaching": "Attached",
     "noResponse": "I couldn't generate a response.",
     "contextMedia": "[Context: {{type}} attached] {{question}}",
     "contextText": "Context: \"{{content}}\"\n\nUser Question: {{question}}",
