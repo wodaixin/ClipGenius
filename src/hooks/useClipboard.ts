@@ -45,6 +45,8 @@ export function useClipboard() {
               isAnalyzing: isAutoAnalyzeEnabled,
               isPinned: false,
               userId: user?.uid ?? "",
+              syncRev: 0,
+              updatedAt: new Date(),
             };
             addItem(newItem);
           };
@@ -76,6 +78,8 @@ export function useClipboard() {
                 isAnalyzing: isAutoAnalyzeEnabled,
                 isPinned: false,
                 userId: user?.uid ?? "",
+                syncRev: 0,
+                updatedAt: new Date(),
               };
               addItem(newItem);
             } else {
@@ -92,6 +96,8 @@ export function useClipboard() {
                 isAnalyzing: isAutoAnalyzeEnabled,
                 isPinned: false,
                 userId: user?.uid ?? "",
+                syncRev: 0,
+                updatedAt: new Date(),
               };
               addItem(newItem);
             }
@@ -113,6 +119,8 @@ export function useClipboard() {
           isAnalyzing: isAutoAnalyzeEnabled,
           isPinned: false,
           userId: user?.uid ?? "",
+          syncRev: 0,
+          updatedAt: new Date(),
         };
         addItem(newItem);
       }
