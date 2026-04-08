@@ -71,15 +71,7 @@ All data persisted to IndexedDB via `idb` library. App is fully functional offli
 
 ## Documentation
 
-For full documentation, see the [docs/](docs/en/) directory.
-
-- [Quick Start](docs/en/quick-start.md) — Set up ClipGenius from scratch
-- [Feature Guides](docs/en/features/) — Deep dives on every feature
-- [Deployment](docs/en/deployment/cloud-run-ai-studio.md) — Deploy to Cloud Run via AI Studio
-- [Environment Variables](docs/en/deployment/environment-variables.md) — Complete `.env` reference
-- [Architecture Reference](docs/en/reference/architecture.md) — System design
-- [Firestore Security Rules](docs/en/reference/firestore-security.md) — Rules walkthrough
-- [中文文档](docs/zh/) — 中文文档
+Documentation is a work in progress. For configuration details, see the environment variables in .env.example.
 
 ## Architecture
 
@@ -219,7 +211,7 @@ The app includes an in-app Settings modal (accessible from the PasteZone header)
 - API keys for Gemini and Minimax
 - Per-feature model overrides
 
-Settings are stored in browser `localStorage` and persist across sessions. See [Advanced Settings](docs/en/guides/advanced-settings.md) for details.
+Settings are stored in browser `localStorage` and persist across sessions. See in-app Settings for details.
 
 ## Data Models
 
@@ -255,4 +247,3 @@ StoredAttachment {
   suggestedName: string
 }
 ```
-

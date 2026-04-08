@@ -71,16 +71,8 @@
 
 ## 文档
 
-完整文档请查看 [docs/zh/](docs/zh/) 目录。
-
-- [快速入门](docs/zh/quick-start.md) — 从零开始配置 ClipGenius
-- [功能指南](docs/zh/features/) — 每个功能的深度解析
-- [部署指南](docs/zh/deployment/cloud-run-ai-studio.md) — 通过 AI Studio 部署到 Cloud Run
-- [环境变量参考](docs/zh/deployment/environment-variables.md) — 完整 `.env` 配置参考
-- [架构参考](docs/zh/reference/architecture.md) — 系统设计
-- [Firestore 安全规则](docs/zh/reference/firestore-security.md) — 安全规则详解
-- [English Documentation](docs/en/) — English docs
-
+文档正在开发中。环境变量说明请参阅 .env.example 中的配置项。
+ 
 ## 架构
 
 ```
@@ -219,7 +211,7 @@ npm run clean     # 清除 dist/
 - Gemini 和 Minimax 的 API 密钥
 - 各功能的模型覆盖
 
-设置存储在浏览器 `localStorage` 中，跨会话保留。详见[高级设置](docs/zh/guides/advanced-settings.md)。
+设置存储在浏览器 `localStorage` 中，跨会话保留。
 
 ## 数据模型
 
@@ -255,5 +247,4 @@ StoredAttachment {
   suggestedName: string
 }
 ```
-
 
