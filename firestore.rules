@@ -9,7 +9,7 @@ service cloud.firestore {
     // Document ID: auto-generated or custom UUID
     // Fields:
     //   - id: string (required)
-    //   - type: string (required, enum: image, text, url, video)
+    //   - type: string (required, enum: image, text, url, video, markdown, code)
     //   - content: string (required)
     //   - mimeType: string (required)
     //   - timestamp: timestamp (required)
@@ -17,6 +17,10 @@ service cloud.firestore {
     //   - summary: string (optional)
     //   - isPinned: boolean (optional)
     //   - userId: string (required)
+    //   - updatedAt: timestamp (optional, set by syncEngine on every update)
+    //   - syncRev: number (optional, monotonically increasing version, -1 = never synced)
+    //   - isDeleted: boolean (optional, soft-delete flag)
+    //   - deletedAt: timestamp (optional, set when isDeleted is true)
     //
     // Collection: /users/{userId}/chats/{chatId}/messages/{messageId}
     // Fields:
@@ -45,12 +49,18 @@ service cloud.firestore {
     function isValidPaste(data) {
       return data.keys().hasAll(['id', 'type', 'content', 'mimeType', 'timestamp', 'suggestedName', 'userId']) &&
              data.id is string &&
-             data.type in ['image', 'text', 'url', 'video'] &&
+             data.type in ['image', 'text', 'url', 'video', 'markdown', 'code'] &&
              data.content is string && data.content.size() < 1048576 && // 1MB limit
              data.mimeType is string &&
              data.timestamp is timestamp &&
              data.suggestedName is string && data.suggestedName.size() < 255 &&
-             data.userId == request.auth.uid;
+             data.userId == request.auth.uid &&
+             // Sync fields written by syncEngine (always together, optional for backward compat)
+             (!data.keys().hasAny(['updatedAt', 'syncRev', 'isDeleted', 'deletedAt']) ||
+              (data.updatedAt is timestamp &&
+               data.syncRev is int &&
+               data.isDeleted is bool &&
+               (data.keys().hasAny(['deletedAt']) ? data.deletedAt is timestamp : true)));
     }
 
     function isValidMessage(data) {

@@ -3,7 +3,7 @@ import { PasteItem } from "../types";
 import { getPastes, updatePaste as updateLocalPaste } from "../lib/db";
 import { generateImage } from "../services/ai/generateImage";
 import { analyzeContent } from "../services/ai/analyzeContent";
-import { syncPasteUpdateToCloud } from "../services/sync/dualSync";
+import { syncEngine } from "../lib/syncEngine";
 
 export type ImageQuality = "standard" | "pro";
 export type ImageSize = "1K" | "2K" | "4K";
@@ -68,11 +68,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const PREVIEW_LIMIT = 2000;
   useEffect(() => {
     getPastes().then((pastes) =>
-      setItemsState(pastes.map((p) =>
-        (p.type === "text" || p.type === "url" || p.type === "markdown" || p.type === "code") && p.content.length > PREVIEW_LIMIT
-          ? { ...p, content: p.content.slice(0, PREVIEW_LIMIT) }
-          : p
-      ))
+      setItemsState(
+        pastes
+          .filter((p) => !p.isDeleted)
+          .map((p) =>
+            (p.type === "text" || p.type === "url" || p.type === "markdown" || p.type === "code") && p.content.length > PREVIEW_LIMIT
+              ? { ...p, content: p.content.slice(0, PREVIEW_LIMIT) }
+              : p
+          )
+      )
     );
   }, []);
 
@@ -83,12 +87,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((i) => (i.id === updated.id ? updated : i))
     );
     if (userId) {
-      syncPasteUpdateToCloud(updated.id, userId, {
-        suggestedName: updated.suggestedName,
-        summary: updated.summary,
-        isAnalyzing: updated.isAnalyzing,
-        isPinned: updated.isPinned,
-      });
+      await syncEngine.writeWithSync(updated, userId);
     }
   }, []);
 
