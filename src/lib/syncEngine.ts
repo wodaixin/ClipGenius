@@ -241,6 +241,7 @@ class Engine {
       if (item.userId && item.userId !== uid) continue;
       if (item.isDeleted) continue;
       if ((item.syncRev ?? 0) > 0) continue;
+      if (item.type === 'video') continue;
       const toSync: PasteItem = item.userId ? item : { ...item, userId: uid };
       console.log('[migrateLocalItems] pushing:', toSync.id, 'userId:', toSync.userId);
       await this.writeToCloud(toSync, uid, false);

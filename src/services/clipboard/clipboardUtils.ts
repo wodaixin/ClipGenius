@@ -1,9 +1,9 @@
 import { PasteItem } from "../../types";
 
-/** Copy a PasteItem to the clipboard (handles image blobs + text) */
+/** Copy a PasteItem to the clipboard (handles image + video blobs, falls back to text) */
 export async function copyItemToClipboard(item: PasteItem): Promise<void> {
   try {
-    if (item.type === "image") {
+    if (item.type === "image" || item.type === "video") {
       const response = await fetch(item.content);
       const blob = await response.blob();
       await navigator.clipboard.write([
@@ -13,7 +13,6 @@ export async function copyItemToClipboard(item: PasteItem): Promise<void> {
       await navigator.clipboard.writeText(item.content);
     }
   } catch (err) {
-    // Fallback to text copy if image copy fails
     navigator.clipboard.writeText(item.content);
   }
 }

@@ -179,14 +179,12 @@ export function PasteCard({ item }: PasteCardProps) {
               </>
             )}
 
-            {item.type !== "video" && (
-              <button
-                onClick={(e) => { e.stopPropagation(); copyToClipboard(item); }}
-                className="w-8 h-8 xl:w-12 xl:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
-              >
-                {isCopied ? <CheckCircle2 className="w-4 h-4 xl:w-5 xl:h-5 text-green-600" /> : <Copy className="w-4 h-4 xl:w-5 xl:h-5" />}
-              </button>
-            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); copyToClipboard(item); }}
+              className="w-8 h-8 xl:w-12 xl:h-12 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+            >
+              {isCopied ? <CheckCircle2 className="w-4 h-4 xl:w-5 xl:h-5 text-green-600" /> : <Copy className="w-4 h-4 xl:w-5 xl:h-5" />}
+            </button>
           </div>
         </div>
 
