@@ -28,6 +28,12 @@ export function useFirestoreSync() {
   useEffect(() => {
     if (!user) return;
 
+    syncEngine.migrateLocalItems(user.uid).then(({ migrated, skipped }) => {
+      if (migrated > 0 || skipped > 0) {
+        console.log(`[useFirestoreSync] Migration: ${migrated} pushed, ${skipped} skipped`);
+      }
+    });
+
     const q = query(
       collection(db, `users/${user.uid}/pastes`),
       orderBy("updatedAt", "desc")
