@@ -3,6 +3,17 @@ import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { X, Save, AlertCircle } from "lucide-react";
 
+type ProviderType = "gemini" | "minimax";
+
+interface ContentTypeAnalysisSettings {
+  image: ProviderType;
+  text: ProviderType;
+  url: ProviderType;
+  video: ProviderType;
+  markdown: ProviderType;
+  code: ProviderType;
+}
+
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,19 +27,22 @@ interface Settings {
   firebaseStorageBucket: string;
   firebaseMessagingSenderId: string;
   firebaseAppId: string;
-  
+
   // AI Providers
   geminiApiKey: string;
   minimaxApiKey: string;
   minimaxBaseUrl: string;
-  
+
   // Provider Selection
-  analysisProvider: "gemini" | "minimax";
-  chatProvider: "gemini" | "minimax";
-  liveProvider: "gemini" | "minimax";
-  imageStandardProvider: "gemini" | "minimax";
-  imageProProvider: "gemini" | "minimax";
-  
+  analysisProvider: ProviderType;
+  chatProvider: ProviderType;
+  liveProvider: ProviderType;
+  imageStandardProvider: ProviderType;
+  imageProProvider: ProviderType;
+
+  // Per-content-type analysis providers
+  analysisProvidersByType: ContentTypeAnalysisSettings;
+
   // Models
   analysisModel: string;
   chatModel: string;
@@ -38,6 +52,15 @@ interface Settings {
 }
 
 const STORAGE_KEY = "clipgenius_settings";
+
+const DEFAULT_ANALYSIS_PROVIDERS: ContentTypeAnalysisSettings = {
+  image: "gemini",
+  text: "minimax",
+  url: "gemini",
+  video: "gemini",
+  markdown: "minimax",
+  code: "minimax",
+};
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { t } = useTranslation();
@@ -56,6 +79,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     liveProvider: "gemini",
     imageStandardProvider: "gemini",
     imageProProvider: "gemini",
+    analysisProvidersByType: { ...DEFAULT_ANALYSIS_PROVIDERS },
     analysisModel: "",
     chatModel: "",
     liveModel: "",
@@ -70,7 +94,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        setSettings(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        if (!parsed.analysisProvidersByType) {
+          parsed.analysisProvidersByType = { ...DEFAULT_ANALYSIS_PROVIDERS };
+        }
+        setSettings(parsed);
       } catch (error) {
         console.error("Failed to load settings:", error);
       }
@@ -90,6 +118,16 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   const handleChange = (key: keyof Settings, value: string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleAnalysisProviderByType = (type: keyof ContentTypeAnalysisSettings, value: ProviderType) => {
+    setSettings((prev) => ({
+      ...prev,
+      analysisProvidersByType: {
+        ...prev.analysisProvidersByType,
+        [type]: value,
+      },
+    }));
   };
 
   if (!isOpen) return null;
@@ -218,6 +256,65 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       { value: "minimax", label: "Minimax" },
                     ]}
                   />
+                  <div className="border-t border-[#141414]/5 pt-3 mt-3">
+                    <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-3">
+                      {t("settings.providers.analysisByType")}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <SelectField
+                        label={t("settings.providers.analysisImage")}
+                        value={settings.analysisProvidersByType.image}
+                        onChange={(v) => handleAnalysisProviderByType("image", v as ProviderType)}
+                        options={[
+                          { value: "gemini", label: "Gemini" },
+                        ]}
+                      />
+                      <SelectField
+                        label={t("settings.providers.analysisVideo")}
+                        value={settings.analysisProvidersByType.video}
+                        onChange={(v) => handleAnalysisProviderByType("video", v as ProviderType)}
+                        options={[
+                          { value: "gemini", label: "Gemini" },
+                        ]}
+                      />
+                      <SelectField
+                        label={t("settings.providers.analysisText")}
+                        value={settings.analysisProvidersByType.text}
+                        onChange={(v) => handleAnalysisProviderByType("text", v as ProviderType)}
+                        options={[
+                          { value: "gemini", label: "Gemini" },
+                          { value: "minimax", label: "Minimax" },
+                        ]}
+                      />
+                      <SelectField
+                        label={t("settings.providers.analysisUrl")}
+                        value={settings.analysisProvidersByType.url}
+                        onChange={(v) => handleAnalysisProviderByType("url", v as ProviderType)}
+                        options={[
+                          { value: "gemini", label: "Gemini" },
+                          { value: "minimax", label: "Minimax" },
+                        ]}
+                      />
+                      <SelectField
+                        label={t("settings.providers.analysisMarkdown")}
+                        value={settings.analysisProvidersByType.markdown}
+                        onChange={(v) => handleAnalysisProviderByType("markdown", v as ProviderType)}
+                        options={[
+                          { value: "gemini", label: "Gemini" },
+                          { value: "minimax", label: "Minimax" },
+                        ]}
+                      />
+                      <SelectField
+                        label={t("settings.providers.analysisCode")}
+                        value={settings.analysisProvidersByType.code}
+                        onChange={(v) => handleAnalysisProviderByType("code", v as ProviderType)}
+                        options={[
+                          { value: "gemini", label: "Gemini" },
+                          { value: "minimax", label: "Minimax" },
+                        ]}
+                      />
+                    </div>
+                  </div>
                   <SelectField
                     label={t("settings.providers.chat")}
                     value={settings.chatProvider}

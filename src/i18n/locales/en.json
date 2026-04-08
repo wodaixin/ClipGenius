@@ -128,7 +128,7 @@
     },
     "providers": {
       "title": "Provider Selection",
-      "analysis": "Content Analysis Provider",
+      "analysis": "Content Analysis (Default)",
       "chat": "Chat Provider",
       "live": "Live Voice Provider",
       "imageStandard": "Image Generation Provider (Standard)",
@@ -137,7 +137,14 @@
       "chatModel": "Chat Model (Optional)",
       "liveModel": "Live Voice Model (Optional)",
       "imageStandardModel": "Image Generation Model - Standard (Optional)",
-      "imageProModel": "Image Generation Model - Pro (Optional)"
+      "imageProModel": "Image Generation Model - Pro (Optional)",
+      "analysisByType": "Analysis Provider by Content Type",
+      "analysisImage": "Image Analysis",
+      "analysisText": "Text Analysis",
+      "analysisUrl": "URL Analysis",
+      "analysisVideo": "Video Analysis",
+      "analysisMarkdown": "Markdown Analysis",
+      "analysisCode": "Code Analysis"
     }
   }
 }

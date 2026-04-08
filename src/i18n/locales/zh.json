@@ -128,7 +128,7 @@
     },
     "providers": {
       "title": "提供商选择",
-      "analysis": "内容分析提供商",
+      "analysis": "内容分析（默认）",
       "chat": "聊天提供商",
       "live": "语音对话提供商",
       "imageStandard": "图片生成提供商（标准）",
@@ -137,7 +137,14 @@
       "chatModel": "聊天模型（可选）",
       "liveModel": "语音对话模型（可选）",
       "imageStandardModel": "图片生成模型 - 标准（可选）",
-      "imageProModel": "图片生成模型 - 专业（可选）"
+      "imageProModel": "图片生成模型 - 专业（可选）",
+      "analysisByType": "按内容类型分析提供商",
+      "analysisImage": "图片分析",
+      "analysisText": "文本分析",
+      "analysisUrl": "链接分析",
+      "analysisVideo": "视频分析",
+      "analysisMarkdown": "Markdown 分析",
+      "analysisCode": "代码分析"
     }
   }
 }
