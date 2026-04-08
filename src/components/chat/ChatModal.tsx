@@ -224,9 +224,9 @@ export function ChatModal() {
                               <Sparkles className="w-3 h-3 text-white" />
                             </div>
                           )}
-                          <div className={cn("flex flex-col max-w-[85%]", msg.role === "user" ? "items-end" : "items-start")}>
+                          <div className={cn("flex flex-col max-w-[85%] w-full", msg.role === "user" ? "items-end" : "items-start")}>
                             {msg.role === "user" && msg.attachments && msg.attachments.length > 0 && (
-                              <div className="mb-1 rounded-3xl overflow-hidden border border-[#141414]/10">
+                              <div className="mb-1 rounded-3xl overflow-hidden border border-[#141414]/10 w-full">
                                 {msg.attachments.length === 1 ? (
                                   <AttachmentPreview item={msg.attachments[0]} />
                                 ) : (
@@ -240,19 +240,19 @@ export function ChatModal() {
                             )}
                             {msg.role === "model" && (
                               msg.thinking ? (
-                                <div className="mb-1 p-3 rounded-3xl bg-[#E8E8E4] text-[12px] font-sans opacity-80 leading-relaxed whitespace-pre-wrap break-words">
+                                <div className="mb-1 p-4 rounded-3xl bg-[#E8E8E4] text-sm font-sans opacity-80 leading-relaxed whitespace-pre-wrap break-words w-full">
                                   <div className="uppercase tracking-widest opacity-70 mb-1 text-xs">{t("chat.thinking")}</div>
                                   {msg.thinking}
                                 </div>
                               ) : msg.isResponding ? (
-                                <div className="mb-1 flex items-center gap-2 p-3 rounded-3xl bg-[#E8E8E4]">
+                                <div className="mb-1 flex items-center gap-2 p-4 rounded-3xl bg-[#E8E8E4] w-full">
                                   <Loader2 className="w-3 h-3 animate-spin opacity-75" />
                                   <span className="text-xs font-sans opacity-75 uppercase tracking-widest">{t("chat.thinking")}</span>
                                 </div>
                               ) : null
                             )}
                             {msg.text && (
-                              <div className={cn("p-4 text-sm leading-relaxed", msg.role === "user" ? "bg-[#1a1a1a] text-white rounded-3xl" : "bg-[#F0F0EE] text-[#141414] rounded-3xl")}>
+                              <div className={cn("p-4 text-sm leading-relaxed w-full", msg.role === "user" ? "bg-[#1a1a1a] text-white rounded-3xl" : "bg-[#F0F0EE] text-[#141414] rounded-3xl")}>
                                 <div className={cn("prose prose-sm max-w-none", msg.role === "user" ? "prose-invert" : "")}>
                                   <ReactMarkdown>{msg.text}</ReactMarkdown>
                                 </div>
