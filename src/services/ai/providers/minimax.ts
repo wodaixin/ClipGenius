@@ -2,6 +2,7 @@ import { PasteItem } from "../../../types";
 import { AnalysisProvider, AnalysisResult } from "./types";
 import i18n from "../../../i18n";
 import { getPrompts, fillTemplate } from "../../../config/prompts";
+import { getStoredSettings } from "../../../lib/settings";
 
 function getMinimaxBaseUrl(): string {
   if (import.meta.env.DEV) return "/api/minimax";
@@ -26,11 +27,12 @@ function buildAnalysisPrompt(item: PasteItem): string {
 
 export const minimaxAnalysisProvider: AnalysisProvider = {
   async analyze(item) {
-    const apiKey = import.meta.env.VITE_MINIMAX_API_KEY;
-    if (!apiKey) throw new Error("Minimax API key not configured (VITE_MINIMAX_API_KEY)");
+    const stored = getStoredSettings();
+    const apiKey = stored.minimaxApiKey || import.meta.env.VITE_MINIMAX_API_KEY;
+    if (!apiKey) throw new Error("Minimax API key not configured");
 
-    const baseUrl = getMinimaxBaseUrl();
-    const model = import.meta.env.VITE_ANALYSIS_MODEL || "MiniMax-M2.7";
+    const baseUrl = stored.minimaxBaseUrl || getMinimaxBaseUrl();
+    const model = stored.analysisModel || import.meta.env.VITE_ANALYSIS_MODEL || "MiniMax-M2.7";
 
     const prompt = buildAnalysisPrompt(item);
     const isMultimodal = item.type === "image" || item.type === "video";

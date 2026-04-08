@@ -33,6 +33,8 @@ export function PasteZone() {
   const { openImageGen } = useImageGen();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false);
+  const [settingsConfirmOpen, setSettingsConfirmOpen] = useState(false);
+  const [countdown, setCountdown] = useState(3);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,6 +46,22 @@ export function PasteZone() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Countdown timer for advanced settings protection
+  useEffect(() => {
+    if (!settingsConfirmOpen) return;
+    setCountdown(3);
+    const interval = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [settingsConfirmOpen]);
 
   return (
     <aside className="w-full md:w-[45%] min-h-screen md:h-full md:overflow-y-auto shrink-0 border-r border-[#141414]/10 bg-white flex flex-col relative">
@@ -144,7 +162,7 @@ export function PasteZone() {
                       <button
                         onClick={() => {
                           setSettingsOpen(false);
-                          setAdvancedSettingsOpen(true);
+                          setSettingsConfirmOpen(true);
                         }}
                         className="w-full py-2 px-4 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-xl hover:bg-[#333] transition-all"
                       >
@@ -327,6 +345,55 @@ export function PasteZone() {
         isOpen={advancedSettingsOpen} 
         onClose={() => setAdvancedSettingsOpen(false)} 
       />
+
+      <AnimatePresence>
+        {settingsConfirmOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#141414]/40 backdrop-blur-sm p-4"
+            onClick={() => setSettingsConfirmOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-[#141414]/10 overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <h3 className="text-sm font-bold uppercase tracking-widest mb-4">
+                  {t("pasteZone.settings.advancedConfirmTitle")}
+                </h3>
+                <p className="text-xs text-[#141414]/60 leading-relaxed mb-6">
+                  {t("pasteZone.settings.advancedConfirmWarning")}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setSettingsConfirmOpen(false)}
+                    className="flex-1 py-3 border border-[#141414]/10 text-xs font-sans uppercase tracking-widest rounded-xl hover:bg-[#141414]/5 transition-all"
+                  >
+                    {t("pasteZone.settings.cancel")}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSettingsConfirmOpen(false);
+                      setAdvancedSettingsOpen(true);
+                    }}
+                    disabled={countdown > 0}
+                    className="flex-1 py-3 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#333]"
+                  >
+                    {countdown > 0
+                      ? t("pasteZone.settings.waitCountdown", { count: countdown })
+                      : t("pasteZone.settings.confirm")}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </aside>
   );
 }

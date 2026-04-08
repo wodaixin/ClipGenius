@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { PasteItem } from "../../types";
+import { getStoredSettings } from "../../lib/settings";
 
 interface GenerateImageParams {
   prompt: string;
@@ -13,7 +14,9 @@ interface GenerateImageParams {
 export async function generateImage(params: GenerateImageParams): Promise<string | null> {
   const { prompt, quality, size, contextItem, apiKey } = params;
 
-  const ai = new GoogleGenAI({ apiKey: apiKey || import.meta.env.VITE_GEMINI_API_KEY });
+  const stored = getStoredSettings();
+  const effectiveApiKey = apiKey || stored.geminiApiKey || import.meta.env.VITE_GEMINI_API_KEY;
+  const ai = new GoogleGenAI({ apiKey: effectiveApiKey });
 
   let response;
 

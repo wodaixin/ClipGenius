@@ -3,6 +3,7 @@ import { PasteItem } from "../../../types";
 import { AnalysisProvider, AnalysisResult } from "./types";
 import i18n from "../../../i18n";
 import { getPrompts, fillTemplate } from "../../../config/prompts";
+import { getStoredSettings } from "../../../lib/settings";
 
 function buildAnalysisPrompt(item: PasteItem): string {
   const prompts = getPrompts(i18n.language);
@@ -48,8 +49,9 @@ function buildAnalysisParts(item: PasteItem): { parts: unknown[]; config: Record
 
 export const geminiAnalysisProvider: AnalysisProvider = {
   async analyze(item) {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    const model = import.meta.env.VITE_ANALYSIS_MODEL || "gemini-3-flash-preview";
+    const stored = getStoredSettings();
+    const apiKey = stored.geminiApiKey || import.meta.env.VITE_GEMINI_API_KEY;
+    const model = stored.analysisModel || import.meta.env.VITE_ANALYSIS_MODEL || "gemini-3-flash-preview";
     const ai = new GoogleGenAI({ apiKey });
     const { parts, config } = buildAnalysisParts(item);
 

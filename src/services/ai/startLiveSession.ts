@@ -2,6 +2,7 @@ import { GoogleGenAI, Modality, LiveServerMessage } from "@google/genai";
 import { LiveSessionConnection } from "../../types";
 import i18n from "../../i18n";
 import { getPrompts } from "../../config/prompts";
+import { getStoredSettings } from "../../lib/settings";
 
 interface LiveSessionCallbacks {
   onOpen: () => void;
@@ -13,7 +14,10 @@ interface LiveSessionCallbacks {
 export async function startLiveSession(
   callbacks: LiveSessionCallbacks
 ): Promise<LiveSessionConnection> {
-  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+  const stored = getStoredSettings();
+  const apiKey = stored.geminiApiKey || import.meta.env.VITE_GEMINI_API_KEY;
+  const model = stored.liveModel || import.meta.env.VITE_LIVE_MODEL || "gemini-3.1-flash-live-preview";
+  const ai = new GoogleGenAI({ apiKey });
 
   let audioCtx: AudioContext | null = null;
   let sourceNode: AudioBufferSourceNode | null = null;
@@ -51,7 +55,7 @@ export async function startLiveSession(
   };
 
   const session = await ai.live.connect({
-    model: import.meta.env.VITE_LIVE_MODEL || "gemini-3.1-flash-live-preview",
+    model,
     config: {
       responseModalities: [Modality.AUDIO],
       systemInstruction: getPrompts(i18n.language).liveVoice.systemInstruction,

@@ -27,7 +27,12 @@
       "language": "Language",
       "english": "English",
       "chinese": "中文",
-      "advanced": "Advanced Settings"
+      "advanced": "Advanced Settings",
+      "advancedConfirmTitle": "Advanced Settings",
+      "advancedConfirmWarning": "These settings are stored in browser localStorage. Do not save sensitive information on public devices. Settings take effect after page refresh.",
+      "waitCountdown": "Please wait {{count}}s",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
     }
   },
   "history": {

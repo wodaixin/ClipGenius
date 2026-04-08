@@ -27,7 +27,12 @@
       "language": "语言",
       "english": "English",
       "chinese": "中文",
-      "advanced": "高级设置"
+      "advanced": "高级设置",
+      "advancedConfirmTitle": "高级设置",
+      "advancedConfirmWarning": "这些设置将存储在浏览器本地存储中。请勿在公共设备上保存敏感信息。刷新页面后设置将生效。",
+      "waitCountdown": "请等待 {{count}} 秒",
+      "confirm": "确认进入",
+      "cancel": "取消"
     }
   },
   "history": {
