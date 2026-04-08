@@ -12,6 +12,7 @@ import { useAuth } from "../context/AuthContext";
 import { useAppContext } from "../context/AppContext";
 import { PasteItem } from "../types";
 import { syncEngine } from "../lib/syncEngine";
+import { broadcastItemUpdated } from "../lib/tabSync";
 
 function toDate(val: unknown): Date {
   if (val instanceof Timestamp) return (val as Timestamp).toDate();
@@ -79,6 +80,8 @@ export function useFirestoreSync() {
                 }
                 return [cloudItem, ...prev];
               });
+              // Broadcast to other tabs so they don't get stale
+              broadcastItemUpdated(cloudItem);
             }
             // accepted === false → local has a newer pending write; skip
           } else if (change.type === "removed") {

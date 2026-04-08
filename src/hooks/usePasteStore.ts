@@ -5,6 +5,7 @@ import {
   deletePaste as deleteLocalPaste,
 } from "../lib/db";
 import { syncEngine } from "../lib/syncEngine";
+import { broadcastItemUpdated, broadcastItemDeleted, markItemEditing, unmarkItemEditing } from "../lib/tabSync";
 import { copyItemToClipboard, downloadItem as downloadItemUtil } from "../services/clipboard/clipboardUtils";
 import { useAuth } from "../context/AuthContext";
 import { useAppContext } from "../context/AppContext";
@@ -90,6 +91,7 @@ export function usePasteStore() {
 
       if (user?.uid) {
         syncEngine.writeWithSync(deletedItem, user.uid, { isDeletion: true });
+        broadcastItemDeleted(deletedItem.id);
       }
     },
     [user, items, setItems]
@@ -106,6 +108,7 @@ export function usePasteStore() {
       );
       if (user?.uid) {
         syncEngine.writeWithSync(updated, user.uid);
+        broadcastItemUpdated(updated);
       }
     },
     [user, items, setItems]
@@ -137,6 +140,7 @@ export function usePasteStore() {
     if (user?.uid) {
       for (const item of deletedItems) {
         syncEngine.writeWithSync(item, user.uid, { isDeletion: true });
+        broadcastItemDeleted(item.id);
       }
     }
   }, [user, items, setItems]);
@@ -146,6 +150,7 @@ export function usePasteStore() {
       const item = items.find((i) => i.id === id);
       if (!item) return;
       const updated = { ...item, suggestedName: editName, summary: editSummary, updatedAt: new Date(), syncRev: (item.syncRev ?? 0) + 1 };
+      unmarkItemEditing(id);
       await savePaste(updated);
       setItems((prev: PasteItem[]) =>
         prev.map((i) => (i.id === id ? updated : i))
@@ -153,6 +158,7 @@ export function usePasteStore() {
       setEditingItemId(null);
       if (user?.uid) {
         syncEngine.writeWithSync(updated, user.uid);
+        broadcastItemUpdated(updated);
       }
     },
     [user, items, editName, editSummary, setItems]
@@ -162,6 +168,7 @@ export function usePasteStore() {
     setEditingItemId(item.id);
     setEditName(item.suggestedName);
     setEditSummary(item.summary || "");
+    markItemEditing(item.id);
   }, []);
 
   const copyToClipboard = useCallback(async (item: PasteItem) => {
