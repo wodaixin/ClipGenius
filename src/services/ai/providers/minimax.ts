@@ -1,6 +1,7 @@
 import { PasteItem } from "../../../types";
 import { AnalysisProvider, AnalysisResult } from "./types";
 import i18n from "../../../i18n";
+import { getPrompts, fillTemplate } from "../../../config/prompts";
 
 function getMinimaxBaseUrl(): string {
   if (import.meta.env.DEV) return "/api/minimax";
@@ -8,18 +9,19 @@ function getMinimaxBaseUrl(): string {
 }
 
 function buildAnalysisPrompt(item: PasteItem): string {
-  const langSuffix = i18n.t("analyze.langSuffix");
+  const prompts = getPrompts(i18n.language);
+
   let prompt: string;
   if (item.type === "image") {
-    prompt = i18n.t("analyze.prompt.image");
+    prompt = prompts.analyze.image;
   } else if (item.type === "video") {
-    prompt = i18n.t("analyze.prompt.video");
+    prompt = prompts.analyze.video;
   } else if (item.type === "url") {
-    prompt = i18n.t("analyze.prompt.url", { content: item.content });
+    prompt = fillTemplate(prompts.analyze.url, { content: item.content });
   } else {
-    prompt = i18n.t("analyze.prompt.text", { content: item.content.substring(0, 1000) });
+    prompt = fillTemplate(prompts.analyze.text, { content: item.content.substring(0, 1000) });
   }
-  return `${prompt}\n${langSuffix}`;
+  return `${prompt}\n${prompts.analyze.langSuffix}`;
 }
 
 export const minimaxAnalysisProvider: AnalysisProvider = {
