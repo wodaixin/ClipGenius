@@ -13,6 +13,7 @@ import {
   Loader2,
   Volume2,
   Send,
+  Square,
   XCircle,
   Film,
   AlertTriangle,
@@ -82,6 +83,7 @@ export function ChatModal() {
     chatMessages,
     chatInput,
     isChatLoading,
+    isStreaming,
     isChatOpen,
     isLiveActive,
     liveTranscription,
@@ -90,6 +92,7 @@ export function ChatModal() {
     closeChat,
     clearChat,
     sendMessage,
+    cancelSend,
     startLiveSessionHandler,
     stopLiveSession,
     clearChatError,
@@ -337,7 +340,7 @@ export function ChatModal() {
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !isChatLoading && sendMessage()}
+                  onKeyDown={(e) => e.key === "Enter" && !isStreaming && sendMessage()}
                   placeholder={
                     contextItem ? t("chat.inputContextPlaceholder") : t("chat.inputPlaceholder")
                   }
@@ -345,13 +348,17 @@ export function ChatModal() {
                 />
                 <button
                   onClick={() => {
-                    const input = modalRef.current?.querySelector('input[type="text"]') as HTMLInputElement | null;
-                    sendMessage(input?.value);
+                    if (isStreaming) {
+                      cancelSend();
+                    } else {
+                      const input = modalRef.current?.querySelector('input[type="text"]') as HTMLInputElement | null;
+                      sendMessage(input?.value);
+                    }
                   }}
-                  disabled={isChatLoading || (!chatInput.trim() && !contextItem)}
+                  disabled={isStreaming || (!chatInput.trim() && !contextItem)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#141414] text-white rounded-xl flex items-center justify-center disabled:opacity-40 transition-opacity"
                 >
-                  <Send className="w-4 h-4" />
+                  {isChatLoading ? <Square className="w-4 h-4" /> : <Send className="w-4 h-4" />}
                 </button>
               </div>
               </div>

@@ -28,7 +28,8 @@ export function getChatProvider(): ChatProvider {
 }
 
 export function buildChatParams(
-  messages: { role: "user" | "model"; content: string }[]
+  messages: { role: "user" | "model"; content: string }[],
+  signal?: AbortSignal
 ): ChatProviderParams {
   const prompts = getPrompts(i18n.language);
   const stored = getStoredSettings();
@@ -50,6 +51,7 @@ export function buildChatParams(
     baseUrl,
     messages,
     systemInstruction: prompts.chatRouter.systemInstruction,
+    signal,
   };
 }
 

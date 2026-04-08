@@ -19,7 +19,7 @@ export interface ChatProviderResponse {
 }
 
 export interface ChatStreamChunk {
-  type: "text" | "thinking" | "done";
+  type: "text" | "thinking" | "done" | "aborted";
   text?: string;
 }
 

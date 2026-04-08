@@ -32,6 +32,7 @@ interface ChatContextValue {
   chatMessages: ChatMessage[];
   chatInput: string;
   isChatLoading: boolean;
+  isStreaming: boolean;
   isChatOpen: boolean;
   isLiveActive: boolean;
   isMicMuted: boolean;
@@ -43,6 +44,7 @@ interface ChatContextValue {
   closeChat: () => void;
   clearChat: () => void;
   sendMessage: (rawInput?: string) => void;
+  cancelSend: () => void;
   startLiveSessionHandler: () => void;
   stopLiveSession: () => void;
   clearChatError: () => void;
@@ -60,6 +62,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [displayChatId, setDisplayChatId] = useState<string>("default");
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isLiveActive, setIsLiveActive] = useState(false);
   const [isMicMuted, setIsMicMuted] = useState(false);
@@ -68,6 +71,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   // currentChatId: the chat that new messages are sent to (never changed by closeChat)
   const [currentChatId, setCurrentChatId] = useState<string>("default");
   const isSendingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const liveSessionRef = useRef<LiveSessionConnection | null>(null);
 
   // chatMessages shown in UI = messages for displayChatId
@@ -161,6 +165,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         setContextItem(item);
         setChatInput("");
         setDisplayChatId(newChatId);
+        setCurrentChatId(newChatId);
         // Don't clear messages here - let the effect load them from Firestore/IndexedDB
       }
     },
@@ -332,10 +337,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
 
     const provider = getChatProvider();
-    const params = buildChatParams(history);
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    const params = buildChatParams(history, abortController.signal);
     params.messages.push({ role: "user", content: finalPrompt });
 
     try {
+      setIsStreaming(true);
       const chunks = provider.streamChat(params);
       let fullText = "";
       let hasStarted = false;
@@ -354,14 +362,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           });
           if (!hasStarted) {
             hasStarted = true;
-            setIsChatLoading(false);
+            setIsStreaming(true);
           }
         } else if (chunk.type === "text") {
           fullText += chunk.text;
           modelMsg.text = fullText;
           if (!hasStarted) {
             hasStarted = true;
-            setIsChatLoading(false);
+            setIsStreaming(true);
           }
           setMessagesMap((prev) => {
             const chatMsgs = prev.get(targetChatId) ?? [];
@@ -374,6 +382,21 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           });
         } else if (chunk.type === "done") {
           break;
+        } else if (chunk.type === "aborted") {
+          setMessagesMap((prev) => {
+            const chatMsgs = prev.get(targetChatId) ?? [];
+            const next = new Map(prev);
+            next.set(targetChatId, chatMsgs.filter((m) => m.id !== modelMsgId));
+            return next;
+          });
+          void deleteDoc(doc(db, `users/${user.uid}/chats/${targetChatId}/messages`, modelMsgId)).catch(
+            console.error
+          );
+          setIsChatLoading(false);
+          setIsStreaming(false);
+          isSendingRef.current = false;
+          abortControllerRef.current = null;
+          return;
         }
       }
 
@@ -390,30 +413,47 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         await saveChatMessage(finalMsg);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : t("errors.tryAgain");
-      setChatError(
-        message.includes("429") || message.includes("quota") || message.includes("rate") || message.includes("529") || message.includes("overloaded")
-          ? t("errors.rateLimit")
-          : message.includes("fetch")
-          ? t("errors.network")
-          : message
-      );
-      void deleteDoc(doc(db, `users/${user.uid}/chats/${targetChatId}/messages`, modelMsgId)).catch(
-        console.error
-      );
-      setMessagesMap((prev) => {
-        const chatMsgs = prev.get(targetChatId) ?? [];
-        const next = new Map(prev);
-        next.set(targetChatId, chatMsgs.filter((m) => m.id !== modelMsgId));
-        return next;
-      });
+      if (error instanceof Error && error.name === "AbortError") {
+        setMessagesMap((prev) => {
+          const chatMsgs = prev.get(targetChatId) ?? [];
+          const next = new Map(prev);
+          next.set(targetChatId, chatMsgs.filter((m) => m.id !== modelMsgId));
+          return next;
+        });
+        setIsStreaming(false);
+      } else {
+        const message = error instanceof Error ? error.message : t("errors.tryAgain");
+        setChatError(
+          message.includes("429") || message.includes("quota") || message.includes("rate") || message.includes("529") || message.includes("overloaded")
+            ? t("errors.rateLimit")
+            : message.includes("fetch")
+            ? t("errors.network")
+            : message
+        );
+        void deleteDoc(doc(db, `users/${user.uid}/chats/${targetChatId}/messages`, modelMsgId)).catch(
+          console.error
+        );
+        setMessagesMap((prev) => {
+          const chatMsgs = prev.get(targetChatId) ?? [];
+          const next = new Map(prev);
+          next.set(targetChatId, chatMsgs.filter((m) => m.id !== modelMsgId));
+          return next;
+        });
+        setIsStreaming(false);
+      }
     } finally {
       setIsChatLoading(false);
+      setIsStreaming(false);
       isSendingRef.current = false;
+      abortControllerRef.current = null;
     }
   }, [chatInput, messagesMap, contextItem, user, setContextItem, currentChatId, t]);
 
   const clearChatError = useCallback(() => setChatError(null), []);
+
+  const cancelSend = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
 
   return (
     <ChatContext.Provider
@@ -421,6 +461,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         chatMessages,
         chatInput,
         isChatLoading,
+        isStreaming,
         isChatOpen,
         isLiveActive,
         isMicMuted,
@@ -432,6 +473,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         closeChat,
         clearChat,
         sendMessage,
+        cancelSend,
         startLiveSessionHandler: _handleStartLiveSession,
         stopLiveSession,
         clearChatError,

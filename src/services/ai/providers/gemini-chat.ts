@@ -41,6 +41,7 @@ export const geminiChatProvider: ChatProvider = {
         systemInstruction: params.systemInstruction,
         tools: [{ googleSearch: {} }],
         thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+        abortSignal: params.signal,
       },
     });
 

@@ -67,7 +67,6 @@ export const minimaxChatProvider: ChatProvider = {
       stream: true,
     };
 
-    // Add system instruction if provided
     if (params.systemInstruction) {
       body.system = params.systemInstruction;
     }
@@ -80,6 +79,7 @@ export const minimaxChatProvider: ChatProvider = {
         "x-api-key": apiKey,
       },
       body: JSON.stringify(body),
+      signal: params.signal,
     });
 
     if (!res.ok) {
@@ -96,12 +96,19 @@ export const minimaxChatProvider: ChatProvider = {
 
     try {
       while (true) {
+        if (params.signal?.aborted) {
+          yield { type: "aborted" };
+          return;
+        }
         const { done, value } = await reader.read();
         if (done) break;
+        if (params.signal?.aborted) {
+          yield { type: "aborted" };
+          return;
+        }
 
         buffer += decoder.decode(value, { stream: true });
 
-        // Parse SSE: events start with "event:", data lines follow with "data:"
         const lines = buffer.split("\n");
         buffer = lines.pop() || "";
 
@@ -120,7 +127,6 @@ export const minimaxChatProvider: ChatProvider = {
           try {
             const event = JSON.parse(json);
 
-            // content_block_start: init thinking block
             if (currentEventType === "content_block_start" || event.type === "content_block_start") {
               const block = event.content_block || event;
               if (block?.type === "thinking") {
@@ -129,7 +135,6 @@ export const minimaxChatProvider: ChatProvider = {
               continue;
             }
 
-            // content_block_delta: incremental updates
             if (currentEventType === "content_block_delta" || event.type === "content_block_delta") {
               const delta = event.delta;
               if (delta?.type === "thinking_delta") {
@@ -140,7 +145,6 @@ export const minimaxChatProvider: ChatProvider = {
               continue;
             }
 
-            // message_delta / content_block_stop: done
             if (currentEventType === "message_delta" || currentEventType === "content_block_stop") {
               continue;
             }
