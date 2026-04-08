@@ -10,7 +10,6 @@ import { PasteItem, SyncState, SyncStore } from '../types';
 import { savePaste } from './db';
 
 const SYNC_STORE_KEY = 'ClipGenius:sync';
-const MIGRATED_KEY = 'ClipGenius:migrated'; // tracks which uids have been migrated
 const MAX_RETRIES = 2;
 const RETRY_DELAYS = [1000, 3000]; // ms
 
@@ -234,11 +233,6 @@ class Engine {
   }
 
   async migrateLocalItems(uid: string): Promise<{ migrated: number; skipped: number }> {
-    try {
-      const migrated = new Set<string>(JSON.parse(localStorage.getItem(MIGRATED_KEY) || '[]'));
-      if (migrated.has(uid)) return { migrated: 0, skipped: 0 };
-    } catch { /* ignore */ }
-
     const { getPastes } = await import('./db');
     const all = await getPastes();
     let count = 0;
@@ -246,17 +240,12 @@ class Engine {
     for (const item of all) {
       if (item.userId && item.userId !== uid) continue;
       if (item.isDeleted) continue;
+      if ((item.syncRev ?? 0) > 0) continue;
       const toSync: PasteItem = item.userId ? item : { ...item, userId: uid };
       console.log('[migrateLocalItems] pushing:', toSync.id, 'userId:', toSync.userId);
       await this.writeToCloud(toSync, uid, false);
       count++;
     }
-
-    try {
-      const migrated = new Set<string>(JSON.parse(localStorage.getItem(MIGRATED_KEY) || '[]'));
-      migrated.add(uid);
-      localStorage.setItem(MIGRATED_KEY, JSON.stringify([...migrated]));
-    } catch { /* ignore */ }
 
     return { migrated: count, skipped: all.length - count };
   }
