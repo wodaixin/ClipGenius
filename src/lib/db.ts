@@ -19,6 +19,10 @@ export async function initDB(): Promise<IDBPDatabase> {
   });
 }
 
+/**
+ * Persists a PasteItem (including soft-deleted items with isDeleted=true and deletedAt)
+ * to IndexedDB. The item may contain additional fields beyond the original schema.
+ */
 export async function savePaste(item: PasteItem) {
   const db = await initDB();
   await db.put(STORE_PASTES, item);

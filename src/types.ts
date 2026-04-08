@@ -23,6 +23,10 @@ export interface PasteItem {
   isAnalyzing: boolean;
   isPinned?: boolean;
   userId: string;
+  updatedAt?: Date;       // last modification time, refreshed on every update
+  syncRev?: number;        // monotonically increasing version, -1 = never synced
+  isDeleted?: boolean;     // soft-delete flag
+  deletedAt?: Date;        // soft-delete timestamp
 }
 
 export interface ChatMessage {
@@ -50,4 +54,21 @@ export type { LiveServerMessage };
 // Connection object returned by ai.live.connect()
 export interface LiveSessionConnection {
   close: () => void;
+}
+/** Local sync status for a single PasteItem */
+export type SyncStatus = 'synced' | 'pending' | 'conflict';
+
+/** Tracks the sync state of one PasteItem */
+export interface SyncState {
+  status: SyncStatus;
+  localUpdatedAt: Date;       // the updatedAt of the local version
+  localSyncRev: number;         // the syncRev of the local version (-1 if never synced)
+  pendingCloudRev?: number;   // the syncRev we are waiting for the cloud to acknowledge
+  retryCount: number;           // current retry attempt count
+  lastError?: string;           // last error message
+}
+
+/** The persisted sync store — lives in localStorage */
+export interface SyncStore {
+  states: Record<string, SyncState>;
 }
