@@ -339,7 +339,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     onChange={(v) => handleChange("imageStandardProvider", v)}
                     options={[
                       { value: "gemini", label: "Gemini" },
-                      { value: "minimax", label: "Minimax" },
                     ]}
                   />
                   <SelectField
@@ -348,7 +347,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     onChange={(v) => handleChange("imageProProvider", v)}
                     options={[
                       { value: "gemini", label: "Gemini" },
-                      { value: "minimax", label: "Minimax" },
                     ]}
                   />
                   <InputField
