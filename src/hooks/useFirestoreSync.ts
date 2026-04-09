@@ -54,6 +54,12 @@ export function useFirestoreSync() {
             deletedAt: docData.deletedAt ? toDate(docData.deletedAt) : undefined,
           } as PasteItem;
 
+          // Skip video items from cloud sync (videos are local-only due to size limits)
+          if (cloudItem.type === 'video') {
+            console.log('[useFirestoreSync] Skipping cloud video item:', cloudItem.id.substring(0, 8));
+            continue;
+          }
+
           // --- soft-delete path ---
           if (cloudItem.isDeleted && cloudItem.deletedAt) {
             // Remove from UI immediately (optimistic)

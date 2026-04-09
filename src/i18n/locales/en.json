@@ -93,7 +93,8 @@
     "chatWithAi": "Chat with AI",
     "editImage": "Edit Image",
     "generateImage": "Generate Image",
-    "loginForAi": "Login for AI Analysis"
+    "loginForAi": "Login for AI Analysis",
+    "localOnly": "Local Only"
   },
   "analyze": {
     "noSummary": "No summary available."

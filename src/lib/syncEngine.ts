@@ -89,6 +89,19 @@ class Engine {
     // 1. Write local (IndexedDB) immediately — UI never waits for network
     await savePaste(updated);
 
+    // Skip cloud sync for video items (too large for Firestore 1MB limit)
+    if (item.type === 'video') {
+      console.log('[SyncEngine] Skipping cloud sync for video item:', item.id.substring(0, 8));
+      this.setSyncState(updated.id, {
+        status: 'synced', // Mark as synced locally (no cloud sync needed)
+        localUpdatedAt: now,
+        localSyncRev: nextRev,
+        pendingCloudRev: undefined,
+        retryCount: 0,
+      });
+      return { success: true };
+    }
+
     // 2. Track pending state
     this.setSyncState(updated.id, {
       status: 'pending',

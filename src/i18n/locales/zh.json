@@ -93,7 +93,8 @@
     "chatWithAi": "AI 聊天",
     "editImage": "编辑图片",
     "generateImage": "生成图片",
-    "loginForAi": "登录以使用 AI 分析"
+    "loginForAi": "登录以使用 AI 分析",
+    "localOnly": "仅本地"
   },
   "analyze": {
     "noSummary": "未生成摘要。"

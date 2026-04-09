@@ -113,10 +113,15 @@ export function PasteCard({ item }: PasteCardProps) {
           <PastePreview item={item} />
 
           {/* Type Badge */}
-          <div className="absolute top-2 left-2 xl:top-4 xl:left-4">
+          <div className="absolute top-2 left-2 xl:top-4 xl:left-4 flex flex-col gap-1">
             <span className="px-2 py-0.5 xl:px-3 xl:py-1 bg-white/90 backdrop-blur-md border border-[#141414]/5 text-[10px] xl:text-xs font-bold uppercase tracking-widest rounded-full shadow-sm">
               {item.type}
             </span>
+            {item.type === 'video' && (
+              <span className="px-2 py-0.5 xl:px-3 xl:py-1 bg-amber-100/90 backdrop-blur-md border border-amber-200/50 text-[8px] xl:text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm text-amber-700">
+                {t("pasteCard.localOnly")}
+              </span>
+            )}
           </div>
 
           {/* Quick Actions Overlay */}
