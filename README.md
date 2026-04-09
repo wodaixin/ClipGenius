@@ -20,7 +20,7 @@ Listens globally for `paste` events and automatically classifies clipboard conte
 
 Images and videos are stored as base64 data URIs. All other types are stored as raw text.
 
-### AI Analysis
+### AI Content Analysis
 When signed in and auto-analyze is enabled, AI generates:
 - **Suggested filename** — e.g. `img_20260402_143052`
 - **Content summary** — one-paragraph description
@@ -71,7 +71,13 @@ All data persisted to IndexedDB via `idb` library. App is fully functional offli
 
 ## Documentation
 
-Documentation is a work in progress. For configuration details, see the environment variables in .env.example.
+See [`docs/en/`](./docs/en/) for full documentation including:
+
+- [Getting Started](./docs/en/getting-started/) — Installation, setup, first steps
+- [Guides](./docs/en/guides/) — Feature-by-feature usage guides
+- [Architecture](./docs/en/architecture/) — System design and data flow
+- [Reference](./docs/en/reference/) — API, hooks, types, environment variables
+- [Deployment](./docs/en/deployment/) — Google Cloud Run, CI/CD
 
 ## Architecture
 
@@ -118,7 +124,7 @@ src/
 │   │       ├── types.ts
 │   │       ├── capabilities.ts   # Provider capability definitions
 │   │       ├── gemini.ts         # Gemini content analysis
-│   │       ├── gemini-chat.ts    # Gemini chat + thinking stream
+│   │       ├── gemini-chat.ts   # Gemini chat + thinking stream
 │   │       ├── minimax.ts        # Minimax content analysis
 │   │       └── minimax-chat.ts   # Minimax chat
 │   ├── clipboard/
@@ -127,6 +133,9 @@ src/
 │       └── dualSync.ts           # Firestore + IndexedDB dual-write
 ├── lib/
 │   ├── db.ts                     # IndexedDB operations (idb wrapper)
+│   ├── settings.ts                # localStorage settings management
+│   ├── tabSync.ts               # BroadcastChannel cross-tab sync
+│   ├── syncEngine.ts            # SyncEngine singleton (conflict resolution, retry)
 │   ├── utils.ts
 │   └── estimateCardHeight.ts
 └── i18n/
@@ -201,7 +210,9 @@ npm run clean     # Remove dist/
 
 ## Deployment
 
-Deploy to any static hosting service (Vercel, Netlify, Cloudflare Pages, etc.) by running `npm run build` and serving the `dist/` directory.
+Deploy to Google Cloud Run. See [`docs/en/deployment/`](./docs/en/deployment/) for full deployment instructions including:
+- [Google Cloud Run](./docs/en/deployment/google-cloud-run.md) — Primary deployment target (AI Studio integration)
+- [CI/CD](./docs/en/deployment/ci-cd.md) — GitHub Actions workflow
 
 ## Advanced Settings
 
@@ -211,7 +222,7 @@ The app includes an in-app Settings modal (accessible from the PasteZone header)
 - API keys for Gemini and Minimax
 - Per-feature model overrides
 
-Settings are stored in browser `localStorage` and persist across sessions. See in-app Settings for details.
+Settings are stored in browser `localStorage` and persist across sessions.
 
 ## Data Models
 
