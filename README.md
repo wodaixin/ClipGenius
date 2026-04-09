@@ -210,7 +210,40 @@ npm run clean     # Remove dist/
 
 ## Deployment
 
-Deploy to Google Cloud Run. See [`docs/en/deployment/`](./docs/en/deployment/) for full deployment instructions including:
+### Docker (Recommended)
+
+The easiest way to deploy ClipGenius is using Docker:
+
+```bash
+# Using Docker Compose
+docker-compose up -d
+
+# Or using Docker CLI
+docker build -t clipgenius:latest .
+docker run -d -p 8080:80 --name clipgenius clipgenius:latest
+```
+
+Access the application at `http://localhost:8080`
+
+See [DOCKER.md](./DOCKER.md) for detailed Docker deployment instructions including:
+- Configuration options
+- Production deployment to cloud platforms
+- Troubleshooting
+
+### Google Cloud Run
+
+Deploy to Google Cloud Run for seamless AI Studio integration:
+
+```bash
+gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/clipgenius
+gcloud run deploy clipgenius \
+  --image gcr.io/YOUR_PROJECT_ID/clipgenius \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated
+```
+
+See [`docs/en/deployment/`](./docs/en/deployment/) for full deployment instructions including:
 - [Google Cloud Run](./docs/en/deployment/google-cloud-run.md) — Primary deployment target (AI Studio integration)
 - [CI/CD](./docs/en/deployment/ci-cd.md) — GitHub Actions workflow
 

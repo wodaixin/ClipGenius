@@ -209,7 +209,40 @@ npm run clean     # 清除 dist/
 
 ## 部署
 
-部署到 Google Cloud Run。详见 [`docs/zh/deployment/`](./docs/zh/deployment/)：
+### Docker（推荐）
+
+使用 Docker 是部署 ClipGenius 最简单的方式：
+
+```bash
+# 使用 Docker Compose
+docker-compose up -d
+
+# 或使用 Docker CLI
+docker build -t clipgenius:latest .
+docker run -d -p 8080:80 --name clipgenius clipgenius:latest
+```
+
+访问应用：`http://localhost:8080`
+
+详见 [DOCKER.md](./DOCKER.md) 获取完整的 Docker 部署说明，包括：
+- 配置选项
+- 生产环境部署到云平台
+- 故障排查
+
+### Google Cloud Run
+
+部署到 Google Cloud Run 以实现无缝的 AI Studio 集成：
+
+```bash
+gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/clipgenius
+gcloud run deploy clipgenius \
+  --image gcr.io/YOUR_PROJECT_ID/clipgenius \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated
+```
+
+详见 [`docs/zh/deployment/`](./docs/zh/deployment/) 获取完整部署说明：
 - [Google Cloud Run](./docs/zh/deployment/google-cloud-run.md) — 主要部署目标（AI Studio 集成）
 - [CI/CD](./docs/zh/deployment/ci-cd.md) — GitHub Actions 工作流
 
