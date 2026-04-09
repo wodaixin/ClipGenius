@@ -216,10 +216,10 @@ export function PasteZone() {
 
         <div className="space-y-4">
           <h2 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.9] uppercase">
-            {t("pasteZone.heading")} <br />
+            {t("pasteZone.heading")} <br className="lg:hidden" />
             <span className="text-[#141414]/20 italic font-serif lowercase">{t("pasteZone.subheading")}</span>
           </h2>
-          <p className="text-sm opacity-70 max-w-sm leading-relaxed">
+          <p className="text-sm opacity-70 max-w-sm lg:max-w-lg xl:max-w-xl leading-relaxed">
             {t("pasteZone.description")}
           </p>
         </div>
