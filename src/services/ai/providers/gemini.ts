@@ -89,8 +89,14 @@ export const geminiAnalysisProvider: AnalysisProvider = {
       }
     }
     
+    // Format suggestedName as "type_title"
+    let suggestedName = result.suggestedName || item.suggestedName;
+    if (suggestedName && !suggestedName.startsWith(`${item.type}_`)) {
+      suggestedName = `${item.type}_${suggestedName}`;
+    }
+    
     return {
-      suggestedName: result.suggestedName || item.suggestedName,
+      suggestedName,
       summary: result.summary || i18n.t("analyze.noSummary"),
     } as AnalysisResult;
   },
