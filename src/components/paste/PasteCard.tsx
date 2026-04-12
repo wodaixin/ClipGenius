@@ -82,13 +82,21 @@ export function PasteCard({ item }: PasteCardProps) {
   }, [lightboxOpen]);
 
   const handleAnalyze = useCallback(async () => {
+    console.log(`[PasteCard] handleAnalyze called for item ${item.id.substring(0, 8)}, isAnalyzing=${item.isAnalyzing}`);
     // Prevent duplicate analysis
     if (item.isAnalyzing) {
       console.log(`[PasteCard] Item ${item.id.substring(0, 8)} is already analyzing, skipping`);
       return;
     }
     console.log(`[PasteCard] Starting analysis for item ${item.id.substring(0, 8)}`);
-    updateItem({ ...item, isAnalyzing: true });
+    try {
+      const updatedItem = { ...item, isAnalyzing: true };
+      console.log(`[PasteCard] Calling updateItem with isAnalyzing=true, id=${updatedItem.id.substring(0, 8)}`);
+      await updateItem(updatedItem);
+      console.log(`[PasteCard] updateItem completed for item ${item.id.substring(0, 8)}`);
+    } catch (error) {
+      console.error(`[PasteCard] updateItem failed for item ${item.id.substring(0, 8)}:`, error);
+    }
   }, [item, updateItem]);
 
   return (
