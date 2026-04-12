@@ -4,24 +4,11 @@ All settings are accessible via the settings icon in the Paste Zone header, whic
 
 ## Storage
 
-Settings are stored in `localStorage["clipgenius_settings"]` as a `StoredSettings` object. They persist across sessions but are browser-local (not synced to Firebase).
+Settings are stored in `localStorage["clipgenius_settings"]` as a `StoredSettings` object. They persist across sessions but are browser-local.
 
 > **Warning**: Do not save sensitive information on public/shared devices. Settings are stored in plain localStorage.
 
 ## Settings Sections
-
-### Firebase Configuration
-
-Stores Firebase credentials used by the app. Changes require a page reload to take effect.
-
-| Field | Env Var Equivalent |
-|---|---|
-| API Key | `VITE_FIREBASE_API_KEY` |
-| Auth Domain | `VITE_FIREBASE_AUTH_DOMAIN` |
-| Project ID | `VITE_FIREBASE_PROJECT_ID` |
-| Storage Bucket | `VITE_FIREBASE_STORAGE_BUCKET` |
-| Messaging Sender ID | `VITE_FIREBASE_MESSAGING_SENDER_ID` |
-| App ID | `VITE_FIREBASE_APP_ID` |
 
 ### AI Configuration
 

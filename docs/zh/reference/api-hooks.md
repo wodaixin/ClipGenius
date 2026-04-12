@@ -60,18 +60,6 @@ function usePasteStore(): {
 
 ---
 
-## useFirestoreSync
-
-```typescript
-function useFirestoreSync(): void
-```
-
-纯副作用钩子。在用户登录时挂载，订阅 Firestore `onSnapshot`。登录时调用 `syncEngine.migrateLocalItems()`。处理来自云端变更的软删除传播。
-
-**参数**：无。
-
----
-
 ## useImageGen
 
 ```typescript

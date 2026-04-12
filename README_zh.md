@@ -1,6 +1,6 @@
 # ClipGenius — AI 剪贴板管理器
 
-> 由 React 19 + Vite 构建的专业级 AI 剪贴板管理器。自动捕获图片、视频、文本、链接、Markdown 和代码片段，并通过 AI（Gemini、Minimax）进行分析，通过 Firebase 实现跨设备同步。
+> 由 React 19 + Vite 构建的专业级 AI 剪贴板管理器。自动捕获图片、视频、文本、链接、Markdown 和代码片段，并通过 AI（Gemini、Minimax）进行分析。所有数据通过 IndexedDB 本地存储。
 
 [English Version](README.md)
 
@@ -21,7 +21,7 @@
 图片和视频以 base64 data URI 格式存储，其他类型以原始文本存储。
 
 ### AI 内容分析
-登录并启用自动分析后，AI 自动生成：
+启用自动分析后，AI 自动生成：
 - **推荐文件名** — 例如 `img_20260402_143052`
 - **内容摘要** — 一段描述文字
 
@@ -43,15 +43,8 @@
 ### 语音实时对话
 基于 Gemini 3.1 Flash Live（`gemini-3.1-flash-live-preview`）的实时语音交互。
 
-### 云端同步（Firebase）
-- **Firestore** 在 `/users/{userId}/pastes/{pasteId}` 存储剪贴历史
-- **Firebase Auth** 支持 Google 账号登录（弹窗）
-- **双写逻辑**：本地变更立即写入 IndexedDB；远程 Firestore 变更覆盖本地（元数据以云端为准）
-- 云同步需登录认证 — 访客仅使用本地功能
-- 对话消息存储于 `/users/{userId}/chats/{chatId}/messages/{messageId}`（chat ID 为附加的 Paste 条目 ID 或 `"default"`）
-
 ### 本地存储（IndexedDB）
-所有数据通过 `idb` 库持久化到 IndexedDB。访客可完全离线使用。
+所有数据通过 `idb` 库持久化到 IndexedDB。可完全离线使用。
 
 ## 技术栈
 
@@ -61,7 +54,7 @@
 | 样式 | Tailwind CSS v4（`@tailwindcss/vite`）|
 | 动画 | motion/react |
 | AI SDK | `@google/genai` v1.29.0 |
-| 后端 | Firebase Auth + Firestore v12 |
+| 后端 | 本地存储（IndexedDB） |
 | 本地数据库 | IndexedDB via `idb` v8 |
 | Markdown | `react-markdown` + `rehype-highlight` + `react-syntax-highlighter` |
 | 图标 | `lucide-react` |
@@ -84,7 +77,6 @@
 src/
 ├── App.tsx                      # 薄组合层
 ├── types.ts                     # PasteItem, ChatMessage, StoredAttachment
-├── firebase.ts                  # Firebase 初始化
 ├── main.tsx                     # React 入口点
 ├── vite-env.d.ts               # Vite 类型定义
 ├── config/                      # AI 提示词配置
@@ -92,13 +84,11 @@ src/
 │   ├── prompts.en.json          # 英文提示词
 │   └── prompts.zh.json          # 中文提示词
 ├── context/
-│   ├── AuthContext.tsx           # Firebase Auth 状态
 │   ├── AppContext.tsx            # 应用级状态（拖拽、模态框、设置）
 │   └── ChatContext.tsx           # 聊天状态
 ├── hooks/
 │   ├── useClipboard.ts           # paste 事件监听 + 类型检测
 │   ├── usePasteStore.ts          # 粘贴条目增删改、自动分析开关
-│   ├── useFirestoreSync.ts       # Firestore onSnapshot 订阅
 │   └── useImageGen.ts            # 图片生成状态
 ├── components/
 │   ├── layout/
@@ -126,17 +116,13 @@ src/
 │   │       ├── gemini-chat.ts   # Gemini 聊天 + 思考流
 │   │       ├── minimax.ts         # Minimax 内容分析
 │   │       └── minimax-chat.ts   # Minimax 聊天
-│   ├── clipboard/
-│   │   └── clipboardUtils.ts
-│   └── sync/
-│       └── dualSync.ts           # Firestore + IndexedDB 双写
+│   └── clipboard/
+│       └── clipboardUtils.ts
 ├── lib/
 │   ├── db.ts                     # IndexedDB 操作（idb 封装）
 │   ├── settings.ts                # localStorage 设置管理
-│   ├── tabSync.ts               # BroadcastChannel 跨标签页同步
-│   ├── syncEngine.ts            # SyncEngine 单例（冲突解决、重试）
-│   ├── utils.ts
-│   └── estimateCardHeight.ts
+│   ├── tabSync.ts               # BroadcastChannel 跨标签页同步（本地）
+│   └── utils.ts
 └── i18n/
     ├── index.ts
     └── locales/{en,zh}.json
@@ -179,15 +165,6 @@ npm install
 将 `.env.example` 复制为 `.env` 并填写所有必填值：
 
 ```env
-# Firebase（云同步必需）
-VITE_FIREBASE_PROJECT_ID="your-project-id"
-VITE_FIREBASE_APP_ID="1:123456789:web:abcdef"
-VITE_FIREBASE_API_KEY="your-api-key"
-VITE_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
-VITE_FIREBASE_FIRESTORE_DB="your-firestore-database-id"
-VITE_FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
-VITE_FIREBASE_MESSAGING_SENDER_ID="123456789"
-
 # Gemini API 密钥（AI 功能必需）
 VITE_GEMINI_API_KEY="your-gemini-api-key"
 
@@ -195,7 +172,7 @@ VITE_GEMINI_API_KEY="your-gemini-api-key"
 VITE_APP_URL="http://localhost:3000"
 ```
 
-Firebase 配置请从 [Firebase Console](https://console.firebase.google.com/) 获取。Gemini API 密钥请从 [Google AI Studio](https://aistudio.google.com/app/apikey) 获取。
+Gemini API 密钥请从 [Google AI Studio](https://aistudio.google.com/app/apikey) 获取。
 
 ### 3. 启动
 
@@ -249,7 +226,6 @@ gcloud run deploy clipgenius \
 ## 高级设置
 
 应用内置高级设置模态框（PasteZone 顶部的设置按钮），可配置：
-- Firebase 配置
 - AI 提供商选择（分析、聊天、语音、图片生成）
 - Gemini 和 Minimax 的 API 密钥
 - 各功能的模型覆盖
@@ -269,7 +245,6 @@ PasteItem {
   summary?: string
   isAnalyzing: boolean
   isPinned?: boolean       // 默认 false
-  userId: string            // Firebase UID（访客为空字符串）
 }
 
 ChatMessage {

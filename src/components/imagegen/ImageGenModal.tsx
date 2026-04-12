@@ -9,12 +9,10 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useImageGen } from "../../hooks/useImageGen";
-import { useAuth } from "../../context/AuthContext";
 import { cn } from "../../lib/utils";
 
 export function ImageGenModal() {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const {
     isImageGenOpen,
     imagePrompt,

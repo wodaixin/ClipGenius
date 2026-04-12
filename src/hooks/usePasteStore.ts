@@ -5,14 +5,11 @@ import {
   savePaste,
   deletePaste as deleteLocalPaste,
 } from "../lib/db";
-import { syncEngine } from "../lib/syncEngine";
-import { broadcastItemUpdated, broadcastItemDeleted, markItemEditing, unmarkItemEditing } from "../lib/tabSync";
+import { markItemEditing, unmarkItemEditing } from "../lib/tabSync";
 import { copyItemToClipboard, downloadItem as downloadItemUtil } from "../services/clipboard/clipboardUtils";
-import { useAuth } from "../context/AuthContext";
 import { useAppContext } from "../context/AppContext";
 
 export function usePasteStore() {
-  const { user } = useAuth();
   const { items, setItems, isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled } = useAppContext();
 
   // ---------- UI state ----------
@@ -53,15 +50,11 @@ export function usePasteStore() {
       const newItem: PasteItem = {
         ...item,
         updatedAt: new Date(),
-        syncRev: 0,
       };
       await savePaste(newItem);
       setItems((prev: PasteItem[]) => [newItem, ...prev]);
-      if (user?.uid) {
-        syncEngine.writeWithSync(newItem, user.uid);
-      }
     },
-    [user, setItems]
+    [setItems]
   );
 
   const updateItem = useCallback(
@@ -69,17 +62,13 @@ export function usePasteStore() {
       const updatedWithSync: PasteItem = {
         ...updated,
         updatedAt: new Date(),
-        syncRev: (updated.syncRev ?? 0) + 1,
       };
       await savePaste(updatedWithSync);
       setItems((prev: PasteItem[]) =>
         prev.map((i) => (i.id === updated.id ? updatedWithSync : i))
       );
-      if (user?.uid) {
-        syncEngine.writeWithSync(updatedWithSync, user.uid);
-      }
     },
-    [user, setItems]
+    [setItems]
   );
 
   const deleteItem = useCallback(
@@ -87,41 +76,30 @@ export function usePasteStore() {
       const item = items.find((i) => i.id === id);
       if (!item) return;
 
-      // Soft-delete: mark isDeleted instead of hard-deleting
       const deletedItem: PasteItem = {
         ...item,
         isDeleted: true,
         deletedAt: new Date(),
         updatedAt: new Date(),
-        syncRev: (item.syncRev ?? 0) + 1,
       };
 
       await savePaste(deletedItem);
       setItems((prev: PasteItem[]) => prev.filter((i) => i.id !== id));
-
-      if (user?.uid) {
-        syncEngine.writeWithSync(deletedItem, user.uid, { isDeletion: true });
-        broadcastItemDeleted(deletedItem.id);
-      }
     },
-    [user, items, setItems]
+    [items, setItems]
   );
 
   const togglePin = useCallback(
     async (id: string) => {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-      const updated = { ...item, isPinned: !item.isPinned, updatedAt: new Date(), syncRev: (item.syncRev ?? 0) + 1 };
+      const updated = { ...item, isPinned: !item.isPinned, updatedAt: new Date() };
       await savePaste(updated);
       setItems((prev: PasteItem[]) =>
         prev.map((i) => (i.id === id ? updated : i))
       );
-      if (user?.uid) {
-        syncEngine.writeWithSync(updated, user.uid);
-        broadcastItemUpdated(updated);
-      }
     },
-    [user, items, setItems]
+    [items, setItems]
   );
 
   const clearUnpinned = useCallback(async () => {
@@ -133,45 +111,30 @@ export function usePasteStore() {
       isDeleted: true,
       deletedAt: new Date(),
       updatedAt: new Date(),
-      syncRev: (item.syncRev ?? 0) + 1,
     }));
 
-    // Optimistic: remove from UI immediately
     setItems((prev: PasteItem[]) =>
       prev.filter((i) => !deletedItems.some((d) => d.id === i.id))
     );
 
-    // Persist soft-delete state to IndexedDB
     for (const item of deletedItems) {
       await savePaste(item);
     }
-
-    // Fan out async cloud writes
-    if (user?.uid) {
-      for (const item of deletedItems) {
-        syncEngine.writeWithSync(item, user.uid, { isDeletion: true });
-        broadcastItemDeleted(item.id);
-      }
-    }
-  }, [user, items, setItems]);
+  }, [items, setItems]);
 
   const saveEdit = useCallback(
     async (id: string) => {
       const item = items.find((i) => i.id === id);
       if (!item) return;
-      const updated = { ...item, suggestedName: editName, summary: editSummary, updatedAt: new Date(), syncRev: (item.syncRev ?? 0) + 1 };
+      const updated = { ...item, suggestedName: editName, summary: editSummary, updatedAt: new Date() };
       unmarkItemEditing(id);
       await savePaste(updated);
       setItems((prev: PasteItem[]) =>
         prev.map((i) => (i.id === id ? updated : i))
       );
       setEditingItemId(null);
-      if (user?.uid) {
-        syncEngine.writeWithSync(updated, user.uid);
-        broadcastItemUpdated(updated);
-      }
     },
-    [user, items, editName, editSummary, setItems]
+    [items, editName, editSummary, setItems]
   );
 
   const startEditing = useCallback((item: PasteItem) => {

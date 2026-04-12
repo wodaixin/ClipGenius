@@ -2,18 +2,6 @@
 
 所有环境变量必须以 `VITE_` 为前缀，在构建时嵌入。将 `.env.example` 复制为 `.env` 并填写值。
 
-## Firebase 配置
-
-| 变量 | 描述 | 获取方式 |
-|---|---|---|
-| `VITE_FIREBASE_PROJECT_ID` | Firebase 项目 ID | Firebase Console → Project Settings → General |
-| `VITE_FIREBASE_APP_ID` | Firebase Web 应用 ID | Firebase Console → Project Settings → Your apps |
-| `VITE_FIREBASE_API_KEY` | Firebase Web API 密钥 | Firebase Console → Project Settings → Your apps |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth 域名 | Firebase Console → Project Settings → Your apps |
-| `VITE_FIREBASE_FIRESTORE_DB` | Firestore 数据库 ID | Firebase Console → Firestore → (default) |
-| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase Storage 存储桶 | Firebase Console → Project Settings → General |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | FCM Sender ID（未使用但必需） | Firebase Console → Project Settings → Cloud Messaging |
-
 ## AI 配置
 
 | 变量 | 描述 | 默认值 | 获取方式 |

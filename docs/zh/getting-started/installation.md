@@ -16,20 +16,11 @@ npm install
 cp .env.example .env
 ```
 
-编辑 `.env`，以下是需要填写的内容。获取各密钥的方式请参考 [Firebase 配置](./firebase-setup.md) 和[环境变量参考](../reference/env-variables.md)。
+编辑 `.env`，以下是需要填写的内容。获取各密钥的方式请参考[环境变量参考](../reference/env-variables.md)。
 
 ### 所有用户都需要填写
 
 ```env
-# Firebase（从 https://console.firebase.google.com/ 获取）
-VITE_FIREBASE_PROJECT_ID="your-project-id"
-VITE_FIREBASE_APP_ID="1:123456789:web:abcdef"
-VITE_FIREBASE_API_KEY="your-firebase-api-key"
-VITE_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
-VITE_FIREBASE_FIRESTORE_DB="your-firestore-database-id"
-VITE_FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
-VITE_FIREBASE_MESSAGING_SENDER_ID="123456789"
-
 # Gemini API 密钥（从 https://aistudio.google.com/app/apikey 获取）
 VITE_GEMINI_API_KEY="your-gemini-api-key"
 
@@ -81,15 +72,6 @@ npm run dev
 
 ## 常见问题
 
-### "Firebase: Error (auth/network-request-failed)"
-
-网络连接问题。检查网络和防火墙设置。如需代理，配置 npm：
-
-```bash
-npm config set proxy http://proxy-host:port
-npm config set https-proxy http://proxy-host:port
-```
-
 ### "API key not valid"
 
 确认 `.env` 中的 `VITE_GEMINI_API_KEY` 与 [Google AI Studio](https://aistudio.google.com/app/apikey) 中的密钥一致。密钥格式为 `AIza...` 开头。
@@ -105,5 +87,4 @@ npm config set https-proxy http://proxy-host:port
 
 ## 下一步
 
-- [Firebase 配置](./firebase-setup.md) — 配置 Firebase Auth 和 Firestore
 - [快速开始](./quick-start.md) — 完成首次剪贴板捕获

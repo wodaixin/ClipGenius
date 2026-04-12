@@ -1,6 +1,6 @@
 # ClipGenius — AI Clipboard Manager
 
-> A professional-grade AI clipboard manager built with React 19 + Vite. Captures images, videos, text, URLs, markdown, and code snippets — then analyzes and syncs them across devices via AI (Gemini, Minimax) and Firebase.
+> A professional-grade AI clipboard manager built with React 19 + Vite. Captures images, videos, text, URLs, markdown, and code snippets — then analyzes them via AI (Gemini, Minimax). All data stored locally via IndexedDB.
 
 [中文版](README_zh.md)
 
@@ -21,7 +21,7 @@ Listens globally for `paste` events and automatically classifies clipboard conte
 Images and videos are stored as base64 data URIs. All other types are stored as raw text.
 
 ### AI Content Analysis
-When signed in and auto-analyze is enabled, AI generates:
+When auto-analyze is enabled, AI generates:
 - **Suggested filename** — e.g. `img_20260402_143052`
 - **Content summary** — one-paragraph description
 
@@ -43,15 +43,8 @@ Text-to-image via Gemini:
 ### Live Voice Session
 Real-time voice interaction powered by Gemini 3.1 Flash Live (`gemini-3.1-flash-live-preview`).
 
-### Cloud Sync (Firebase)
-- **Firestore** stores clipboard history at `/users/{userId}/pastes/{pasteId}`
-- **Firebase Auth** with Google sign-in (popup)
-- **Dual-write logic**: local changes write to IndexedDB immediately; remote Firestore changes overwrite local (cloud wins for metadata)
-- Cloud sync is gated on authentication — guests use the app locally only
-- Chat messages stored at `/users/{userId}/chats/{chatId}/messages/{messageId}` (chat ID = attached paste ID or `"default"`)
-
 ### Local Storage (IndexedDB)
-All data persisted to IndexedDB via `idb` library. App is fully functional offline for guests.
+All data persisted to IndexedDB via `idb` library. App is fully functional offline.
 
 ## Tech Stack
 
@@ -61,7 +54,7 @@ All data persisted to IndexedDB via `idb` library. App is fully functional offli
 | Styling | Tailwind CSS v4 (`@tailwindcss/vite`) |
 | Animations | motion/react |
 | AI SDK | `@google/genai` v1.29.0 |
-| Backend | Firebase Auth + Firestore v12 |
+| Backend | Local-only (IndexedDB) |
 | Local DB | IndexedDB via `idb` v8 |
 | Markdown | `react-markdown` + `rehype-highlight` + `react-syntax-highlighter` |
 | Icons | `lucide-react` |
@@ -85,7 +78,6 @@ See [`docs/en/`](./docs/en/) for full documentation including:
 src/
 ├── App.tsx                      # Thin composition layer
 ├── types.ts                     # PasteItem, ChatMessage, StoredAttachment
-├── firebase.ts                  # Firebase initialization
 ├── main.tsx                     # React entry point
 ├── vite-env.d.ts               # Vite type definitions
 ├── config/                      # AI Prompts configuration
@@ -93,13 +85,11 @@ src/
 │   ├── prompts.en.json          # English prompts
 │   └── prompts.zh.json          # Chinese prompts
 ├── context/
-│   ├── AuthContext.tsx           # Firebase Auth state
 │   ├── AppContext.tsx            # App-level state (drag, modals, settings)
 │   └── ChatContext.tsx           # Chat state
 ├── hooks/
 │   ├── useClipboard.ts           # paste event listener + type detection
 │   ├── usePasteStore.ts          # paste item CRUD, auto-analyze toggle
-│   ├── useFirestoreSync.ts       # Firestore onSnapshot subscription
 │   └── useImageGen.ts            # image generation state
 ├── components/
 │   ├── layout/
@@ -127,17 +117,13 @@ src/
 │   │       ├── gemini-chat.ts   # Gemini chat + thinking stream
 │   │       ├── minimax.ts        # Minimax content analysis
 │   │       └── minimax-chat.ts   # Minimax chat
-│   ├── clipboard/
-│   │   └── clipboardUtils.ts
-│   └── sync/
-│       └── dualSync.ts           # Firestore + IndexedDB dual-write
+│   └── clipboard/
+│       └── clipboardUtils.ts
 ├── lib/
 │   ├── db.ts                     # IndexedDB operations (idb wrapper)
 │   ├── settings.ts                # localStorage settings management
-│   ├── tabSync.ts               # BroadcastChannel cross-tab sync
-│   ├── syncEngine.ts            # SyncEngine singleton (conflict resolution, retry)
-│   ├── utils.ts
-│   └── estimateCardHeight.ts
+│   ├── tabSync.ts               # BroadcastChannel cross-tab sync (local)
+│   └── utils.ts
 └── i18n/
     ├── index.ts
     └── locales/{en,zh}.json
@@ -180,15 +166,6 @@ npm install
 Copy `.env.example` to `.env` and fill in all required values:
 
 ```env
-# Firebase (required for cloud sync)
-VITE_FIREBASE_PROJECT_ID="your-project-id"
-VITE_FIREBASE_APP_ID="1:123456789:web:abcdef"
-VITE_FIREBASE_API_KEY="your-api-key"
-VITE_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
-VITE_FIREBASE_FIRESTORE_DB="your-firestore-database-id"
-VITE_FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
-VITE_FIREBASE_MESSAGING_SENDER_ID="123456789"
-
 # Gemini API key (required for AI features)
 VITE_GEMINI_API_KEY="your-gemini-api-key"
 
@@ -196,7 +173,7 @@ VITE_GEMINI_API_KEY="your-gemini-api-key"
 VITE_APP_URL="http://localhost:3000"
 ```
 
-Get your Firebase config from [Firebase Console](https://console.firebase.google.com/). Get your Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+Get your Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
 ### 3. Run
 
@@ -250,7 +227,6 @@ See [`docs/en/deployment/`](./docs/en/deployment/) for full deployment instructi
 ## Advanced Settings
 
 The app includes an in-app Settings modal (accessible from the PasteZone header) for configuring:
-- Firebase configuration
 - AI provider selection per feature (analysis, chat, live voice, image generation)
 - API keys for Gemini and Minimax
 - Per-feature model overrides
@@ -270,7 +246,6 @@ PasteItem {
   summary?: string
   isAnalyzing: boolean
   isPinned?: boolean      // default false
-  userId: string          // Firebase UID (empty string for guests)
 }
 
 ChatMessage {

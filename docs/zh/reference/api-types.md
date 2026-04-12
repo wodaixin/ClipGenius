@@ -23,31 +23,9 @@ export interface PasteItem {
   summary?: string;         // AI 生成；未分析时为 undefined
   isAnalyzing: boolean;    // AI 分析进行中时为 true
   isPinned?: boolean;      // 默认为 false
-  userId: string;          // Firebase UID；访客为空字符串 ""
-  // 同步字段
   updatedAt?: Date;        // 最后修改时间
-  syncRev?: number;        // 单调递增；0 = 从未同步到云端
   isDeleted?: boolean;     // 软删除标志
   deletedAt?: Date;        // 软删除时间戳
-}
-```
-
-## SyncState
-
-```typescript
-export type SyncStatus = 'synced' | 'pending' | 'conflict';
-
-export interface SyncState {
-  status: SyncStatus;
-  localUpdatedAt: Date;        // 本地版本的 updatedAt
-  localSyncRev: number;       // 本地版本的 syncRev（从未同步为 -1）
-  pendingCloudRev?: number;    // 等待云端确认的 syncRev
-  retryCount: number;          // 当前重试次数
-  lastError?: string;          // 上次错误消息
-}
-
-export interface SyncStore {
-  states: Record<string, SyncState>;
 }
 ```
 

@@ -1,8 +1,6 @@
 import React from "react";
-import { AuthProvider } from "./context/AuthContext";
 import { AppProvider } from "./context/AppContext";
 import { ChatProvider } from "./context/ChatContext";
-import { useFirestoreSync } from "./hooks/useFirestoreSync";
 import { useClipboard } from "./hooks/useClipboard";
 import { PasteZone } from "./components/layout/PasteZone";
 import { HistoryPane } from "./components/layout/HistoryPane";
@@ -10,9 +8,6 @@ import { ChatModal } from "./components/chat/ChatModal";
 import { ImageGenModal } from "./components/imagegen/ImageGenModal";
 
 function AppContent() {
-  // Background Firestore sync (invisible)
-  useFirestoreSync();
-
   // Clipboard event listener
   useClipboard();
 
@@ -30,12 +25,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppProvider>
-        <ChatProvider>
-          <AppContent />
-        </ChatProvider>
-      </AppProvider>
-    </AuthProvider>
+    <AppProvider>
+      <ChatProvider>
+        <AppContent />
+      </ChatProvider>
+    </AppProvider>
   );
 }

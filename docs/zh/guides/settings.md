@@ -4,24 +4,11 @@
 
 ## 存储
 
-设置存储在 `localStorage["clipgenius_settings"]` 中，格式为 `StoredSettings` 对象。它们在会话间持久化，但仅限本地浏览器（不同步到 Firebase）。
+设置存储在 `localStorage["clipgenius_settings"]` 中，格式为 `StoredSettings` 对象。它们在会话间持久化，但仅限本地浏览器。
 
 > **警告**：请勿在公共或共享设备上保存敏感信息。设置存储在明文 localStorage 中。
 
 ## 设置分区
-
-### Firebase 配置
-
-存储应用使用的 Firebase 凭证。变更后需要刷新页面才能生效。
-
-| 字段 | 对应 Env 变量 |
-|---|---|
-| API Key | `VITE_FIREBASE_API_KEY` |
-| Auth Domain | `VITE_FIREBASE_AUTH_DOMAIN` |
-| Project ID | `VITE_FIREBASE_PROJECT_ID` |
-| Storage Bucket | `VITE_FIREBASE_STORAGE_BUCKET` |
-| Messaging Sender ID | `VITE_FIREBASE_MESSAGING_SENDER_ID` |
-| App ID | `VITE_FIREBASE_APP_ID` |
 
 ### AI 配置
 

@@ -73,24 +73,6 @@ export function downloadItem(item: PasteItem): void;
 
 ---
 
-## SyncEngine
-
-**文件**：`src/lib/syncEngine.ts`
-
-```typescript
-export const syncEngine: Engine;
-
-interface Engine {
-  getSyncState(id: string): SyncState | undefined;
-  writeWithSync(item: PasteItem, uid: string, options?: { isDeletion?: boolean }): Promise<{ success: boolean }>;
-  handleCloudChange(cloudItem: PasteItem): { accepted: boolean };
-  migrateLocalItems(uid: string): Promise<{ migrated: number; skipped: number }>;
-  reset(): void;  // 仅供测试使用
-}
-```
-
----
-
 ## IndexedDB 操作
 
 **文件**：`src/lib/db.ts`

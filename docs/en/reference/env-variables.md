@@ -2,18 +2,6 @@
 
 All environment variables must be prefixed with `VITE_` and are embedded at build time. Copy `.env.example` to `.env` and fill in values.
 
-## Firebase Configuration
-
-| Variable | Description | Where to get |
-|---|---|---|
-| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID | Firebase Console → Project Settings → General |
-| `VITE_FIREBASE_APP_ID` | Firebase Web App ID | Firebase Console → Project Settings → Your apps |
-| `VITE_FIREBASE_API_KEY` | Firebase Web API Key | Firebase Console → Project Settings → Your apps |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain | Firebase Console → Project Settings → Your apps |
-| `VITE_FIREBASE_FIRESTORE_DB` | Firestore database ID | Firebase Console → Firestore → (default) |
-| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase Storage bucket | Firebase Console → Project Settings → General |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | FCM Sender ID (unused but required) | Firebase Console → Project Settings → Cloud Messaging |
-
 ## AI Configuration
 
 | Variable | Description | Default | Where to get |

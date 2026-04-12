@@ -23,14 +23,7 @@ npm run dev
 | 源代码 | `code` |
 | 纯文本 | `text` |
 
-## 第三步：登录（可选）
-
-点击 **Login with Google** 启用云同步。你的剪贴板历史将备份到 Firebase 并可在多设备间同步。
-
-- 访客模式可完全离线使用，无需登录
-- 云同步需要 Google 账号
-
-## 第四步：探索功能
+## 第三步：探索功能
 
 ### 预览和编辑
 
@@ -55,13 +48,11 @@ npm run dev
 ### 设置
 
 点击粘贴区顶部的设置图标，可以配置：
-- Firebase 凭证
 - AI 提供商选择（Gemini / Minimax）
 - 按内容类型的 AI 路由配置
 - API 密钥和模型覆盖
 
 ## 下一步
 
-- [Firebase 配置](./firebase-setup.md) — 完整的 Firebase 配置，包括安全规则
 - [AI 分析指南](../guides/ai-analysis.md) — 自动分析功能的工作原理
 - [AI 聊天指南](../guides/chat.md) — 与剪贴板内容对话

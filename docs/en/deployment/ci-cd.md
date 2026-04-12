@@ -43,13 +43,6 @@ jobs:
             --port 3000 \
             --allow-unauthenticated \
             --set-env-vars DISABLE_HMR=true \
-              VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }} \
-              VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }} \
-              VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }} \
-              VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }} \
-              VITE_FIREBASE_FIRESTORE_DB=${{ secrets.VITE_FIREBASE_FIRESTORE_DB }} \
-              VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }} \
-              VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }} \
               VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }} \
               VITE_APP_URL=${{ secrets.VITE_APP_URL }}
         env:
@@ -64,13 +57,6 @@ Store all sensitive values as GitHub repository secrets:
 |---|---|
 | `GCP_PROJECT` | Google Cloud project ID |
 | `GCP_SERVICE_ACCOUNT_KEY` | JSON key for a Cloud Run Deployer service account |
-| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
-| `VITE_FIREBASE_APP_ID` | Firebase app ID |
-| `VITE_FIREBASE_API_KEY` | Firebase API key |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
-| `VITE_FIREBASE_FIRESTORE_DB` | Firestore database ID |
-| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID |
 | `VITE_GEMINI_API_KEY` | Gemini API key |
 | `VITE_APP_URL` | Deployed app URL |
 | `VITE_MINIMAX_API_KEY` | Minimax API key (optional) |

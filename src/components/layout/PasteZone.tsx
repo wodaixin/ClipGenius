@@ -13,10 +13,8 @@ import {
   Layers,
   Search,
   Settings,
-  Globe,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../context/AuthContext";
 import { usePasteStore } from "../../hooks/usePasteStore";
 import { useClipboard } from "../../hooks/useClipboard";
 import { useChat } from "../../context/ChatContext";
@@ -26,7 +24,6 @@ import { cn } from "../../lib/utils";
 
 export function PasteZone() {
   const { t, i18n } = useTranslation();
-  const { user, login, logout } = useAuth();
   const { isDragging, isAutoAnalyzeEnabled, setIsAutoAnalyzeEnabled } = usePasteStore();
   const { handleDragOver, handleDragLeave, handleDrop } = useClipboard();
   const { openChatWithItem } = useChat();
@@ -174,43 +171,7 @@ export function PasteZone() {
               </AnimatePresence>
             </div>
 
-            {user ? (
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-end">
-                  <span className="text-xs font-sans opacity-75 uppercase tracking-widest">
-                    {user.displayName}
-                  </span>
-                  <button
-                    onClick={logout}
-                    className="text-xs font-sans font-bold hover:underline flex items-center gap-1"
-                  >
-                    <span>{t("pasteZone.logout")}</span>
-                  </button>
-                </div>
-                {user.photoURL && (
-                  <img
-                    src={user.photoURL}
-                    alt="User"
-                    className="w-8 h-8 rounded-full border border-[#141414]/10"
-                    onError={(e) => {
-                      const img = e.currentTarget as HTMLImageElement;
-                      img.style.display = "none";
-                      (img.nextElementSibling as HTMLElement).style.display = "flex";
-                    }}
-                  />
-                )}
-                <span className="hidden w-8 h-8 rounded-full border border-[#141414]/10 bg-[#141414] text-white text-xs font-bold items-center justify-center select-none">
-                  {user.displayName?.[0] || user.email?.[0]?.toUpperCase() || "?"}
-                </span>
-              </div>
-            ) : (
-              <button
-                onClick={login}
-                className="px-4 py-2 bg-[#141414] text-white text-xs font-sans uppercase tracking-widest rounded-full hover:bg-[#333] transition-colors"
-              >
-                {t("pasteZone.loginWithGoogle")}
-              </button>
-            )}
+
           </div>
         </div>
 

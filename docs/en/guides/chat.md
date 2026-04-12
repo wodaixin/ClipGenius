@@ -14,7 +14,7 @@ When a paste item is attached to chat:
 
 - **Images and videos**: Stored as base64 `StoredAttachment` objects in the message's `attachments` array, sent as inline data to the model.
 - **Text, URL, markdown, code**: Included as plain text in the system prompt.
-- The `chatId` (paste item ID) is persisted in Firestore at `/users/{userId}/chats/{chatId}/messages/{messageId}` for logged-in users, or in IndexedDB for guests.
+- The `chatId` (paste item ID) is persisted in IndexedDB.
 
 ## Streaming
 

@@ -1,28 +1,5 @@
 # Contexts API 参考
 
-## AuthContext
-
-**文件**：`src/context/AuthContext.tsx`
-
-```typescript
-function useAuth(): AuthContextValue;
-```
-
-### AuthContextValue
-
-```typescript
-interface AuthContextValue {
-  user: User | null;     // Firebase User；访客为 null
-  isLoaded: boolean;      // 初始为 false，onAuthStateChanged 触发后为 true
-  login: () => Promise<void>;   // signInWithPopup(googleProvider)
-  logout: () => Promise<void>;   // signOut()
-}
-```
-
-**抛出**：在 `AuthProvider` 外使用时抛出 `Error`。
-
----
-
 ## AppContext
 
 **文件**：`src/context/AppContext.tsx`
@@ -40,7 +17,7 @@ interface AppContextValue {
   setItems: React.Dispatch<React.SetStateAction<PasteItem[]>>;
   contextItem: PasteItem | null;        // 附加到聊天/图片生成的条目
   setContextItem: (item: PasteItem | null) => void;
-  updateItem: (updated: PasteItem, userId?: string) => Promise<void>;
+  updateItem: (updated: PasteItem) => Promise<void>;
 
   // 图片生成
   isImageGenOpen: boolean;
@@ -68,7 +45,7 @@ interface AppContextValue {
 
 ### 关键实现细节
 
-- `updateItem` 是集中化写入路径：保存到 IndexedDB + 如果提供了 `userId` 则触发 `syncEngine.writeWithSync()`。
+- `updateItem` 是集中化写入路径：保存到 IndexedDB。
 - 自动分析 `useEffect` 使用 `analysisPromises.current`（`Map<id, Promise>`）和 `analyzingRef.current`（`Set<id>`）进行去重，防止重复调用分析。
 - 调用 `closeImageGen()` 时会清除 `generatedImage` 状态。
 

@@ -23,14 +23,7 @@ Press `Cmd/Ctrl+V` anywhere outside input fields to capture what is on your clip
 | Source code | `code` |
 | Plain text | `text` |
 
-## Step 3: Sign In (Optional)
-
-Click **Login with Google** to enable cloud sync. Your clipboard history will be backed up to Firebase and available across devices.
-
-- Guest mode works fully offline without login
-- Cloud sync requires a Google account
-
-## Step 4: Explore Features
+## Step 3: Explore Features
 
 ### Preview and Edit
 
@@ -55,13 +48,11 @@ Click **Generate Image** to open the image generation modal. Describe what you w
 ### Settings
 
 Click the settings icon in the Paste Zone header to configure:
-- Firebase credentials
 - AI provider selection (Gemini / Minimax)
 - Per-content-type AI routing
 - API keys and model overrides
 
 ## Next Steps
 
-- [Firebase Setup](./firebase-setup.md) — Full Firebase configuration including security rules
 - [AI Analysis Guide](../guides/ai-analysis.md) — How auto-analyze works
 - [AI Chat Guide](../guides/chat.md) — Chat with your clipboard content

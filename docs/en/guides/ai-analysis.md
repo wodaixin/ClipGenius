@@ -17,7 +17,7 @@ Provider returns { suggestedName, summary }
     ↓
 updateItem({ ...item, suggestedName, summary, isAnalyzing: false })
     ↓
-Result saved to IndexedDB + synced to Firestore
+Result saved to IndexedDB
 ```
 
 The `AppContext` uses a `ref`-based deduplication map (`analysisPromises.current`) to prevent duplicate analysis calls if the same item ID appears in the items array multiple times (e.g. due to StrictMode re-renders).

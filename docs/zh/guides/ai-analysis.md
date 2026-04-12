@@ -17,7 +17,7 @@ AppContext 自动分析 Effect 检测到 isAnalyzing = true
     ↓
 updateItem({ ...item, suggestedName, summary, isAnalyzing: false })
     ↓
-结果保存到 IndexedDB + 同步到 Firestore
+结果保存到 IndexedDB
 ```
 
 `AppContext` 使用基于 `ref` 的去重映射（`analysisPromises.current`）来防止同一 ID 的条目在 items 数组中多次出现时（如 StrictMode 重渲染导致）重复调用分析。

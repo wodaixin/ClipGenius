@@ -112,15 +112,6 @@
     "cancel": "取消",
     "reloadPrompt": "设置已保存。需要刷新页面以应用更改，是否立即刷新？",
     "warning": "这些设置将存储在浏览器本地存储中。请勿在公共设备上保存敏感信息。刷新页面后设置将生效。",
-    "firebase": {
-      "title": "Firebase 配置",
-      "apiKey": "API 密钥",
-      "authDomain": "认证域名",
-      "projectId": "项目 ID",
-      "storageBucket": "存储桶",
-      "messagingSenderId": "消息发送者 ID",
-      "appId": "应用 ID"
-    },
     "ai": {
       "title": "AI 配置",
       "geminiApiKey": "Gemini API 密钥",

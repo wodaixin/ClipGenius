@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { useChat } from "../../context/ChatContext";
 import { useAppContext } from "../../context/AppContext";
-import { useAuth } from "../../context/AuthContext";
 import { cn } from "../../lib/utils";
 import { StoredAttachment } from "../../types";
 
@@ -78,7 +77,6 @@ function AttachmentPreview({ item }: { item: StoredAttachment }) {
 
 export function ChatModal() {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const {
     chatMessages,
     chatInput,

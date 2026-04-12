@@ -1,5 +1,5 @@
 Project Overview
-ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite + TypeScript. It captures clipboard content (images, videos, text, URLs), analyzes it with AI (Gemini, Minimax), and syncs across devices via Firebase. It’s designed for hosting on Google Cloud Run.
+ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite + TypeScript. It captures clipboard content (images, videos, text, URLs), analyzes it with AI (Gemini, Minimax). All data stored locally via IndexedDB. Designed for local-first usage.
 
 Commands
 - npm run dev: Start dev server
@@ -37,18 +37,12 @@ Code Style Guidelines
 
 Architecture Overview
 - Data flow
-  - Clipboard capture → App context/state → IndexedDB persistence → Firestore cloud sync → AI analysis
+  - Clipboard capture → App context/state → IndexedDB persistence → AI analysis
 - Provider Architecture
   - Gemini default; Minimax alternative; per-feature routing via VITE provider settings
   - Capability table listing features and supported models
-- Auth Pattern
-  - Firebase Auth for signed-in users; guests can run locally; cloud-synced items require login
-- Firestore Paths
-  - /users/{userId}/pastes/{pasteId}
-  - /users/{userId}/chats/{chatId}/messages/{messageId}
 
 Environment Variables
-- VITE_FIREBASE_*: Firebase project config
 - VITE_GEMINI_API_KEY or VITE_MINIMAX_API_KEY: AI service keys
 - VITE_<FEATURE>_PROVIDER: Select provider for a feature (gemini or minimax)
 - VITE_<FEATURE>_MODEL: Optional model override

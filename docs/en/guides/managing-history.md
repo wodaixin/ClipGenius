@@ -38,11 +38,11 @@ Double-click the name or summary on any card, or click the save button after foc
 
 ## Delete
 
-Click the delete icon on any card to soft-delete it. The item is marked `isDeleted: true` with a `deletedAt` timestamp, removed from the UI immediately, and synced to Firestore if logged in.
+Click the delete icon on any card to soft-delete it. The item is marked `isDeleted: true` with a `deletedAt` timestamp, removed from the UI immediately.
 
 ## Clear Unpinned
 
-The **Clear Unpinned** action (available in the History Pane header or context menu) soft-deletes all non-pinned items in bulk. Pinned items are preserved. The operation is optimistic: items are removed from the UI immediately while Firestore writes fan out asynchronously.
+The **Clear Unpinned** action (available in the History Pane header or context menu) soft-deletes all non-pinned items in bulk. Pinned items are preserved.
 
 ## Content Preview Truncation
 

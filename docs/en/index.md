@@ -1,6 +1,6 @@
 # ClipGenius Documentation
 
-> **ClipGenius** — Professional-grade AI clipboard manager. Captures images, videos, text, URLs, markdown, and code snippets; analyzes them with AI (Gemini / Minimax); syncs across devices via Firebase.
+> **ClipGenius** — Professional-grade AI clipboard manager. Captures images, videos, text, URLs, markdown, and code snippets; analyzes them with AI (Gemini / Minimax); all data stored locally via IndexedDB.
 
 ## Navigation
 
@@ -9,7 +9,6 @@ Install, configure, and get up and running in minutes.
 
 - [Installation](./getting-started/installation.md)
 - [Quick Start](./getting-started/quick-start.md)
-- [Firebase Setup](./getting-started/firebase-setup.md)
 
 ### [Guides](./guides/)
 Step-by-step explanations of every feature.
@@ -18,7 +17,6 @@ Step-by-step explanations of every feature.
 - [AI Analysis](./guides/ai-analysis.md)
 - [AI Chat](./guides/chat.md)
 - [Image Generation](./guides/image-generation.md)
-- [Sync](./guides/sync.md)
 - [Settings](./guides/settings.md)
 - [Managing History](./guides/managing-history.md)
 
@@ -27,8 +25,6 @@ Deep dives into system design and key technical decisions.
 
 - [Overview](./architecture/overview.md)
 - [Provider Model](./architecture/provider-model.md)
-- [Data Flow](./architecture/data-flow.md)
-- [Sync Strategy](./architecture/sync-strategy.md)
 - [Cross-Tab Sync](./architecture/cross-tab-sync.md)
 
 ### [Reference](./reference/)
@@ -39,7 +35,6 @@ Complete API surface: hooks, contexts, services, types.
 - [Services](./reference/api-services.md)
 - [Types](./reference/api-types.md)
 - [Environment Variables](./reference/env-variables.md)
-- [Firestore Schema](./reference/firestore-schema.md)
 - [Prompts](./reference/prompts.md)
 
 ### [Deployment](./deployment/)
@@ -65,6 +60,6 @@ Contribute code, add new AI providers, add new paste types.
 | **AI Analysis** | Auto-generates suggested name and summary per item |
 | **AI Chat** | Multimodal chat with streaming thinking, live voice support |
 | **Image Generation** | Standard (free) and Pro (paid AI Studio key) modes |
-| **Cloud Sync** | Firebase Firestore, offline-first for guests |
+| **Local Storage** | IndexedDB, fully offline-capable |
 | **Cross-Tab Sync** | BroadcastChannel + localStorage fallback |
 | **i18n** | English and Chinese UI |

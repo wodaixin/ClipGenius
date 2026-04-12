@@ -28,7 +28,6 @@ feat: add audio paste type support
 fix: prevent duplicate analysis on StrictMode remount
 docs: add AI chat guide
 chore: update Gemini SDK to v1.30.0
-refactor: extract sync logic into syncEngine
 ```
 
 类型：`feat`、`fix`、`docs`、`chore`、`refactor`、`test`。

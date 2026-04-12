@@ -97,4 +97,3 @@ Add translation keys for the new type in `src/i18n/locales/en.json` and `zh.json
 2. Verify it is classified as `audio`
 3. Verify the preview renders the `<audio>` element
 4. Verify AI analysis works (if supported)
-5. Verify cloud sync works

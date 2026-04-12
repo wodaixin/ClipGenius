@@ -20,14 +20,6 @@ interface SettingsModalProps {
 }
 
 interface Settings {
-  // Firebase
-  firebaseApiKey: string;
-  firebaseAuthDomain: string;
-  firebaseProjectId: string;
-  firebaseStorageBucket: string;
-  firebaseMessagingSenderId: string;
-  firebaseAppId: string;
-
   // AI Providers
   geminiApiKey: string;
   minimaxApiKey: string;
@@ -65,12 +57,6 @@ const DEFAULT_ANALYSIS_PROVIDERS: ContentTypeAnalysisSettings = {
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { t } = useTranslation();
   const [settings, setSettings] = useState<Settings>({
-    firebaseApiKey: "",
-    firebaseAuthDomain: "",
-    firebaseProjectId: "",
-    firebaseStorageBucket: "",
-    firebaseMessagingSenderId: "",
-    firebaseAppId: "",
     geminiApiKey: "",
     minimaxApiKey: "",
     minimaxBaseUrl: "https://api.minimaxi.com/anthropic",
@@ -164,52 +150,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
             <div className="space-y-8">
-              {/* Firebase Configuration */}
-              <section>
-                <h4 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  {t("settings.firebase.title")}
-                </h4>
-                <div className="space-y-3">
-                  <InputField
-                    label={t("settings.firebase.apiKey")}
-                    value={settings.firebaseApiKey}
-                    onChange={(v) => handleChange("firebaseApiKey", v)}
-                    placeholder="AIza..."
-                  />
-                  <InputField
-                    label={t("settings.firebase.authDomain")}
-                    value={settings.firebaseAuthDomain}
-                    onChange={(v) => handleChange("firebaseAuthDomain", v)}
-                    placeholder="your-app.firebaseapp.com"
-                  />
-                  <InputField
-                    label={t("settings.firebase.projectId")}
-                    value={settings.firebaseProjectId}
-                    onChange={(v) => handleChange("firebaseProjectId", v)}
-                    placeholder="your-project-id"
-                  />
-                  <InputField
-                    label={t("settings.firebase.storageBucket")}
-                    value={settings.firebaseStorageBucket}
-                    onChange={(v) => handleChange("firebaseStorageBucket", v)}
-                    placeholder="your-app.appspot.com"
-                  />
-                  <InputField
-                    label={t("settings.firebase.messagingSenderId")}
-                    value={settings.firebaseMessagingSenderId}
-                    onChange={(v) => handleChange("firebaseMessagingSenderId", v)}
-                    placeholder="123456789"
-                  />
-                  <InputField
-                    label={t("settings.firebase.appId")}
-                    value={settings.firebaseAppId}
-                    onChange={(v) => handleChange("firebaseAppId", v)}
-                    placeholder="1:123:web:abc"
-                  />
-                </div>
-              </section>
-
               {/* AI Configuration */}
               <section>
                 <h4 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">

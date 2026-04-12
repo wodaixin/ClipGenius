@@ -1,14 +1,12 @@
 import { useEffect, useCallback } from "react";
 import { PasteItem } from "../types";
 import { usePasteStore } from "./usePasteStore";
-import { useAuth } from "../context/AuthContext";
 import { format } from "date-fns";
 
 // Module-level: ignore paste events within 500ms (handles StrictMode double-mount)
 let lastPasteTime = 0;
 
 export function useClipboard() {
-  const { user } = useAuth();
   const { addItem, setIsDragging, isAutoAnalyzeEnabled } = usePasteStore();
 
   const handlePaste = useCallback(
@@ -44,8 +42,6 @@ export function useClipboard() {
               suggestedName: `${type === "video" ? "vid" : "img"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
               isAnalyzing: isAutoAnalyzeEnabled,
               isPinned: false,
-              userId: user?.uid ?? "",
-              syncRev: 0,
               updatedAt: new Date(),
             };
             addItem(newItem);
@@ -77,8 +73,6 @@ export function useClipboard() {
                 suggestedName: `vid_${format(new Date(), "yyyyMMdd_HHmmss")}`,
                 isAnalyzing: isAutoAnalyzeEnabled,
                 isPinned: false,
-                userId: user?.uid ?? "",
-                syncRev: 0,
                 updatedAt: new Date(),
               };
               addItem(newItem);
@@ -95,8 +89,6 @@ export function useClipboard() {
                 suggestedName: `link_${format(new Date(), "yyyyMMdd_HHmmss")}`,
                 isAnalyzing: isAutoAnalyzeEnabled,
                 isPinned: false,
-                userId: user?.uid ?? "",
-                syncRev: 0,
                 updatedAt: new Date(),
               };
               addItem(newItem);
@@ -118,14 +110,12 @@ export function useClipboard() {
           suggestedName: `${type === "url" ? "link" : type === "markdown" ? "doc" : type === "code" ? `${codeLang}_snippet` : "note"}_${format(new Date(), "yyyyMMdd_HHmmss")}`,
           isAnalyzing: isAutoAnalyzeEnabled,
           isPinned: false,
-          userId: user?.uid ?? "",
-          syncRev: 0,
           updatedAt: new Date(),
         };
         addItem(newItem);
       }
     },
-    [user, isAutoAnalyzeEnabled, addItem]
+    [isAutoAnalyzeEnabled, addItem]
   );
 
   useEffect(() => {

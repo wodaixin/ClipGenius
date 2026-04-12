@@ -21,7 +21,6 @@ import {
 import { PasteItem } from "../../types";
 import { PastePreview } from "./PastePreview";
 import { cn } from "../../lib/utils";
-import { useAuth } from "../../context/AuthContext";
 import { usePasteStore } from "../../hooks/usePasteStore";
 import { useChat } from "../../context/ChatContext";
 import { useImageGen } from "../../hooks/useImageGen";
@@ -33,7 +32,6 @@ interface PasteCardProps {
 
 export function PasteCard({ item }: PasteCardProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const {
     copiedId,
     editingItemId,
@@ -133,7 +131,7 @@ export function PasteCard({ item }: PasteCardProps) {
               <Download className="w-4 h-4 xl:w-5 xl:h-5" />
             </button>
 
-            {user && (
+            {(
               <>
                 <button
                   onClick={(e) => { e.stopPropagation(); openChatWithItem(item); }}

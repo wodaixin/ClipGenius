@@ -8,7 +8,6 @@
 ├── docs/                     # 文档（en/ 和 zh/）
 ├── public/                   # 静态资源
 ├── .env.example              # 环境变量模板
-├── firestore.indexes.json    # Firestore 复合索引定义
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
@@ -22,7 +21,6 @@ src/
 ├── App.tsx                     # 薄组合层：provider wrappers + AppContent
 ├── main.tsx                   # React 19 createRoot, StrictMode, i18n
 ├── types.ts                   # 核心类型：PasteItem, ChatMessage, PasteType 等
-├── firebase.ts                # Firebase 初始化 + 命名导出
 ├── vite-env.d.ts
 ├── index.css                  # Tailwind v4 导入，全局样式，滚动条
 │
@@ -33,14 +31,12 @@ src/
 │   └── README.md
 │
 ├── context/                   # React Context providers
-│   ├── AuthContext.tsx         # Firebase Auth 状态
 │   ├── AppContext.tsx          # 条目、图片生成、自动分析
 │   └── ChatContext.tsx        # 聊天状态、流式传输、语音对话
 │
 ├── hooks/                     # 自定义钩子
 │   ├── useClipboard.ts        # paste 监听 + 类型检测
-│   ├── usePasteStore.ts       # CRUD、搜索、同步触发
-│   ├── useFirestoreSync.ts   # Firestore onSnapshot 订阅
+│   ├── usePasteStore.ts       # CRUD、搜索
 │   └── useImageGen.ts        # 从 AppContext 重新导出图片生成状态
 │
 ├── components/
@@ -70,17 +66,14 @@ src/
 │   │       ├── gemini-chat.ts # Gemini 流式聊天 + 思考
 │   │       ├── minimax.ts   # Minimax 内容分析
 │   │       └── minimax-chat.ts # Minimax 流式聊天
-│   ├── clipboard/
-│   │   └── clipboardUtils.ts # copyItemToClipboard, downloadItem
-│   └── sync/
-│       └── dualSync.ts       # 遗留/已废弃的同步辅助函数
+│   └── clipboard/
+│       └── clipboardUtils.ts # copyItemToClipboard, downloadItem
 │
 ├── lib/                       # 核心工具
 │   ├── db.ts                 # 通过 idb 的 IndexedDB（粘贴 + 聊天持久化）
 │   ├── utils.ts              # cn() 工具函数
 │   ├── settings.ts           # localStorage 设置管理
-│   ├── tabSync.ts           # BroadcastChannel + storage 事件跨标签页同步
-│   ├── syncEngine.ts        # SyncEngine 单例（冲突解决、重试）
+│   ├── tabSync.ts           # BroadcastChannel + storage 事件跨标签页同步（本地编辑保护）
 │   └── estimateCardHeight.ts # 虚拟列表条目高度估算
 │
 └── i18n/

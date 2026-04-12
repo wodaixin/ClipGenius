@@ -16,20 +16,11 @@ Copy `.env.example` to `.env` and fill in your values:
 cp .env.example .env
 ```
 
-Edit `.env` with the following values. See [Firebase Setup](../getting-started/firebase-setup.md) and the [Environment Variables Reference](../reference/env-variables.md) for where to get each key.
+Edit `.env` with the following values. See the [Environment Variables Reference](../reference/env-variables.md) for where to get each key.
 
 ### Required for All Users
 
 ```env
-# Firebase (get from https://console.firebase.google.com/)
-VITE_FIREBASE_PROJECT_ID="your-project-id"
-VITE_FIREBASE_APP_ID="1:123456789:web:abcdef"
-VITE_FIREBASE_API_KEY="your-firebase-api-key"
-VITE_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
-VITE_FIREBASE_FIRESTORE_DB="your-firestore-database-id"
-VITE_FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
-VITE_FIREBASE_MESSAGING_SENDER_ID="123456789"
-
 # Gemini API Key (get from https://aistudio.google.com/app/apikey)
 VITE_GEMINI_API_KEY="your-gemini-api-key"
 
@@ -81,15 +72,6 @@ You should see the ClipGenius Paste Zone. Press `Cmd/Ctrl+V` anywhere outside of
 
 ## Common Issues
 
-### "Firebase: Error (auth/network-request-failed)"
-
-Network connectivity issue. Check your internet connection and firewall. If behind a proxy, configure `npm` to use your proxy:
-
-```bash
-npm config set proxy http://proxy-host:port
-npm config set https-proxy http://proxy-host:port
-```
-
 ### "API key not valid"
 
 Make sure `VITE_GEMINI_API_KEY` in `.env` matches the key from [Google AI Studio](https://aistudio.google.com/app/apikey). Keys are prefixed with `AIza...`.
@@ -105,5 +87,4 @@ Set `VITE_CORS_PROXY_URL` to a working CORS proxy. The default `https://corsprox
 
 ## Next Steps
 
-- [Firebase Setup](./firebase-setup.md) — Configure Firebase Auth and Firestore
 - [Quick Start](./quick-start.md) — Make your first capture

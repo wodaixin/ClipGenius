@@ -60,18 +60,6 @@ Manages clipboard items and UI state. `filteredItems` is derived state: sorted b
 
 ---
 
-## useFirestoreSync
-
-```typescript
-function useFirestoreSync(): void
-```
-
-Side-effect-only hook. Subscribes to Firestore `onSnapshot` on mount when the user is logged in. On login, calls `syncEngine.migrateLocalItems()`. Handles soft-delete propagation from cloud changes.
-
-**Parameters**: None.
-
----
-
 ## useImageGen
 
 ```typescript

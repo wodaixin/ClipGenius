@@ -1,20 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { ChatMessage } from "../types";
-import { useAuth } from "../context/AuthContext";
 import { useAppContext } from "../context/AppContext";
-import {
-  db,
-  collection,
-  doc,
-  setDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  getDocs,
-  deleteDoc,
-  serverTimestamp,
-} from "../firebase";
 import {
   saveChatMessage,
   getChatMessages,
@@ -54,10 +41,9 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const { contextItem, setContextItem } = useAppContext();
 
-  // Per-chat message storage: Map&lt;chatId, ChatMessage[]&gt;
+  // Per-chat message storage: Map<chatId, ChatMessage[]>
   const [messagesMap, setMessagesMap] = useState<Map<string, ChatMessage[]>>(new Map());
   const [displayChatId, setDisplayChatId] = useState<string>("default");
   const [chatInput, setChatInput] = useState("");
@@ -83,69 +69,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     isSendingRef.current = false;
   }, []);
 
-  // Sync chat messages from cloud when chat is open
+  // Load local chat messages on mount
   useEffect(() => {
-    if (!user || !isChatOpen) return;
-
-    const q = query(
-      collection(db, `users/${user.uid}/chats/${displayChatId}/messages`),
-      orderBy("timestamp", "asc")
-    );
-
-    // Initial load — onSnapshot doesn't fire on first subscription if data is empty
-    getDocs(q).then((snapshot) => {
-      const firestoreMessages: ChatMessage[] = snapshot.docs.map((d) => {
-        const data = d.data();
-        return {
-          ...data,
-          timestamp: data.timestamp
-            ? new Date(data.timestamp.seconds * 1000)
-            : new Date(),
-        } as ChatMessage;
-      });
-      setMessagesMap((prev) => {
-        const next = new Map(prev);
-        next.set(displayChatId, firestoreMessages);
-        return next;
-      });
-    });
-
-    // Real-time updates
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const firestoreMessages: ChatMessage[] = snapshot.docs.map((d) => {
-        const data = d.data();
-        return {
-          ...data,
-          timestamp: data.timestamp
-            ? new Date(data.timestamp.seconds * 1000)
-            : new Date(),
-        } as ChatMessage;
-      });
-
-      // Merge: Firestore is source of truth, append local-only messages (optimistic updates not yet in cloud)
-      setMessagesMap((prev) => {
-        const prevChatMsgs = prev.get(displayChatId) ?? [];
-        const firestoreIds = new Set(firestoreMessages.map((fm) => fm.id));
-        const localOnly = prevChatMsgs.filter((m) => !firestoreIds.has(m.id) && m.chatId === displayChatId);
-        const merged: ChatMessage[] = firestoreMessages.map((fm) => {
-          const local = prevChatMsgs.find((m) => m.id === fm.id);
-          if (local) {
-            return { ...fm, attachments: local.attachments ?? fm.attachments };
-          }
-          return fm;
-        });
-        const next = new Map(prev);
-        next.set(displayChatId, [...merged, ...localOnly]);
-        return next;
-      });
-    });
-
-    return () => unsubscribe();
-  }, [user, isChatOpen, displayChatId]);
-
-  // Load local chat messages on mount (for guest users)
-  useEffect(() => {
-    if (user) return;
     getChatMessages(displayChatId).then((msgs) => {
       setMessagesMap((prev) => {
         const next = new Map(prev);
@@ -153,7 +78,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         return next;
       });
     });
-  }, [user, displayChatId]);
+  }, [displayChatId]);
 
   const openChatWithItem = useCallback(
     (item: import("../types").PasteItem | null) => {
@@ -166,7 +91,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         setChatInput("");
         setDisplayChatId(newChatId);
         setCurrentChatId(newChatId);
-        // Don't clear messages here - let the effect load them from Firestore/IndexedDB
+        // Load messages for the new chat
+        getChatMessages(newChatId).then((msgs) => {
+          setMessagesMap((prev) => {
+            const next = new Map(prev);
+            next.set(newChatId, msgs);
+            return next;
+          });
+        });
       }
     },
     [displayChatId, isChatOpen, setContextItem]
@@ -185,23 +117,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       return next;
     });
 
-    if (user) {
-      try {
-        const q = query(collection(db, `users/${user.uid}/chats/${currentChatId}/messages`));
-        const snapshot = await getDocs(q);
-        await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
-      } catch (error) {
-        console.error("Failed to clear chat:", error);
-      }
-    } else {
-      // For guest users, clear from IndexedDB
-      try {
-        await clearChatMessages(currentChatId);
-      } catch (error) {
-        console.error("Failed to clear local chat:", error);
-      }
+    // Clear from IndexedDB
+    try {
+      await clearChatMessages(currentChatId);
+    } catch (error) {
+      console.error("Failed to clear local chat:", error);
     }
-  }, [user, currentChatId]);
+  }, [currentChatId]);
 
   const _handleStartLiveSession = useCallback(async () => {
     try {
@@ -284,14 +206,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       return next;
     });
 
-    if (user) {
-      void setDoc(doc(db, `users/${user.uid}/chats/${targetChatId}/messages`, userMsgId), {
-        ...userMsg,
-        timestamp: serverTimestamp(),
-      }).catch(console.error);
-    } else {
-      await saveChatMessage(userMsg);
-    }
+    // Save to IndexedDB
+    await saveChatMessage(userMsg);
 
     // Build history from the target chat's current messages (captured from Map at function start)
     const targetMessages = messagesMap.get(targetChatId) ?? [];
@@ -328,13 +244,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       next.set(targetChatId, [...chatMsgs, modelMsg]);
       return next;
     });
-
-    if (user) {
-      void setDoc(doc(db, `users/${user.uid}/chats/${targetChatId}/messages`, modelMsgId), {
-        ...modelMsg,
-        timestamp: serverTimestamp(),
-      }).catch(console.error);
-    }
 
     const provider = getChatProvider();
     const abortController = new AbortController();
@@ -389,9 +298,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             next.set(targetChatId, chatMsgs.filter((m) => m.id !== modelMsgId));
             return next;
           });
-          void deleteDoc(doc(db, `users/${user.uid}/chats/${targetChatId}/messages`, modelMsgId)).catch(
-            console.error
-          );
           setIsChatLoading(false);
           setIsStreaming(false);
           isSendingRef.current = false;
@@ -401,17 +307,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       }
 
       const finalMsg = { ...modelMsg, text: fullText || t("chat.noResponse"), isResponding: false };
-      if (user) {
-        void setDoc(
-          doc(db, `users/${user.uid}/chats/${targetChatId}/messages`, modelMsgId),
-          {
-            ...finalMsg,
-            timestamp: serverTimestamp(),
-          }
-        ).catch(console.error);
-      } else {
-        await saveChatMessage(finalMsg);
-      }
+      await saveChatMessage(finalMsg);
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         setMessagesMap((prev) => {
@@ -430,9 +326,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             ? t("errors.network")
             : message
         );
-        void deleteDoc(doc(db, `users/${user.uid}/chats/${targetChatId}/messages`, modelMsgId)).catch(
-          console.error
-        );
         setMessagesMap((prev) => {
           const chatMsgs = prev.get(targetChatId) ?? [];
           const next = new Map(prev);
@@ -447,7 +340,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       isSendingRef.current = false;
       abortControllerRef.current = null;
     }
-  }, [chatInput, messagesMap, contextItem, user, setContextItem, currentChatId, t]);
+  }, [chatInput, messagesMap, contextItem, setContextItem, currentChatId, t]);
 
   const clearChatError = useCallback(() => setChatError(null), []);
 

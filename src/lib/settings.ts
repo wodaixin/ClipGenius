@@ -13,14 +13,6 @@ export interface ContentTypeAnalysisSettings {
 }
 
 export interface StoredSettings {
-  // Firebase (not used by AI, but part of Settings interface)
-  firebaseApiKey: string;
-  firebaseAuthDomain: string;
-  firebaseProjectId: string;
-  firebaseStorageBucket: string;
-  firebaseMessagingSenderId: string;
-  firebaseAppId: string;
-
   // AI Providers
   geminiApiKey: string;
   minimaxApiKey: string;

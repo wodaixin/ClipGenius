@@ -3,7 +3,6 @@ import { PasteItem } from "../types";
 import { getPastes, updatePaste as updateLocalPaste } from "../lib/db";
 import { generateImage } from "../services/ai/generateImage";
 import { analyzeContent } from "../services/ai/analyzeContent";
-import { syncEngine } from "../lib/syncEngine";
 
 export type ImageQuality = "standard" | "pro";
 export type ImageSize = "1K" | "2K" | "4K";
@@ -13,7 +12,7 @@ interface AppContextValue {
   setItems: React.Dispatch<React.SetStateAction<PasteItem[]>>;
   contextItem: PasteItem | null;
   setContextItem: (item: PasteItem | null) => void;
-  updateItem: (updated: PasteItem, userId?: string) => Promise<void>;
+  updateItem: (updated: PasteItem) => Promise<void>;
   // Image Gen
   isImageGenOpen: boolean;
   imagePrompt: string;
@@ -81,14 +80,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Centralized updateItem function
-  const updateItem = useCallback(async (updated: PasteItem, userId?: string) => {
+  const updateItem = useCallback(async (updated: PasteItem) => {
     await updateLocalPaste(updated);
     setItemsState((prev: PasteItem[]) =>
       prev.map((i) => (i.id === updated.id ? updated : i))
     );
-    if (userId) {
-      await syncEngine.writeWithSync(updated, userId);
-    }
   }, []);
 
   // Auto-analyze: watch for items with isAnalyzing=true (CENTRALIZED - runs once per app)

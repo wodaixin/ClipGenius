@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite. It captures clipboard content (images, videos, text, URLs), analyzes it with AI (Gemini, Minimax), and syncs across devices via Firebase. Designed for Google Cloud Run deployment via AI Studio.
+ClipGenius is a professional-grade AI clipboard manager built with React 19 + Vite. It captures clipboard content (images, videos, text, URLs), analyzes it with AI (Gemini, Minimax). All data stored locally via IndexedDB. Designed for local-first usage with optional cloud backup via Google Cloud Run.
 
 ## Commands
 
@@ -22,8 +22,7 @@ npm run clean    # Remove dist/ directory
 
 - **Clipboard capture**: `useClipboard` hook listens for `paste` events on `window` — detects images, videos, text, URLs, markdown, and code (with language detection)
 - **Paste handling**: `usePasteStore` manages all paste items; state lives in `AppContext` and is persisted to IndexedDB via `src/lib/db.ts` (using `idb`)
-- **Cloud sync**: `useFirestoreSync` subscribes to Firestore `onSnapshot` — cloud wins for metadata (remote changes overwrite local). `dualSync` writes local changes to cloud only when user is authenticated
-- **AI analysis**: triggered automatically for logged-in users (when `isAutoAnalyzeEnabled` is true); `GoogleGenAI` instances are created per-call to pick up the latest API key
+- **AI analysis**: triggered automatically when `isAutoAnalyzeEnabled` is true; `GoogleGenAI` instances are created per-call to pick up the latest API key
 
 ### App Structure
 
@@ -32,8 +31,8 @@ npm run clean    # Remove dist/ directory
 | Directory | Files | Purpose |
 |---|---|---|
 | `src/config/` | `prompts.ts`, `prompts.en.json`, `prompts.zh.json` | AI prompts configuration |
-| `src/context/` | `AuthContext`, `AppContext`, `ChatContext` | Auth, app state, chat state |
-| `src/hooks/` | `useClipboard`, `usePasteStore`, `useImageGen`, `useFirestoreSync` | Core business logic |
+| `src/context/` | `AppContext`, `ChatContext` | App state, chat state |
+| `src/hooks/` | `useClipboard`, `usePasteStore`, `useImageGen` | Core business logic |
 | `src/components/chat/` | `ChatModal`, `ChatContextItem` | Chat UI and inline context preview |
 | `src/components/imagegen/` | `ImageGenModal` | Image generation UI |
 | `src/components/layout/` | `PasteZone`, `HistoryPane`, `SettingsModal` | Main layout panels and settings |
@@ -41,8 +40,7 @@ npm run clean    # Remove dist/ directory
 | `src/services/ai/` | `analyzeContent`, `generateImage`, `startLiveSession`, plus `providers/` | AI service layer |
 | `src/services/ai/providers/` | `index.ts`, `types.ts`, `capabilities.ts`, `gemini.ts`, `minimax.ts`, etc. | Provider implementations |
 | `src/services/clipboard/` | `clipboardUtils` | Clipboard utility functions |
-| `src/services/sync/` | `dualSync` | Firestore + IndexedDB dual-write logic |
-| `src/lib/` | `db.ts`, `utils.ts`, `estimateCardHeight.ts` | IndexedDB wrapper, utilities |
+| `src/lib/` | `db.ts`, `utils.ts`, `tabSync.ts` | IndexedDB wrapper, utilities, cross-tab sync |
 | `src/i18n/` | `index.ts`, `locales/en.json`, `locales/zh.json` | i18next configuration and translations |
 
 ### Provider Architecture
@@ -83,7 +81,6 @@ PasteItem: {
   summary?: string
   isAnalyzing: boolean
   isPinned: boolean     // always present (initialized to false), optional in type
-  userId: string         // Firebase UID; empty string for guests (guests are not synced to cloud)
 }
 
 ChatMessage: {
@@ -107,8 +104,6 @@ StoredAttachment: {
 LiveSessionConnection: { close: () => void }
 ```
 
-Firestore paths: `/users/{userId}/pastes/{pasteId}`, `/users/{userId}/chats/{chatId}/messages/{messageId}`
-
 Chat ID equals the attached paste's `id`, or `"default"` when no paste is attached.
 
 ### AI Integration
@@ -122,7 +117,7 @@ Chat ID equals the attached paste's `id`, or `"default"` when no paste is attach
 
 ### Auth
 
-Firebase Auth handles Google sign-in via popup. Auth state consumed via `useAuth()` from `AuthContext`. Guests (no login) can use the app locally; cloud sync is gated on `user.uid`.
+This is a local-only app. No authentication is required.
 
 ## Environment Variables
 
@@ -130,7 +125,6 @@ All prefixed with `VITE_` (required in `.env`, see `.env.example`):
 
 | Variable | Purpose |
 |---|---|
-| `VITE_FIREBASE_*` | Firebase project config (projectId, appId, apiKey, authDomain, firestoreDb, storageBucket, messagingSenderId) |
 | `VITE_GEMINI_API_KEY` | Default API key for all AI features |
 | `VITE_*_PROVIDER` | Per-feature provider selection (`gemini` or `minimax`) |
 | `VITE_*_MODEL` | Per-feature model override |
@@ -151,7 +145,6 @@ Key packages:
 
 - `react`, `react-dom` — UI framework (v19)
 - `@google/genai` — Gemini AI SDK (v1.29.0)
-- `firebase` — Auth + Firestore (v12)
 - `idb` — IndexedDB wrapper (v8)
 - `motion` — Animations (v12)
 - `react-markdown`, `rehype-highlight`, `react-syntax-highlighter` — Markdown and code rendering

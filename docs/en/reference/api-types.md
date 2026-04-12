@@ -23,31 +23,9 @@ export interface PasteItem {
   summary?: string;         // AI-generated; undefined if not yet analyzed
   isAnalyzing: boolean;    // true while AI analysis is in progress
   isPinned?: boolean;      // default false
-  userId: string;          // Firebase UID; empty string "" for guests
-  // Sync fields
   updatedAt?: Date;        // last modification time
-  syncRev?: number;        // monotonically increasing; 0 = never synced to cloud
   isDeleted?: boolean;     // soft-delete flag
   deletedAt?: Date;        // soft-delete timestamp
-}
-```
-
-## SyncState
-
-```typescript
-export type SyncStatus = 'synced' | 'pending' | 'conflict';
-
-export interface SyncState {
-  status: SyncStatus;
-  localUpdatedAt: Date;        // updatedAt of the local version
-  localSyncRev: number;        // syncRev of the local version (-1 if never synced)
-  pendingCloudRev?: number;    // syncRev waiting for cloud acknowledgement
-  retryCount: number;          // current retry attempt count
-  lastError?: string;          // last error message
-}
-
-export interface SyncStore {
-  states: Record<string, SyncState>;
 }
 ```
 

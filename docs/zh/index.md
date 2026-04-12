@@ -1,6 +1,6 @@
 # ClipGenius 文档
 
-> **ClipGenius** — 专业级 AI 剪贴板管理器。捕获图片、视频、文本、链接、Markdown 和代码片段；通过 AI（Gemini / Minimax）进行分析；通过 Firebase 在多设备间同步。
+> **ClipGenius** — 专业级 AI 剪贴板管理器。捕获图片、视频、文本、链接、Markdown 和代码片段；通过 AI（Gemini / Minimax）进行分析；所有数据通过 IndexedDB 本地存储。
 
 ## 导航
 
@@ -9,7 +9,6 @@
 
 - [安装指南](./getting-started/installation.md)
 - [快速开始](./getting-started/quick-start.md)
-- [Firebase 配置](./getting-started/firebase-setup.md)
 
 ### [使用指南](./guides/)
 各功能的使用详解。
@@ -18,7 +17,6 @@
 - [AI 分析](./guides/ai-analysis.md)
 - [AI 聊天](./guides/chat.md)
 - [图片生成](./guides/image-generation.md)
-- [数据同步](./guides/sync.md)
 - [设置](./guides/settings.md)
 - [历史记录管理](./guides/managing-history.md)
 
@@ -27,8 +25,6 @@
 
 - [概述](./architecture/overview.md)
 - [AI 提供商模型](./architecture/provider-model.md)
-- [数据流](./architecture/data-flow.md)
-- [同步策略](./architecture/sync-strategy.md)
 - [跨标签页同步](./architecture/cross-tab-sync.md)
 
 ### [参考手册](./reference/)
@@ -39,7 +35,6 @@
 - [Services（服务）](./reference/api-services.md)
 - [Types（类型）](./reference/api-types.md)
 - [环境变量](./reference/env-variables.md)
-- [Firestore 数据结构](./reference/firestore-schema.md)
 - [AI 提示词](./reference/prompts.md)
 
 ### [部署指南](./deployment/)
@@ -65,6 +60,6 @@
 | **AI 分析** | 自动为每个条目生成建议名称和摘要 |
 | **AI 聊天** | 多模态对话，支持流式思考和语音对话 |
 | **图片生成** | 标准模式（免费）和专业模式（付费 AI Studio 密钥） |
-| **云同步** | Firebase Firestore，访客离线优先 |
+| **本地存储** | IndexedDB，完全离线可用 |
 | **跨标签页同步** | BroadcastChannel + localStorage 后备方案 |
 | **国际化** | 英文和中文界面 |

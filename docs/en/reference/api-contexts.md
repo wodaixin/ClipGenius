@@ -1,28 +1,5 @@
 # Contexts API Reference
 
-## AuthContext
-
-**File**: `src/context/AuthContext.tsx`
-
-```typescript
-function useAuth(): AuthContextValue;
-```
-
-### AuthContextValue
-
-```typescript
-interface AuthContextValue {
-  user: User | null;     // Firebase User; null for guests
-  isLoaded: boolean;      // false until onAuthStateChanged fires
-  login: () => Promise<void>;   // signInWithPopup(googleProvider)
-  logout: () => Promise<void>;   // signOut()
-}
-```
-
-**Throws**: `Error` if used outside `AuthProvider`.
-
----
-
 ## AppContext
 
 **File**: `src/context/AppContext.tsx`
@@ -40,7 +17,7 @@ interface AppContextValue {
   setItems: React.Dispatch<React.SetStateAction<PasteItem[]>>;
   contextItem: PasteItem | null;        // item attached to chat/image-gen
   setContextItem: (item: PasteItem | null) => void;
-  updateItem: (updated: PasteItem, userId?: string) => Promise<void>;
+  updateItem: (updated: PasteItem) => Promise<void>;
 
   // Image Generation
   isImageGenOpen: boolean;
@@ -68,7 +45,7 @@ interface AppContextValue {
 
 ### Key Implementation Details
 
-- `updateItem` is the centralized write path: saves to IndexedDB + triggers `syncEngine.writeWithSync()` if `userId` is provided.
+- `updateItem` is the centralized write path: saves to IndexedDB.
 - The auto-analyze `useEffect` deduplicates analysis using `analysisPromises.current` (a `Map<id, Promise>`) and `analyzingRef.current` (a `Set<id>`) to prevent duplicate analysis calls.
 - `generatedImage` state is cleared when `closeImageGen()` is called.
 
